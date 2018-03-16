@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include "dbmanager.h"
 
-//#define PATH_DATABASE "F:/Develop/RechnungsApp/mainDatabase.db"
-#define PATH_DATABASE "C:/Users/Marcel/Programmieren/RechnungsApp/mainDatabase.db"
+#define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
+
 #define CUSTOMER_COLUMN_OFFSET 15
 #define CUSTOMER_ROW_HEIGHT 40
 

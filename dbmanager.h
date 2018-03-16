@@ -16,7 +16,7 @@ class DBManager
 {
 
 public:
-    DBManager(const QString& path);
+    DBManager(const QString &path);
     ~DBManager();
 
     bool isOpen() const;
