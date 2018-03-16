@@ -196,7 +196,7 @@ void MainWindow::printAllAricles() const
 
 void MainWindow::printAllCustomers() const
 {
-//    ui->tvCustomers->setModel(m_dbManager->readDbData(KUNDEN));
+    ui->tvCustomers->setModel(m_dbManager->readDbData(KUNDEN));
     qDebug() << DEBUG_TAG << ": Print all customers successfull!";
 }
 
