@@ -35,6 +35,7 @@ public:
     QSqlQueryModel *readDbData(QString table);
 
     bool addArticle(const Articles &article);
+    QMap<int, QString> readFieldNames(QString table);
 private:
     QSqlDatabase m_db;
 };

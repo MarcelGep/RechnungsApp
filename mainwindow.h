@@ -62,9 +62,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void printAllCustomers() const;
+    void printAllCustomers();
     int getLastID(QString table);
-    bool printCustomer();
+    void printCustomer(Customers customer);
     void clearCustomerEdits() const;
 
     void printAllAricles() const;
@@ -84,8 +84,20 @@ private slots:
     void on_tvArtList_clicked(const QModelIndex &index);
 
 private:
+    void setCustomerColumnsWidth() const;
+
+private:
     Ui::MainWindow *ui;
     DBManager* m_dbManager;
+
+    QMap<int, QString> m_customerFields;
+    QMap<int, QString> m_articleFields;
+    QMap<int, QString> m_calculationFields;
+    QMap<int, QString> m_positionFields;
+
+    std::vector<Customers> m_customers;
+
+    void clearTWCustomers() const;
 };
 
 #endif // MAINWINDOW_H

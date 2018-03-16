@@ -35,10 +35,22 @@ void DBManager::closeDatabase()
 
 bool DBManager::dbEntryExist(QString table, QString id)
 {
+    QString _id = "";
+    if (table == KUNDEN)
+        _id = "KdNr";
+    else if (table == ARTIKEL)
+        _id = "ArtNr";
+    else if (table == RECHNUNG)
+        _id = "RgnNr";
+    else if (table == POSITIONEN)
+        _id = "PosNr";
+    else
+        return false;
+
     if (isOpen())
     {
         QSqlQuery querySearch;
-        querySearch.prepare("SELECT ID FROM '"+table+"'");
+        querySearch.prepare("SELECT '"+_id+"' FROM '"+table+"'");
         querySearch.exec();
 
         while(querySearch.next())
@@ -212,8 +224,20 @@ bool DBManager::removeDbEntry(QString table, QString id)
         return false;
     }
 
+    QString ident = "";
+    if (table == KUNDEN)
+        ident = "KdNr";
+    else if (table == ARTIKEL)
+        ident = "ArtNr";
+    else if (table == RECHNUNG)
+        ident = "RgnNr";
+    else if (table == POSITIONEN)
+        ident = "PosNr";
+    else
+        return false;
+
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM '"+table+"' WHERE ID = '"+id+"'");
+    queryDelete.prepare("DELETE FROM '"+table+"' WHERE '"+ident+"' = '"+id+"'");
 
     if(!queryDelete.exec())
     {
@@ -274,7 +298,7 @@ bool DBManager::editCustomer(QString id, const Customers& customers)
                               "Rabatt=:rabatt, "
                               "Kontostand=:kontostand, "
                               "Information=:info "
-                      "WHERE ID='"+id+"'");
+                      "WHERE KdNr='"+id+"'");
 
         query.bindValue(":firma", customers.getFirma());
         query.bindValue(":name1", customers.getName1());
@@ -306,15 +330,45 @@ bool DBManager::editCustomer(QString id, const Customers& customers)
         return false;
 }
 
+QMap<int, QString> DBManager::readFieldNames(QString table)
+{
+    QMap<int, QString> fields;
+
+    QSqlQuery query;
+    query.prepare("select * from '"+table+"' LIMIT 0, 0");
+    query.exec();
+           
+    for (int i = 0; i < query.record().count(); i++)
+    {
+        fields.insert(i, query.record().fieldName(i));
+        //fields.append(rec.fieldName(i));
+    }
+
+    return fields;
+}
+
 int DBManager::readLastID(QString table) const
 {
+    QString id = "";
+
+    if (table == KUNDEN)
+        id = "KdNr";
+    else if (table == ARTIKEL)
+        id = "ArtNr";
+    else if (table == RECHNUNG)
+        id = "RgnNr";
+    else if (table == POSITIONEN)
+        id = "PosNr";
+    else
+        return -1;
+
     QSqlQuery query;
-    query.prepare("SELECT * FROM '"+table+"' ORDER BY ID DESC LIMIT 1; ");
+    query.prepare("SELECT * FROM '"+table+"' ORDER BY '"+id+"' DESC LIMIT 1; ");
 
     if(!query.exec())
         qDebug() << DEBUG_TAG << ": No table in database!";
 
-    int idID = query.record().indexOf("ID");
+    int idID = query.record().indexOf(id);
 
     int lastId = -1;
 
@@ -379,7 +433,7 @@ Customers DBManager::readCustomer(QString customerID) const
 bool DBManager::readCustomers(std::vector<Customers> &customers) const
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM Kunden ORDER BY ID ASC");
+    query.prepare("SELECT * FROM Kunden ORDER BY KdNr ASC");
 
     if(!query.exec())
     {
