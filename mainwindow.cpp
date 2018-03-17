@@ -21,14 +21,33 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set active tabs
     ui->tabMain->setCurrentIndex(EvidenceTab);
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
+
+    // Setup customer list
+    ui->twCustomers->setColumnCount(m_customerFields.size() - 1);
+    for ( int i = 0; i < m_customerFields.size(); i++)
+    {
+        ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_customerFields[i]));
+    }
+    QFont fontCustomer("MS Shell Dlg 2", 8, QFont::Bold);
+    ui->twCustomers->horizontalHeader()->setFont(fontCustomer);
+    ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
+    // Setup article list
+    ui->twArticles->setColumnCount(m_articleFields.size());
+    for ( int i = 0; i < m_articleFields.size(); i++)
+    {
+        ui->twArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_articleFields[i]));
+    }
+    QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
+    ui->twArticles->horizontalHeader()->setFont(fontArticles);
+    ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+
 }
 
 MainWindow::~MainWindow()
 {
-    if (m_dbManager->isOpen())
-    {
-        m_dbManager->closeDatabase();
-    }
+    m_dbManager->closeDatabase();
+
     delete m_dbManager;
     delete ui;
 }
@@ -95,9 +114,9 @@ void MainWindow::on_btnSaveCustomer_clicked()
     {
         if (m_dbManager->addCustomer(customer))
         {
-            printAllCustomers();
             QMessageBox::information(this, "Info", "Der Kunde wurde erfolgreich angelegt!", QMessageBox::Ok);
             clearCustomerEdits();
+            printAllCustomers();
             ui->tabWidKunden->setCurrentIndex(OverviewTab);
         }
         else
@@ -137,12 +156,13 @@ void MainWindow::on_btnDeleteCustomer_clicked()
 void MainWindow::on_btnNewCustomer_clicked()
 {
     clearCustomerEdits();
-    ui->tabWidKunden->setCurrentIndex(EditTab);
 
-    int lastID = getLastID(KUNDEN);
+    int lastID = m_dbManager->readLastID(KUNDEN);
     ui->leKdNr->setText(QString::number(lastID + 1));
 
-    ui->tvCustomers->clearSelection();
+    ui->tabWidKunden->setCurrentIndex(EditTab);
+
+    ui->twCustomers->clearSelection();
 }
 
 void MainWindow::on_btnEditCustomer_clicked()
@@ -153,7 +173,8 @@ void MainWindow::on_btnEditCustomer_clicked()
             ui->leKdNr->clear();
 
             QString kdnr = ui->twCustomers->item(ui->twCustomers->currentRow(), KdNr)->text();
-            Customers customer = m_dbManager->readCustomer(kdnr);
+            Customers customer;
+            m_dbManager->readCustomer(kdnr, customer);
 
             printCustomer(customer);
         }
@@ -166,6 +187,7 @@ void MainWindow::on_btnEditCustomer_clicked()
 
 void MainWindow::on_btnCancelCustomer_clicked()
 {
+    ui->twCustomers->clearSelection();
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
     clearCustomerEdits();
 }
@@ -189,44 +211,77 @@ void MainWindow::printCustomer(Customers customer)
     ui->ptCustomerInfo->setPlainText(customer.getInfo());
 }
 
-void MainWindow::printAllAricles() const
+void MainWindow::printAllArticles()
 {
-    ui->tvArtList->setModel(m_dbManager->readDbData(ARTIKEL));
-    qDebug() << DEBUG_TAG << ": Print all articles successfull!";
+    // clear article list
+    if(ui->twArticles->rowCount() > 0)
+        clearArticles();
+
+    // read articles from database
+    if (!m_dbManager->readArticles(m_articles))
+    {
+       qDebug() << DEBUG_TAG_MAIN << ": Error read customers!";
+       return;
+    }
+
+    // print all exist articles to list
+    for (std::vector<Articles>::iterator it = m_articles.begin(); it != m_articles.end(); ++it)
+    {
+       int row = ui->twArticles->rowCount();
+       ui->twArticles->insertRow(row);
+       ui->twArticles->setRowHeight(row, ARTICLE_ROW_HEIGHT);
+       ui->twArticles->setItem(row, ArtNr, new QTableWidgetItem(QString::number(it->getArtNr())));
+       ui->twArticles->setItem(row, Einheit, new QTableWidgetItem(it->getUnit()));
+       ui->twArticles->setItem(row, Bezeichnung, new QTableWidgetItem(it->getName()));
+       ui->twArticles->setItem(row, Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
+       ui->twArticles->item(row, Preis)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twArticles->setItem(row, Beschreibung, new QTableWidgetItem(it->getDescription()));
+       ui->twArticles->item(row, Beschreibung)->setTextAlignment(Qt::AlignCenter);
+    }
+
+    // Set articles table column width offset
+    setArticleColumnsWidth();
+
+    qDebug() << DEBUG_TAG_MAIN << ": Print all articles successfull!";
 }
 
-void MainWindow::clearTWCustomers() const
+void MainWindow::clearArticles()
+{
+    while (ui->twArticles->rowCount() > 0)
+    {
+        ui->twArticles->removeRow(0);
+    }
+    m_articles.clear();
+}
+
+void MainWindow::clearCustomers()
 {
     while (ui->twCustomers->rowCount() > 0)
     {
         ui->twCustomers->removeRow(0);
     }
+    m_customers.clear();
 }
 
 void MainWindow::printAllCustomers()
 {
+    // clear customer list
     if(ui->twCustomers->rowCount() > 0)
-           clearTWCustomers();
+        clearCustomers();
 
-    // set columns
-    ui->twCustomers->setColumnCount(m_customerFields.size() - 1);
-    for ( int i = 0; i < m_customerFields.size(); i++)
+    // read customers from database
+    if (!m_dbManager->readCustomers(m_customers))
     {
-        ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_customerFields[i]));
-    }
-
-    std::vector<Customers> customers;
-    if (!m_dbManager->readCustomers(customers))
-    {
-       qDebug() << DEBUG_TAG << ": Error read customers!";
+       qDebug() << DEBUG_TAG_MAIN << ": Error read customers!";
        return;
     }
 
-    for (std::vector<Customers>::iterator it = customers.begin(); it != customers.end(); ++it)
+    // print all exist customers to list
+    for (std::vector<Customers>::iterator it = m_customers.begin(); it != m_customers.end(); ++it)
     {
        int row = ui->twCustomers->rowCount();
        ui->twCustomers->insertRow(row);
-       //ui->twCustomers->setRowHeight(row, CUSTOMER_ROW_HEIGHT);
+       ui->twCustomers->setRowHeight(row, CUSTOMER_ROW_HEIGHT);
        ui->twCustomers->setItem(row, KdNr, new QTableWidgetItem(QString::number(it->getKdnr())));
        ui->twCustomers->setItem(row, Firma, new QTableWidgetItem(it->getFirma()));
        ui->twCustomers->setItem(row, Name1, new QTableWidgetItem(it->getName1()));
@@ -239,32 +294,37 @@ void MainWindow::printAllCustomers()
        ui->twCustomers->setItem(row, Telefax, new QTableWidgetItem(it->getTelefax()));
        ui->twCustomers->setItem(row, Email, new QTableWidgetItem(it->getEmail()));
        ui->twCustomers->setItem(row, Website, new QTableWidgetItem(it->getWebsite()));
-       ui->twCustomers->setItem(row, Rabatt, new QTableWidgetItem(QString::number(it->getRabatt()) + " %"));
+       ui->twCustomers->setItem(row, Rabatt, new QTableWidgetItem(QString::number(it->getRabatt(), 'f', 2) + " %"));
        ui->twCustomers->item(row, Rabatt)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-       ui->twCustomers->setItem(row, Kontostand, new QTableWidgetItem(QString::number(it->getKontostand()) + " €"));
+       ui->twCustomers->setItem(row, Kontostand, new QTableWidgetItem(QString::number(it->getKontostand(), 'f', 2) + " €"));
        ui->twCustomers->item(row, Kontostand)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
 
-    ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-   //ui->twCustomers->resizeColumnsToContents();
+    // Set customer table column width offset
+    setCustomerColumnsWidth();
 
-   /* Set customer table column width offset */
+    qDebug() << DEBUG_TAG_MAIN << ": Print all customers!";
+}
+
+void MainWindow::setCustomerColumnsWidth() const
+{
+    ui->twCustomers->resizeColumnsToContents();
+
     for (int i = 0; i < ui->twCustomers->columnCount(); i++)
     {
         int tempWidth = ui->twCustomers->columnWidth(i);
         ui->twCustomers->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
     }
-
-    qDebug() << DEBUG_TAG << ": Print all customers!";
 }
 
-void MainWindow::setCustomerColumnsWidth() const
+void MainWindow::setArticleColumnsWidth() const
 {
-    ui->tvCustomers->resizeColumnsToContents();
-    for(int i = 0; i < columnsCount; i++)
+    ui->twArticles->resizeColumnsToContents();
+
+    for (int i = 0; i < ui->twArticles->columnCount(); i++)
     {
-        int colWidth = ui->tvCustomers->columnWidth(i);
-        ui->tvCustomers->setColumnWidth(i, colWidth + CUSTOMER_COLUMN_OFFSET);
+        int tempWidth = ui->twArticles->columnWidth(i);
+        ui->twArticles->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
     }
 }
 
@@ -274,7 +334,7 @@ void MainWindow::clearArticleEdits()
     ui->leArtPrice->clear();
     ui->leArtUnit->clear();
     ui->ptArtDescription->clear();
-    ui->leArtNr->setText(QString::number(getLastID(ARTIKEL) + 1));
+    ui->leArtNr->setText(QString::number(m_dbManager->readLastID(ARTIKEL) + 1));
 }
 
 void MainWindow::clearCustomerEdits() const
@@ -296,22 +356,6 @@ void MainWindow::clearCustomerEdits() const
     ui->ptCustomerInfo->clear();
 }
 
-int MainWindow::getLastID(QString table)
-{
-    int lastID = -1;
-
-    if (m_dbManager->isOpen())
-    {
-        lastID = m_dbManager->readLastID(table);
-    }
-    else
-    {
-        qDebug() << "Database is not open!";
-    }
-
-    return lastID;
-}
-
 void MainWindow::on_tabWidKunden_tabBarClicked(int index)
 {
     if (index == EditTab)
@@ -319,13 +363,14 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
         if(ui->twCustomers->selectedItems().count() >  0)
         {
             QString kdnr = ui->twCustomers->item(ui->twCustomers->currentRow(), KdNr)->text();
-            Customers customer = m_dbManager->readCustomer(kdnr);
+            Customers customer;
+            m_dbManager->readCustomer(kdnr, customer);
 
             printCustomer(customer);
         }
         else
         {
-            int lastID = getLastID("Kunden");
+            int lastID = m_dbManager->readLastID(KUNDEN);
             ui->leKdNr->setText(QString::number(lastID + 1));
         }
     }
@@ -352,9 +397,6 @@ void MainWindow::on_tabMain_currentChanged(int index)
         case CustomersTab:
         {
             // Setup customer list
-            QFont font("MS Shell Dlg 2", 8, QFont::Bold);
-            ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-            ui->twCustomers->horizontalHeader()->setFont(font);
             printAllCustomers();
         }
         break;
@@ -362,9 +404,8 @@ void MainWindow::on_tabMain_currentChanged(int index)
         case ArticlesTab:
         {
             // Setup article list
-            ui->tvArtList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
             clearArticleEdits();
-            printAllAricles();
+            printAllArticles();
         }
         break;
 
@@ -453,7 +494,7 @@ void MainWindow::on_btnArtSave_clicked()
         // add data entry
         if (m_dbManager->addArticle(article))
         {
-            printAllAricles();
+            printAllArticles();
             clearArticleEdits();
             QMessageBox::information(this, "Info", "Der Artikel wurde erfolgreich angelegt!", QMessageBox::Ok);
         }
@@ -462,18 +503,27 @@ void MainWindow::on_btnArtSave_clicked()
     }
 }
 
-void MainWindow::on_tvArtList_clicked(const QModelIndex &index)
+void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
 {
-    int row = index.row();
-    QString artnr = ui->tvArtList->model()->index(row, 0).data().toString();
-    QString unit = ui->tvArtList->model()->index(row, 1).data().toString();
-    QString name = ui->tvArtList->model()->index(row, 2).data().toString();
-    QString price = ui->tvArtList->model()->index(row, 3).data().toString();
-    QString description = ui->tvArtList->model()->index(row, 4).data().toString();
+    // read customer from database
+    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
+    Articles article;
+    if (!m_dbManager->readArticle(artNr, article))
+    {
+       qDebug() << DEBUG_TAG_MAIN << ": Error read customer!";
+       return;
+    }
 
-    ui->leArtNr->setText(artnr);
-    ui->leArtUnit->setText(unit);
-    ui->leArtName->setText(name);
-    ui->leArtPrice->setText(price);
-    ui->ptArtDescription->setPlainText(description);
+    // print all customer to edits
+    ui->leArtNr->setText(QString::number(article.getArtNr()));
+    ui->leArtUnit->setText(article.getUnit());
+    ui->leArtName->setText(article.getName());
+    ui->leArtPrice->setText(QString::number(article.getPrice()));
+    ui->ptArtDescription->setPlainText(article.getDescription());
+}
+
+void MainWindow::on_btnArtNew_clicked()
+{
+    ui->twArticles->clearSelection();
+    clearArticleEdits();
 }

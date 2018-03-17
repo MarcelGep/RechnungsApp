@@ -2,19 +2,24 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTableWidgetItem>
+
 #include "dbmanager.h"
 
 #define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
 
-#define CUSTOMER_COLUMN_OFFSET 15
-#define CUSTOMER_ROW_HEIGHT 40
+#define DEBUG_TAG_MAIN "MainWindow"
+
+#define CUSTOMER_COLUMN_OFFSET 25
+#define CUSTOMER_ROW_HEIGHT 25
+#define ARTICLE_ROW_HEIGHT 25
 
 #define ARTIKEL "Artikel"
 #define KUNDEN "Kunden"
 #define RECHNUNG "Rechnungen"
 #define POSITIONEN "Positionen"
 
-enum Columns
+enum CustomerColumns
 {
     KdNr,
     Firma,
@@ -32,7 +37,18 @@ enum Columns
     Kontostand,
     Info,
 
-    columnsCount
+    CustomersColumnsCount
+};
+
+enum ArticleColumns
+{
+    ArtNr,
+    Einheit,
+    Bezeichnung,
+    Preis,
+    Beschreibung,
+
+    ArticleColumnsCount
 };
 
 enum CustomerTab
@@ -63,11 +79,10 @@ public:
     ~MainWindow();
 
     void printAllCustomers();
-    int getLastID(QString table);
     void printCustomer(Customers customer);
     void clearCustomerEdits() const;
 
-    void printAllAricles() const;
+    void printAllArticles();
     void clearArticleEdits();
 private slots:
     void on_btnSaveCustomer_clicked();
@@ -81,7 +96,10 @@ private slots:
     void on_btnRgAngebot_clicked();
     void on_btnRgGutschrift_clicked();
     void on_btnArtSave_clicked();
-    void on_tvArtList_clicked(const QModelIndex &index);
+
+    void on_twArticles_itemClicked(QTableWidgetItem *item);
+
+    void on_btnArtNew_clicked();
 
 private:
     void setCustomerColumnsWidth() const;
@@ -96,8 +114,11 @@ private:
     QMap<int, QString> m_positionFields;
 
     std::vector<Customers> m_customers;
+    std::vector<Articles> m_articles;
 
-    void clearTWCustomers() const;
+    void clearCustomers();
+    void clearArticles();
+    void setArticleColumnsWidth() const;
 };
 
 #endif // MAINWINDOW_H

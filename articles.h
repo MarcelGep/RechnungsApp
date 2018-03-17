@@ -17,24 +17,24 @@ public:
 
     ~Articles();
 
-    int artnr() const;
-    void setArtnr(const int &artnr);
+    int getArtNr() const;
+    void setArtNr(const int &artnr);
 
-    QString name() const;
+    QString getName() const;
     void setName(const QString &name);
 
-    QString description() const;
+    QString getDescription() const;
     void setDescription(const QString &description);
 
-    QString unit() const;
+    QString getUnit() const;
     void setUnit(const QString &unit);
 
-    double price() const;
+    double getPrice() const;
     void setPrice(double price);
 
     void setTableColumns();
 
-    std::vector<QString> entries() const;
+    std::vector<QString> getEntries() const;
     void setEntries(const std::vector<QString> &entries);
 
 private:

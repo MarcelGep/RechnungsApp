@@ -10,13 +10,18 @@ DBManager::DBManager(const QString &path)
 {
     QFileInfo fileInfo(path);
 
+    // Datenbank öffnen
     m_db = QSqlDatabase::addDatabase("QSQLITE");
     m_db.setDatabaseName(path);
-
     if (!m_db.open())
+    {
        qDebug() << DEBUG_TAG << ": Error - Connection to Database fail!";
+    }
     else
+    {
        qDebug() << DEBUG_TAG << ": Database Connection to " + fileInfo.absoluteFilePath() + " successfull!";
+
+    }
 }
 
 DBManager::~DBManager()
@@ -25,32 +30,61 @@ DBManager::~DBManager()
 
 void DBManager::closeDatabase()
 {
-    QString connectionName = m_db.connectionName();
+    if (m_db.isOpen())
+    {
+        // Datenbank schließen
+        m_db.close();
+        m_db = QSqlDatabase();
+        QSqlDatabase::removeDatabase(m_db.connectionName());
+        qDebug() << DEBUG_TAG << ": Connection to database closed!";
+    }
+}
 
-    m_db.close();
-    m_db = QSqlDatabase();
-    QSqlDatabase::removeDatabase(connectionName);
-    qDebug() << DEBUG_TAG << ": Connection to database closed!";
+int DBManager::readLastID(QString table) const
+{
+    int lastID = -1;
+
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT seq FROM sqlite_sequence WHERE NAME='" + table + "';");
+
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+        }
+        else
+        {
+            while (query.next())
+                lastID = query.value(0).toInt();
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+    }
+
+    return lastID;
 }
 
 bool DBManager::dbEntryExist(QString table, QString id)
 {
-    QString _id = "";
+    QString ident = "";
     if (table == KUNDEN)
-        _id = "KdNr";
+        ident = "KdNr";
     else if (table == ARTIKEL)
-        _id = "ArtNr";
+        ident = "ArtNr";
     else if (table == RECHNUNG)
-        _id = "RgnNr";
+        ident = "RgnNr";
     else if (table == POSITIONEN)
-        _id = "PosNr";
+        ident = "PosNr";
     else
         return false;
 
     if (isOpen())
     {
         QSqlQuery querySearch;
-        querySearch.prepare("SELECT '"+_id+"' FROM '"+table+"'");
+        querySearch.prepare("SELECT " + ident + " FROM " + table);
         querySearch.exec();
 
         while(querySearch.next())
@@ -96,7 +130,7 @@ bool DBManager::addArticle(const Articles& article)
     bool success = false;
     QString col_names;
 
-    std::vector<QString> entries = article.entries();
+    std::vector<QString> entries = article.getEntries();
 
     for(std::vector<QString>::iterator it = entries.begin(); it != entries.end(); it++)
     {
@@ -113,10 +147,10 @@ bool DBManager::addArticle(const Articles& article)
                                                                     ":bezeichnung, "
                                                                     ":preis, "
                                                                     ":beschreibung)");
-    queryAdd.bindValue(":einheit", article.unit());
-    queryAdd.bindValue(":bezeichnung", article.name());
-    queryAdd.bindValue(":preis", article.price());
-    queryAdd.bindValue(":beschreibung", article.description());
+    queryAdd.bindValue(":einheit", article.getUnit());
+    queryAdd.bindValue(":bezeichnung", article.getName());
+    queryAdd.bindValue(":preis", article.getPrice());
+    queryAdd.bindValue(":beschreibung", article.getDescription());
 
     if(queryAdd.exec())
     {
@@ -237,7 +271,7 @@ bool DBManager::removeDbEntry(QString table, QString id)
         return false;
 
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM '"+table+"' WHERE '"+ident+"' = '"+id+"'");
+    queryDelete.prepare("DELETE FROM " + table + " WHERE " + ident + " = " + id);
 
     if(!queryDelete.exec())
     {
@@ -334,100 +368,177 @@ QMap<int, QString> DBManager::readFieldNames(QString table)
 {
     QMap<int, QString> fields;
 
-    QSqlQuery query;
-    query.prepare("select * from '"+table+"' LIMIT 0, 0");
-    query.exec();
-           
-    for (int i = 0; i < query.record().count(); i++)
+    if (m_db.open())
     {
-        fields.insert(i, query.record().fieldName(i));
-        //fields.append(rec.fieldName(i));
+        QSqlQuery query;
+        query.prepare("select * from " + table + " LIMIT 0, 0");
+        query.exec();
+
+        for (int i = 0; i < query.record().count(); i++)
+        {
+            fields.insert(i, query.record().fieldName(i));
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
     }
 
     return fields;
 }
 
-int DBManager::readLastID(QString table) const
+//int DBManager::readLastID(QString table) const
+//{
+//    QString ident = "";
+//    if (table == KUNDEN)
+//        ident = "KdNr";
+//    else if (table == ARTIKEL)
+//        ident = "ArtNr";
+//    else if (table == RECHNUNG)
+//        ident = "RgnNr";
+//    else if (table == POSITIONEN)
+//        ident = "PosNr";
+//    else
+//        return -1;
+
+//    QSqlQuery query;
+//    query.prepare("SELECT last_insert_rowid()");
+
+//    if(!query.exec())
+//        qDebug() << DEBUG_TAG << ": " << query.lastError();
+
+//    return query.lastInsertId().toInt();
+//}
+
+bool DBManager::readArticle(QString articleID, Articles &article)
 {
-    QString id = "";
-
-    if (table == KUNDEN)
-        id = "KdNr";
-    else if (table == ARTIKEL)
-        id = "ArtNr";
-    else if (table == RECHNUNG)
-        id = "RgnNr";
-    else if (table == POSITIONEN)
-        id = "PosNr";
-    else
-        return -1;
-
-    QSqlQuery query;
-    query.prepare("SELECT * FROM '"+table+"' ORDER BY '"+id+"' DESC LIMIT 1; ");
-
-    if(!query.exec())
-        qDebug() << DEBUG_TAG << ": No table in database!";
-
-    int idID = query.record().indexOf(id);
-
-    int lastId = -1;
-
-    while(query.next())
-        lastId = query.value(idID).toInt();
-
-    return lastId;
-}
-
-Customers DBManager::readCustomer(QString customerID) const
-{
-    QSqlQuery query;
-    query.prepare("SELECT * FROM Kunden WHERE KdNr = '"+customerID+"'");
-
-    Customers customer;
-
-    if(!query.exec())
+    if (m_db.isOpen())
     {
-        qDebug() << DEBUG_TAG << ": No table in database!";
-    }
-    else
-    {
-        int idKdNr = query.record().indexOf("KdNr");
-        int idFirma = query.record().indexOf("Firma");
-        int idName1= query.record().indexOf("Name1");
-        int idName2 = query.record().indexOf("Name2");
-        int idStrasse = query.record().indexOf("Strasse");
-        int idPlz = query.record().indexOf("Plz");
-        int idOrt = query.record().indexOf("Ort");
-        int idLand= query.record().indexOf("Land");
-        int idTelefon = query.record().indexOf("Telefon");
-        int idTelefax= query.record().indexOf("Telefax");
-        int idEmail= query.record().indexOf("Email");
-        int idWebsite = query.record().indexOf("Website");
-        int idRabatt = query.record().indexOf("Rabatt");
-        int idKontostand = query.record().indexOf("Kontostand");
-        int idInfo = query.record().indexOf("Information");
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Artikel WHERE ArtNr = " + articleID);
 
-        while (query.next())
+        if(!query.exec())
         {
-            customer.setKdnr(query.value(idKdNr).toInt());
-            customer.setFirma(query.value(idFirma).toString());
-            customer.setName1(query.value(idName1).toString());
-            customer.setName2(query.value(idName2).toString());
-            customer.setStrasse(query.value(idStrasse).toString());
-            customer.setPlz(query.value(idPlz).toInt());
-            customer.setOrt(query.value(idOrt).toString());
-            customer.setLand(query.value(idLand).toString());
-            customer.setTelefon(query.value(idTelefon).toString());
-            customer.setTelefax(query.value(idTelefax).toString());
-            customer.setEmail(query.value(idEmail).toString());
-            customer.setWebsite(query.value(idWebsite).toString());
-            customer.setRabatt(query.value(idRabatt).toDouble());
-            customer.setKontostand(query.value(idKontostand).toDouble());
-            customer.setInfo(query.value(idInfo).toString());
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+            return false;
+        }
+        else
+        {
+            int idArtNr = query.record().indexOf("ArtNr");
+            int idUnit = query.record().indexOf("Einheit");
+            int idName= query.record().indexOf("Bezeichnung");
+            int idPrice = query.record().indexOf("Preis");
+            int idDescription = query.record().indexOf("Beschreibung");
+
+            while (query.next())
+            {
+                article.setArtNr(query.value(idArtNr).toInt());
+                article.setUnit(query.value(idUnit).toString());
+                article.setName(query.value(idName).toString());
+                article.setPrice(query.value(idPrice).toDouble());
+                article.setDescription(query.value(idDescription).toString());
+            }
         }
     }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
 
-    return customer;
+    return true;
+}
+
+bool DBManager::readCustomer(QString customerID, Customers &customer)
+{
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Kunden WHERE KdNr = " + customerID);
+
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": No table in database!";
+            return false;
+        }
+        else
+        {
+            int idKdNr = query.record().indexOf("KdNr");
+            int idFirma = query.record().indexOf("Firma");
+            int idName1= query.record().indexOf("Name1");
+            int idName2 = query.record().indexOf("Name2");
+            int idStrasse = query.record().indexOf("Strasse");
+            int idPlz = query.record().indexOf("Plz");
+            int idOrt = query.record().indexOf("Ort");
+            int idLand= query.record().indexOf("Land");
+            int idTelefon = query.record().indexOf("Telefon");
+            int idTelefax= query.record().indexOf("Telefax");
+            int idEmail= query.record().indexOf("Email");
+            int idWebsite = query.record().indexOf("Website");
+            int idRabatt = query.record().indexOf("Rabatt");
+            int idKontostand = query.record().indexOf("Kontostand");
+            int idInfo = query.record().indexOf("Information");
+
+            while (query.next())
+            {
+                customer.setKdnr(query.value(idKdNr).toInt());
+                customer.setFirma(query.value(idFirma).toString());
+                customer.setName1(query.value(idName1).toString());
+                customer.setName2(query.value(idName2).toString());
+                customer.setStrasse(query.value(idStrasse).toString());
+                customer.setPlz(query.value(idPlz).toInt());
+                customer.setOrt(query.value(idOrt).toString());
+                customer.setLand(query.value(idLand).toString());
+                customer.setTelefon(query.value(idTelefon).toString());
+                customer.setTelefax(query.value(idTelefax).toString());
+                customer.setEmail(query.value(idEmail).toString());
+                customer.setWebsite(query.value(idWebsite).toString());
+                customer.setRabatt(query.value(idRabatt).toDouble());
+                customer.setKontostand(query.value(idKontostand).toDouble());
+                customer.setInfo(query.value(idInfo).toString());
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
+
+    return true;
+}
+
+bool DBManager::readArticles(std::vector<Articles> &articles) const
+{
+    QSqlQuery query;
+    query.prepare("SELECT * FROM Artikel ORDER BY ArtNr ASC");
+
+    if(!query.exec())
+    {
+        qDebug() << DEBUG_TAG << ": " << query.lastError();
+        return false;
+    }
+
+    int idArtNr = query.record().indexOf("ArtNr");
+    int idUnit = query.record().indexOf("Einheit");
+    int idName= query.record().indexOf("Bezeichnung");
+    int idPrice = query.record().indexOf("Preis");
+    int idDescription = query.record().indexOf("Beschreibung");
+
+    while (query.next())
+    {
+        Articles article;
+        article.setArtNr(query.value(idArtNr).toInt());
+        article.setUnit(query.value(idUnit).toString());
+        article.setName(query.value(idName).toString());
+        article.setPrice(query.value(idPrice).toDouble());
+        article.setDescription(query.value(idDescription).toString());
+
+        articles.push_back(article);
+    }
+    qDebug() << DEBUG_TAG << ": Read all articles successfull!";
+
+    return true;
 }
 
 bool DBManager::readCustomers(std::vector<Customers> &customers) const

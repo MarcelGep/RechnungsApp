@@ -30,12 +30,14 @@ public:
     bool dbEntryExist(QString table, QString id);
     bool readCustomers(std::vector<Customers> &customers) const;
     int readLastID(QString table) const;
-    Customers readCustomer(QString customerID) const;
+    bool readCustomer(QString customerID, Customers &customer);
 
     QSqlQueryModel *readDbData(QString table);
 
     bool addArticle(const Articles &article);
     QMap<int, QString> readFieldNames(QString table);
+    bool readArticles(std::vector<Articles> &articles) const;
+    bool readArticle(QString articleID, Articles &article);
 private:
     QSqlDatabase m_db;
 };
