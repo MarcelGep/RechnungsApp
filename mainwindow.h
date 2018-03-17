@@ -45,8 +45,8 @@ enum ArticleColumns
     ArtNr,
     Einheit,
     Bezeichnung,
-    Preis,
     Beschreibung,
+    Preis,
 
     ArticleColumnsCount
 };

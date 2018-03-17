@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twArticles->horizontalHeader()->setFont(fontArticles);
     ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
+    ui->twArticles->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
 }
 
 MainWindow::~MainWindow()
@@ -233,10 +233,9 @@ void MainWindow::printAllArticles()
        ui->twArticles->setItem(row, ArtNr, new QTableWidgetItem(QString::number(it->getArtNr())));
        ui->twArticles->setItem(row, Einheit, new QTableWidgetItem(it->getUnit()));
        ui->twArticles->setItem(row, Bezeichnung, new QTableWidgetItem(it->getName()));
-       ui->twArticles->setItem(row, Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
-       ui->twArticles->item(row, Preis)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
        ui->twArticles->setItem(row, Beschreibung, new QTableWidgetItem(it->getDescription()));
-       ui->twArticles->item(row, Beschreibung)->setTextAlignment(Qt::AlignCenter);
+       ui->twArticles->setItem(row, Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
+       ui->twArticles->item(row, Preis)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     }
 
     // Set articles table column width offset
