@@ -126,7 +126,7 @@ void MainWindow::on_btnSaveCustomer_clicked()
 
 void MainWindow::on_btnDeleteCustomer_clicked()
 {
-    if(ui->twCustomers->selectedItems().count() >  0)
+    if (ui->twCustomers->selectedItems().count() >  0)
     {
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
@@ -143,6 +143,15 @@ void MainWindow::on_btnDeleteCustomer_clicked()
             QString id = ui->twCustomers->item(ui->twCustomers->currentRow(), 0)->text();
             m_dbManager->removeDbEntry(KUNDEN, id);
             printAllCustomers();
+
+            if (ui->tabWidKunden->currentIndex() == EditTab)
+            {
+                ui->btnDeleteCustomer->setEnabled(false);
+                ui->btnEditCustomer->setEnabled(false);
+                ui->tabWidKunden->setCurrentIndex(OverviewTab);
+                clearCustomerEdits();
+            }
+
             QMessageBox::information(this, "Info", "Der ausgewählte Kunde wurde erfolgreich gelöscht!", QMessageBox::Ok);
         }
     }
@@ -163,6 +172,9 @@ void MainWindow::on_btnNewCustomer_clicked()
     ui->tabWidKunden->setCurrentIndex(EditTab);
 
     ui->twCustomers->clearSelection();
+
+    ui->btnEditCustomer->setEnabled(false);
+    ui->btnDeleteCustomer->setEnabled(false);
 }
 
 void MainWindow::on_btnEditCustomer_clicked()
@@ -187,7 +199,7 @@ void MainWindow::on_btnEditCustomer_clicked()
 
 void MainWindow::on_btnCancelCustomer_clicked()
 {
-    ui->twCustomers->clearSelection();
+    //ui->twCustomers->clearSelection();
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
     clearCustomerEdits();
 }
@@ -505,7 +517,7 @@ void MainWindow::on_btnArtSave_clicked()
 
 void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
 {
-    // read customer from database
+    // read article from database
     QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
     Articles article;
     if (!m_dbManager->readArticle(artNr, article))
@@ -570,20 +582,51 @@ void MainWindow::on_btnArtDelete_clicked()
 
 void MainWindow::on_btnArtDelAll_clicked()
 {
-    QMessageBox msg;
-    msg.setWindowIcon(QPixmap("logo.png"));
-    msg.setText("Möchten Sie ALLE Artikel wirklich löschen?");
-    msg.setWindowTitle("ALLE Artikel löschen");
-    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msg.setButtonText(QMessageBox::Yes, "Ja");
-    msg.setButtonText(QMessageBox::No, "Nein");
-    msg.setDefaultButton(QMessageBox::No);
-    msg.setIcon(QMessageBox::Question);
-
-    if(msg.exec() == QMessageBox::Yes)
+    if (ui->twArticles->rowCount() > 0)
     {
-        m_dbManager->removeDBList(ARTIKEL);
-        printAllArticles();
-        QMessageBox::information(this, "Info", "Alle Artikel wurden erfolgreich gelöscht!", QMessageBox::Ok);
+        QMessageBox msg;
+        msg.setWindowIcon(QPixmap("logo.png"));
+        msg.setText("Möchten Sie ALLE Artikel wirklich löschen?");
+        msg.setWindowTitle("ALLE Artikel löschen");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setButtonText(QMessageBox::Yes, "Ja");
+        msg.setButtonText(QMessageBox::No, "Nein");
+        msg.setDefaultButton(QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+
+        if(msg.exec() == QMessageBox::Yes)
+        {
+            m_dbManager->removeDBList(ARTIKEL);
+            printAllArticles();
+            QMessageBox::information(this, "Info", "Alle Artikel wurden erfolgreich gelöscht!", QMessageBox::Ok);
+        }
     }
+    else
+    {
+        QMessageBox::warning(this, "Warnung", "Keine Artikel zum löschen verfügbar!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_twCustomers_itemClicked(QTableWidgetItem *item)
+{
+    ui->btnEditCustomer->setEnabled(true);
+    ui->btnDeleteCustomer->setEnabled(true);
+
+    // read customer from database
+//    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
+//    Articles article;
+//    if (!m_dbManager->readArticle(artNr, article))
+//    {
+//       qDebug() << DEBUG_TAG_MAIN << ": Error read customer!";
+//       return;
+//    }
+
+//    // print all customer to edits
+//    ui->Artikel_Erfassen->setEnabled(true);
+
+//    ui->leArtNr->setText(QString::number(article.getArtNr()));
+//    ui->leArtUnit->setText(article.getUnit());
+//    ui->leArtName->setText(article.getName());
+//    ui->leArtPrice->setText(QString::number(article.getPrice()));
+//    ui->ptArtDescription->setPlainText(article.getDescription());
 }

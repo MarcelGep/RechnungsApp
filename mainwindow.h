@@ -107,6 +107,8 @@ private slots:
 
     void on_btnArtDelAll_clicked();
 
+    void on_twCustomers_itemClicked(QTableWidgetItem *item);
+
 private:
     void setCustomerColumnsWidth() const;
 

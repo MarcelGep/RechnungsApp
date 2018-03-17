@@ -45,7 +45,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -87,6 +87,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btnDeleteCustomer">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -100,6 +103,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btnEditCustomer">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -268,16 +274,16 @@
                 <number>20</number>
                </property>
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <widget class="QPushButton" name="btnSaveCustomer">
@@ -337,16 +343,16 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_9">
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <widget class="QPlainTextEdit" name="ptCustomerInfo">
@@ -355,6 +361,9 @@
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="tabChangesFocus">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -377,16 +386,16 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_8">
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0">
@@ -405,7 +414,7 @@
                     <set>Qt::ImhNone</set>
                    </property>
                    <property name="clearButtonEnabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -416,6 +425,9 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -459,13 +471,25 @@
                   </widget>
                  </item>
                  <item row="3" column="1" colspan="2">
-                  <widget class="QLineEdit" name="leStrasse"/>
+                  <widget class="QLineEdit" name="leStrasse">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="2" column="1" colspan="2">
-                  <widget class="QLineEdit" name="leName2"/>
+                  <widget class="QLineEdit" name="leName2">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="1" column="1" colspan="2">
-                  <widget class="QLineEdit" name="leName1"/>
+                  <widget class="QLineEdit" name="leName1">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="4" column="0">
                   <widget class="QLabel" name="label_6">
@@ -496,6 +520,9 @@
                    </property>
                    <property name="inputMethodHints">
                     <set>Qt::ImhNone</set>
+                   </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -533,6 +560,9 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -553,16 +583,16 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <layout class="QGridLayout" name="gridLayout_3">
@@ -573,10 +603,18 @@
                   <number>8</number>
                  </property>
                  <item row="1" column="1">
-                  <widget class="QLineEdit" name="leTelefax"/>
+                  <widget class="QLineEdit" name="leTelefax">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="leTelefon"/>
+                  <widget class="QLineEdit" name="leTelefon">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_16">
@@ -650,16 +688,16 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <layout class="QGridLayout" name="gridLayout_2">
@@ -708,10 +746,18 @@
                   </widget>
                  </item>
                  <item row="1" column="1">
-                  <widget class="QLineEdit" name="leWebsite"/>
+                  <widget class="QLineEdit" name="leWebsite">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item row="0" column="1">
-                  <widget class="QLineEdit" name="leEmail"/>
+                  <widget class="QLineEdit" name="leEmail">
+                   <property name="clearButtonEnabled">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                 </layout>
                </item>
@@ -747,16 +793,16 @@
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5">
                <property name="leftMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="topMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="rightMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <property name="bottomMargin">
-                <number>15</number>
+                <number>10</number>
                </property>
                <item>
                 <layout class="QGridLayout" name="gridLayout_4">
@@ -965,6 +1011,18 @@
            <string>Artikelliste</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0">
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+           <property name="bottomMargin">
+            <number>10</number>
+           </property>
            <item>
             <widget class="QTableWidget" name="twArticles">
              <property name="sizePolicy">
@@ -1039,43 +1097,13 @@
             <number>10</number>
            </property>
            <property name="horizontalSpacing">
-            <number>25</number>
+            <number>60</number>
            </property>
            <property name="verticalSpacing">
             <number>5</number>
            </property>
-           <item row="1" column="0">
-            <spacer name="verticalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>5</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="btnArtSave">
-             <property name="text">
-              <string>Speichern</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QPushButton" name="btnArtCancel">
-             <property name="text">
-              <string>Abbrechen</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0" colspan="2">
-            <layout class="QGridLayout" name="gridLayout_11" rowstretch="0,0,0,0,0" columnstretch="0,0,0">
+            <layout class="QGridLayout" name="gridLayout_11" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0">
              <property name="sizeConstraint">
               <enum>QLayout::SetDefaultConstraint</enum>
              </property>
@@ -1087,6 +1115,9 @@
              </property>
              <item row="0" column="1" colspan="2">
               <widget class="QLineEdit" name="leArtNr">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="inputMethodHints">
                 <set>Qt::ImhNone</set>
                </property>
@@ -1099,18 +1130,15 @@
               </widget>
              </item>
              <item row="3" column="1" colspan="2">
-              <widget class="QLineEdit" name="leArtPrice"/>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_35">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QLineEdit" name="leArtPrice">
+               <property name="inputMask">
+                <string/>
                </property>
-               <property name="text">
-                <string>Bezeichnung</string>
+               <property name="placeholderText">
+                <string/>
+               </property>
+               <property name="clearButtonEnabled">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
@@ -1124,19 +1152,6 @@
                </property>
                <property name="text">
                 <string>ArtNr</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_34">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>Preis</string>
                </property>
               </widget>
              </item>
@@ -1154,10 +1169,44 @@
               </widget>
              </item>
              <item row="2" column="1" colspan="2">
-              <widget class="QLineEdit" name="leArtName"/>
+              <widget class="QLineEdit" name="leArtName">
+               <property name="clearButtonEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_35">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Bezeichnung</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_34">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>Preis €</string>
+               </property>
+              </widget>
              </item>
              <item row="1" column="1" colspan="2">
-              <widget class="QLineEdit" name="leArtUnit"/>
+              <widget class="QLineEdit" name="leArtUnit">
+               <property name="clearButtonEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
              </item>
              <item row="4" column="0">
               <widget class="QLabel" name="label_36">
@@ -1170,10 +1219,31 @@
                <property name="text">
                 <string>Beschreibung</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+               </property>
               </widget>
              </item>
              <item row="4" column="1" colspan="2">
-              <widget class="QTextEdit" name="ptArtDescription"/>
+              <widget class="QTextEdit" name="ptArtDescription">
+               <property name="tabChangesFocus">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QPushButton" name="btnArtSave">
+               <property name="text">
+                <string>Speichern</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="2">
+              <widget class="QPushButton" name="btnArtCancel">
+               <property name="text">
+                <string>Abbrechen</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -1187,7 +1257,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <property name="spacing">
-            <number>30</number>
+            <number>60</number>
            </property>
            <property name="leftMargin">
             <number>10</number>
@@ -1979,9 +2049,40 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
+  <tabstop>tabMain</tabstop>
+  <tabstop>btnNewCustomer</tabstop>
+  <tabstop>btnDeleteCustomer</tabstop>
+  <tabstop>btnEditCustomer</tabstop>
+  <tabstop>pushButton_4</tabstop>
+  <tabstop>pushButton_5</tabstop>
+  <tabstop>tabWidKunden</tabstop>
+  <tabstop>leFirma</tabstop>
+  <tabstop>leName1</tabstop>
+  <tabstop>leName2</tabstop>
+  <tabstop>leStrasse</tabstop>
+  <tabstop>lePlz</tabstop>
+  <tabstop>leOrt</tabstop>
+  <tabstop>leLand</tabstop>
+  <tabstop>leTelefon</tabstop>
+  <tabstop>leTelefax</tabstop>
+  <tabstop>sbRabatt</tabstop>
+  <tabstop>leEmail</tabstop>
+  <tabstop>leWebsite</tabstop>
+  <tabstop>ptCustomerInfo</tabstop>
+  <tabstop>btnSaveCustomer</tabstop>
+  <tabstop>btnCancelCustomer</tabstop>
+  <tabstop>btnArtDelAll</tabstop>
+  <tabstop>btnArtDelete</tabstop>
+  <tabstop>btnArtNew</tabstop>
+  <tabstop>leArtNr</tabstop>
+  <tabstop>leArtUnit</tabstop>
+  <tabstop>leArtName</tabstop>
+  <tabstop>leArtPrice</tabstop>
+  <tabstop>ptArtDescription</tabstop>
   <tabstop>btnRgRechnung</tabstop>
   <tabstop>btnRgAngebot</tabstop>
   <tabstop>btnRgGutschrift</tabstop>
+  <tabstop>deRgDate</tabstop>
   <tabstop>cbRgCustomer</tabstop>
   <tabstop>leRgSubject</tabstop>
   <tabstop>leRgText</tabstop>
@@ -1993,40 +2094,18 @@
   <tabstop>lineEdit_9</tabstop>
   <tabstop>spinBox_2</tabstop>
   <tabstop>checkBox</tabstop>
-  <tabstop>deRgDate</tabstop>
   <tabstop>leRgArtNr</tabstop>
   <tabstop>leRgDescription</tabstop>
+  <tabstop>cbRgArtikel</tabstop>
   <tabstop>leRgCount</tabstop>
   <tabstop>leRgUnit</tabstop>
   <tabstop>leRgSinglePrice</tabstop>
   <tabstop>leRgTotalPrice</tabstop>
-  <tabstop>cbRgArtikel</tabstop>
   <tabstop>btnRgAddArticle</tabstop>
   <tabstop>tvRgArticles</tabstop>
   <tabstop>btnRgDeleteArticle</tabstop>
   <tabstop>btnRgClear</tabstop>
   <tabstop>btnRgCreate</tabstop>
-  <tabstop>btnSaveCustomer</tabstop>
-  <tabstop>btnCancelCustomer</tabstop>
-  <tabstop>btnNewCustomer</tabstop>
-  <tabstop>leFirma</tabstop>
-  <tabstop>leOrt</tabstop>
-  <tabstop>leLand</tabstop>
-  <tabstop>leName1</tabstop>
-  <tabstop>leStrasse</tabstop>
-  <tabstop>leTelefax</tabstop>
-  <tabstop>leTelefon</tabstop>
-  <tabstop>leEmail</tabstop>
-  <tabstop>leWebsite</tabstop>
-  <tabstop>pushButton_5</tabstop>
-  <tabstop>pushButton_4</tabstop>
-  <tabstop>tabWidKunden</tabstop>
-  <tabstop>sbRabatt</tabstop>
-  <tabstop>leName2</tabstop>
-  <tabstop>ptCustomerInfo</tabstop>
-  <tabstop>btnEditCustomer</tabstop>
-  <tabstop>btnDeleteCustomer</tabstop>
-  <tabstop>lePlz</tabstop>
   <tabstop>doubleSpinBox_2</tabstop>
  </tabstops>
  <resources/>
