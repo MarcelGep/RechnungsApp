@@ -22,7 +22,7 @@ public:
     bool isOpen() const;
     bool addCustomer(const Customers &customer);
     bool addBill(QString datum, double betrag);
-    bool editCustomer(QString id, const Customers &customers);
+    bool editCustomer(QString id, const Customers &customer);
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
 //    bool removeAllArticles();
@@ -38,6 +38,9 @@ public:
     QMap<int, QString> readFieldNames(QString table);
     bool readArticles(std::vector<Articles> &articles) const;
     bool readArticle(QString articleID, Articles &article);
+    bool editArticle(QString id, const Articles &article);
+public slots:
+    bool removeDBList(QString table);
 private:
     QSqlDatabase m_db;
 };

@@ -250,6 +250,28 @@ bool DBManager::addBill(QString datum, double betrag)
     return success;
 }
 
+bool DBManager::removeDBList(QString table)
+{
+    if(!isOpen())
+    {
+        qDebug() << DEBUG_TAG << ": Database not open!";
+        return false;
+    }
+
+    QSqlQuery queryDelete;
+    queryDelete.prepare("DELETE FROM " + table);
+
+    if(!queryDelete.exec())
+    {
+        qDebug() << DEBUG_TAG << ": Remove all entries from database '" + table + "' failed: " << queryDelete.lastError();
+        return false;
+    }
+    else
+        qDebug() << DEBUG_TAG << ": Remove all entries from database '" + table + "' successfull!";
+
+    return true;
+}
+
 bool DBManager::removeDbEntry(QString table, QString id)
 {
     if(!isOpen())
@@ -311,7 +333,39 @@ void DBManager::removeBill(int billID)
         qDebug() << DEBUG_TAG << ": Remove bill successfull!";
 }
 
-bool DBManager::editCustomer(QString id, const Customers& customers)
+bool DBManager::editArticle(QString id, const Articles& article)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        query.prepare("UPDATE Artikel SET "
+                              "Einheit=:einheit, "
+                              "Bezeichnung=:bezeichnung, "
+                              "Beschreibung=:beschreibung, "
+                              "Preis=:preis "
+                      "WHERE ArtNr='"+id+"'");
+
+        query.bindValue(":einheit", article.getUnit());
+        query.bindValue(":bezeichnung", article.getName());
+        query.bindValue(":beschreibung", article.getDescription());
+        query.bindValue(":preis", article.getPrice());
+
+        if(query.exec())
+        {
+            return true;
+        }
+        else
+        {
+            qDebug() << DEBUG_TAG << ": Edit ERROR - " << query.lastError();
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
+bool DBManager::editCustomer(QString id, const Customers& customer)
 {
     if(isOpen())
     {
@@ -334,20 +388,20 @@ bool DBManager::editCustomer(QString id, const Customers& customers)
                               "Information=:info "
                       "WHERE KdNr='"+id+"'");
 
-        query.bindValue(":firma", customers.getFirma());
-        query.bindValue(":name1", customers.getName1());
-        query.bindValue(":name2", customers.getName2());
-        query.bindValue(":strasse", customers.getStrasse());
-        query.bindValue(":plz", customers.getPlz());
-        query.bindValue(":ort", customers.getOrt());
-        query.bindValue(":land", customers.getLand());
-        query.bindValue(":telefon", customers.getTelefon());
-        query.bindValue(":telefax", customers.getTelefax());
-        query.bindValue(":email", customers.getEmail());
-        query.bindValue(":website", customers.getWebsite());
-        query.bindValue(":rabatt", customers.getRabatt());
-        query.bindValue(":kontostand",customers.getKontostand());
-        query.bindValue(":info", customers.getInfo());
+        query.bindValue(":firma", customer.getFirma());
+        query.bindValue(":name1", customer.getName1());
+        query.bindValue(":name2", customer.getName2());
+        query.bindValue(":strasse", customer.getStrasse());
+        query.bindValue(":plz", customer.getPlz());
+        query.bindValue(":ort", customer.getOrt());
+        query.bindValue(":land", customer.getLand());
+        query.bindValue(":telefon", customer.getTelefon());
+        query.bindValue(":telefax", customer.getTelefax());
+        query.bindValue(":email", customer.getEmail());
+        query.bindValue(":website", customer.getWebsite());
+        query.bindValue(":rabatt", customer.getRabatt());
+        query.bindValue(":kontostand",customer.getKontostand());
+        query.bindValue(":info", customer.getInfo());
 
 
         if(query.exec())

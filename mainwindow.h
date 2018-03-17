@@ -101,6 +101,12 @@ private slots:
 
     void on_btnArtNew_clicked();
 
+    void on_btnArtCancel_clicked();
+
+    void on_btnArtDelete_clicked();
+
+    void on_btnArtDelAll_clicked();
+
 private:
     void setCustomerColumnsWidth() const;
 

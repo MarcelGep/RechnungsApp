@@ -329,11 +329,12 @@ void MainWindow::setArticleColumnsWidth() const
 
 void MainWindow::clearArticleEdits()
 {
+    ui->leArtNr->clear();
     ui->leArtName->clear();
     ui->leArtPrice->clear();
     ui->leArtUnit->clear();
     ui->ptArtDescription->clear();
-    ui->leArtNr->setText(QString::number(m_dbManager->readLastID(ARTIKEL) + 1));
+    ui->Artikel_Erfassen->setEnabled(false);
 }
 
 void MainWindow::clearCustomerEdits() const
@@ -478,15 +479,14 @@ void MainWindow::on_btnArtSave_clicked()
     if (m_dbManager->dbEntryExist(ARTIKEL, QString::number(artnr)))
     {
         // edit data entry
-//        if (m_dbManager->editCustomer(QString::number(artnr), customer))
-//        {
-//            printAllCustomers();
-//            QMessageBox::information(this, "Info", "Der Kunde wurde erfolgreich bearbeitet!", QMessageBox::Ok);
-//            clearCustomerEdits();
-//            ui->tabWidKunden->setCurrentIndex(OverviewTab);
-//        }
-//        else
-//            QMessageBox::critical(this, "Error", "Fehler beim bearbeiten des Kunden!", QMessageBox::Ok);
+        if (m_dbManager->editArticle(QString::number(artnr), article))
+        {
+            printAllArticles();
+            QMessageBox::information(this, "Info", "Der Artikel wurde erfolgreich bearbeitet!", QMessageBox::Ok);
+            clearArticleEdits();
+        }
+        else
+            QMessageBox::critical(this, "Error", "Fehler beim bearbeiten des Artikels!", QMessageBox::Ok);
     }
     else
     {
@@ -496,6 +496,7 @@ void MainWindow::on_btnArtSave_clicked()
             printAllArticles();
             clearArticleEdits();
             QMessageBox::information(this, "Info", "Der Artikel wurde erfolgreich angelegt!", QMessageBox::Ok);
+            ui->Artikel_Erfassen->setEnabled(false);
         }
         else
             QMessageBox::critical(this, "Error", "Fehler beim erstellen des Artikels!", QMessageBox::Ok);
@@ -514,6 +515,8 @@ void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
     }
 
     // print all customer to edits
+    ui->Artikel_Erfassen->setEnabled(true);
+
     ui->leArtNr->setText(QString::number(article.getArtNr()));
     ui->leArtUnit->setText(article.getUnit());
     ui->leArtName->setText(article.getName());
@@ -523,6 +526,64 @@ void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_btnArtNew_clicked()
 {
+    clearArticleEdits();
+    ui->Artikel_Erfassen->setEnabled(true);
+    ui->twArticles->clearSelection();
+    ui->leArtNr->setText(QString::number(m_dbManager->readLastID(ARTIKEL) + 1));
+}
+
+void MainWindow::on_btnArtCancel_clicked()
+{
     ui->twArticles->clearSelection();
     clearArticleEdits();
+    ui->Artikel_Erfassen->setEnabled(false);
+}
+
+void MainWindow::on_btnArtDelete_clicked()
+{
+    if(ui->twArticles->selectedItems().count() >  0)
+    {
+        QMessageBox msg;
+        msg.setWindowIcon(QPixmap("logo.png"));
+        msg.setText("Möchten Sie den Artikel wirklich löschen?");
+        msg.setWindowTitle("Artikel löschen");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setButtonText(QMessageBox::Yes, "Ja");
+        msg.setButtonText(QMessageBox::No, "Nein");
+        msg.setDefaultButton(QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+
+        if(msg.exec() == QMessageBox::Yes)
+        {
+            QString id = ui->twArticles->item(ui->twArticles->currentRow(), 0)->text();
+            m_dbManager->removeDbEntry(ARTIKEL, id);
+            printAllArticles();
+            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        qDebug() << "No article selected!";
+        QMessageBox::warning(this, "Warnung", "Es wurde kein Artikel zum löschen ausgewählt!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_btnArtDelAll_clicked()
+{
+    QMessageBox msg;
+    msg.setWindowIcon(QPixmap("logo.png"));
+    msg.setText("Möchten Sie ALLE Artikel wirklich löschen?");
+    msg.setWindowTitle("ALLE Artikel löschen");
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setButtonText(QMessageBox::Yes, "Ja");
+    msg.setButtonText(QMessageBox::No, "Nein");
+    msg.setDefaultButton(QMessageBox::No);
+    msg.setIcon(QMessageBox::Question);
+
+    if(msg.exec() == QMessageBox::Yes)
+    {
+        m_dbManager->removeDBList(ARTIKEL);
+        printAllArticles();
+        QMessageBox::information(this, "Info", "Alle Artikel wurden erfolgreich gelöscht!", QMessageBox::Ok);
+    }
 }
