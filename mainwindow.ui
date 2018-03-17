@@ -45,7 +45,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -1315,6 +1315,22 @@
         <string>Rechnungen</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer_13">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>5</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="5" column="3">
          <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
           <property name="maximumSize">
@@ -1378,141 +1394,26 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="2">
-         <spacer name="horizontalSpacer_13">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>5</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="3" rowspan="2">
-         <widget class="QGroupBox" name="Steuern">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="title">
-           <string>Steuern</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_9">
-           <property name="leftMargin">
-            <number>15</number>
-           </property>
-           <property name="topMargin">
-            <number>15</number>
-           </property>
-           <property name="rightMargin">
-            <number>15</number>
-           </property>
-           <property name="bottomMargin">
-            <number>15</number>
-           </property>
-           <property name="horizontalSpacing">
-            <number>15</number>
-           </property>
-           <property name="verticalSpacing">
-            <number>8</number>
-           </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_11">
-             <property name="text">
-              <string>Berechnung</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_12">
-             <property name="text">
-              <string>Währung</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="comboBox">
-             <item>
-              <property name="text">
-               <string>Inklusive</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Exklusive</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Netto</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Kleinunternehmer</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_5"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBox">
-             <property name="suffix">
-              <string> %</string>
-             </property>
-             <property name="prefix">
-              <string/>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_21">
-             <property name="text">
-              <string>Artikelrabatt</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_20">
-             <property name="text">
-              <string>Steuersatz</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox">
-             <property name="prefix">
-              <string/>
-             </property>
-             <property name="suffix">
-              <string> %</string>
-             </property>
-             <property name="decimals">
-              <number>1</number>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="4" column="0" colspan="4">
          <widget class="QGroupBox" name="Artikel_Positionen">
           <property name="title">
            <string>Artikel Positionen</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+           <property name="bottomMargin">
+            <number>10</number>
+           </property>
            <item>
-            <widget class="QTableView" name="tvRgArticles"/>
+            <widget class="QTableWidget" name="twRgArticles"/>
            </item>
           </layout>
          </widget>
@@ -1524,16 +1425,16 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_8">
            <property name="leftMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="topMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="rightMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="bottomMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="horizontalSpacing">
             <number>15</number>
@@ -1541,20 +1442,32 @@
            <property name="verticalSpacing">
             <number>8</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_22">
+           <item row="3" column="1">
+            <widget class="QCheckBox" name="checkBox">
              <property name="text">
-              <string>Tage bis Fälligkeit</string>
+              <string>Skontotext auf Rechnung</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit_8"/>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_23">
-             <property name="text">
-              <string>Tage für Skonto</string>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinBox_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="suffix">
+              <string> %</string>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>3</number>
              </property>
             </widget>
            </item>
@@ -1568,17 +1481,20 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spinBox_2">
-             <property name="suffix">
-              <string> %</string>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>Tage für Skonto</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="checkBox">
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="lineEdit_8"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_22">
              <property name="text">
-              <string>Skontotext auf Rechnung</string>
+              <string>Tage bis Fälligkeit</string>
              </property>
             </widget>
            </item>
@@ -1598,16 +1514,16 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
            <property name="leftMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="topMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="rightMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="bottomMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="horizontalSpacing">
             <number>15</number>
@@ -1737,49 +1653,6 @@
           </layout>
          </widget>
         </item>
-        <item row="6" column="0" colspan="4">
-         <widget class="QGroupBox" name="Rechnung_Aktionen">
-          <property name="title">
-           <string>Aktionen</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QPushButton" name="btnRgDeleteArticle">
-             <property name="text">
-              <string>Artikel löschen</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnRgClear">
-             <property name="text">
-              <string>Eingabe löschen</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_11">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btnRgCreate">
-             <property name="text">
-              <string>Rechnung erstellen</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
         <item row="3" column="0" colspan="4">
          <widget class="QGroupBox" name="Artikel_Hinzufuegen">
           <property name="title">
@@ -1787,16 +1660,16 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_10">
            <property name="leftMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="topMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="rightMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="bottomMargin">
-            <number>15</number>
+            <number>10</number>
            </property>
            <property name="horizontalSpacing">
             <number>8</number>
@@ -1804,43 +1677,44 @@
            <property name="verticalSpacing">
             <number>5</number>
            </property>
-           <item row="2" column="3">
-            <widget class="QLineEdit" name="leRgCount">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>50</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
+           <item row="1" column="4">
             <widget class="QLabel" name="label_27">
              <property name="text">
               <string>Anzahl</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="6">
+           <item row="1" column="7">
             <widget class="QLabel" name="label_30">
              <property name="text">
               <string>Einzel Preis</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="leRgDescription"/>
+           <item row="1" column="5">
+            <widget class="QLabel" name="label_28">
+             <property name="text">
+              <string>Einheit</string>
+             </property>
+            </widget>
            </item>
-           <item row="2" column="4">
+           <item row="2" column="10">
+            <widget class="QLineEdit" name="leRgTotalPrice">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="leRgName"/>
+           </item>
+           <item row="2" column="5">
             <widget class="QLineEdit" name="leRgUnit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1855,7 +1729,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Stück</string>
+              <string/>
              </property>
              <property name="placeholderText">
               <string/>
@@ -1869,38 +1743,28 @@
              </property>
             </widget>
            </item>
-           <item row="1" column="4">
-            <widget class="QLabel" name="label_28">
-             <property name="text">
-              <string>Einheit</string>
-             </property>
-            </widget>
-           </item>
            <item row="2" column="9">
-            <widget class="QLineEdit" name="leRgTotalPrice">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="5">
-            <widget class="QLabel" name="label_29">
-             <property name="text">
-              <string>X</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="8">
             <widget class="QLabel" name="label_32">
              <property name="text">
               <string>=</string>
              </property>
             </widget>
            </item>
+           <item row="1" column="10">
+            <widget class="QLabel" name="label_31">
+             <property name="text">
+              <string>Gesamt Preis</string>
+             </property>
+            </widget>
+           </item>
            <item row="2" column="6">
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="7">
             <widget class="QLineEdit" name="leRgSinglePrice">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1908,12 +1772,8 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-            </widget>
-           </item>
-           <item row="1" column="9">
-            <widget class="QLabel" name="label_31">
-             <property name="text">
-              <string>Gesamt Preis</string>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -1923,51 +1783,6 @@
               <string>ArtikelNr.</string>
              </property>
             </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLineEdit" name="leRgArtNr">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="12" rowspan="4">
-            <widget class="QPushButton" name="btnRgAddArticle">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string>Hinzufügen</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="10">
-            <spacer name="horizontalSpacer_9">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>15</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
            </item>
            <item row="2" column="2">
             <spacer name="horizontalSpacer_10">
@@ -2011,6 +1826,255 @@
                <string>Artikel 3</string>
               </property>
              </item>
+            </widget>
+           </item>
+           <item row="2" column="11">
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>15</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="13" rowspan="4">
+            <widget class="QPushButton" name="btnRgAddArticle">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Hinzufügen</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLineEdit" name="leRgArtNr">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QSpinBox" name="sbRgCount">
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="suffix">
+              <string/>
+             </property>
+             <property name="prefix">
+              <string/>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100000</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="4">
+         <widget class="QGroupBox" name="Rechnung_Aktionen">
+          <property name="title">
+           <string>Aktionen</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>25</number>
+           </property>
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+           <property name="bottomMargin">
+            <number>10</number>
+           </property>
+           <item>
+            <widget class="QPushButton" name="btnRgDeleteArticle">
+             <property name="text">
+              <string>Artikel löschen</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnRgClear">
+             <property name="text">
+              <string>Eingabe löschen</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnRgCreate">
+             <property name="text">
+              <string>Rechnung erstellen</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="3" rowspan="2">
+         <widget class="QGroupBox" name="Steuern">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Steuern</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_9">
+           <property name="leftMargin">
+            <number>10</number>
+           </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
+           <property name="rightMargin">
+            <number>10</number>
+           </property>
+           <property name="bottomMargin">
+            <number>10</number>
+           </property>
+           <property name="horizontalSpacing">
+            <number>15</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>8</number>
+           </property>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox">
+             <property name="prefix">
+              <string/>
+             </property>
+             <property name="suffix">
+              <string> %</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Artikelrabatt</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinBox">
+             <property name="suffix">
+              <string> %</string>
+             </property>
+             <property name="prefix">
+              <string/>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>19</number>
+             </property>
+             <property name="displayIntegerBase">
+              <number>10</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Steuersatz</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="lineEdit_5">
+             <property name="text">
+              <string>EUR</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Währung</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="comboBox">
+             <property name="currentIndex">
+              <number>3</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Inklusive</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Exklusive</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Netto</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Kleinunternehmer</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Berechnung</string>
+             </property>
             </widget>
            </item>
           </layout>
@@ -2095,14 +2159,12 @@
   <tabstop>spinBox_2</tabstop>
   <tabstop>checkBox</tabstop>
   <tabstop>leRgArtNr</tabstop>
-  <tabstop>leRgDescription</tabstop>
+  <tabstop>leRgName</tabstop>
   <tabstop>cbRgArtikel</tabstop>
-  <tabstop>leRgCount</tabstop>
   <tabstop>leRgUnit</tabstop>
   <tabstop>leRgSinglePrice</tabstop>
   <tabstop>leRgTotalPrice</tabstop>
   <tabstop>btnRgAddArticle</tabstop>
-  <tabstop>tvRgArticles</tabstop>
   <tabstop>btnRgDeleteArticle</tabstop>
   <tabstop>btnRgClear</tabstop>
   <tabstop>btnRgCreate</tabstop>

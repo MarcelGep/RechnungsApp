@@ -423,6 +423,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
 
         case CalculationsTab:
         {
+            // Fill customers combobox
             QList<QString> entries;
             std::vector<Customers> customerList;
             m_dbManager->readCustomers(customerList);
@@ -437,12 +438,36 @@ void MainWindow::on_tabMain_currentChanged(int index)
 
                 entries.push_back(tempEntry);
             }
-
             ui->cbRgCustomer->clear();
             ui->cbRgCustomer->addItems(entries);
-            ui->leRgSubject->setText("Rechnung XXX");
+
+            // Fill subject line
+            int lastRgNr = m_dbManager->readLastID(RECHNUNG);
+            ui->leRgSubject->setText("Rechnung " + QString::number(lastRgNr));
+
+            // Fill date
             QDate date;
             ui->deRgDate->setDate(date.currentDate());
+
+            // Fill articles combobox
+            // clear articles
+            if(ui->cbRgArtikel->count() > 0)
+                ui->cbRgArtikel->clear();
+
+            // read articles from database
+            std::vector<Articles> articles;
+            if (!m_dbManager->readArticles(articles))
+            {
+               qDebug() << DEBUG_TAG_MAIN << ": Error read customers!";
+               return;
+            }
+
+            // save all exist articles to combobox
+            for (std::vector<Articles>::iterator it = m_articles.begin(); it != m_articles.end(); ++it)
+            {
+               QString article = QString::number(it->getArtNr())+ " - " + it->getName();
+               ui->cbRgArtikel->addItem(article);
+            }
         }
         break;
 
@@ -456,7 +481,9 @@ void MainWindow::on_tabMain_currentChanged(int index)
 
 void MainWindow::on_btnRgRechnung_clicked()
 {
-    ui->leRgSubject->setText("Rechnung XXX");
+    int lastRgNr = m_dbManager->readLastID(RECHNUNG);
+
+    ui->leRgSubject->setText("Rechnung " + QString::number(lastRgNr));
     ui->btnRgRechnung->setChecked(true);
     ui->btnRgAngebot->setChecked(false);
     ui->btnRgGutschrift->setChecked(false);
@@ -629,4 +656,40 @@ void MainWindow::on_twCustomers_itemClicked(QTableWidgetItem *item)
 //    ui->leArtName->setText(article.getName());
 //    ui->leArtPrice->setText(QString::number(article.getPrice()));
 //    ui->ptArtDescription->setPlainText(article.getDescription());
+}
+
+void MainWindow::on_btnRgClear_clicked()
+{
+    clearBillEdits();
+}
+
+void MainWindow::clearBillEdits()
+{
+    ui->leRgArtNr->clear();
+    ui->leRgName->clear();
+    ui->sbRgCount->setValue(1);
+    ui->leRgSinglePrice->clear();
+    ui->leRgTotalPrice->clear();
+    ui->leRgUnit->clear();
+}
+
+void MainWindow::on_cbRgArtikel_currentTextChanged(const QString &name)
+{
+    QString artNr = name.split(" ").value(0);
+
+    Articles article;
+    m_dbManager->readArticle(artNr, article);
+
+    ui->leRgArtNr->setText(artNr);
+    ui->leRgName->setText(article.getName());
+    ui->leRgUnit->setText(article.getUnit());
+    ui->sbRgCount->setValue(1);
+    ui->leRgSinglePrice->setText(QString::number(article.getPrice(), 'f', 2));
+    ui->leRgTotalPrice->setText(QString::number(article.getPrice() * ui->sbRgCount->value(), 'f', 2));
+}
+
+void MainWindow::on_sbRgCount_valueChanged(int value)
+{
+    double totalPriceTemp = ui->leRgSinglePrice->text().toDouble() * value;
+    ui->leRgTotalPrice->setText(QString::number(totalPriceTemp, 'f', 2));
 }

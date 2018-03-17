@@ -109,6 +109,12 @@ private slots:
 
     void on_twCustomers_itemClicked(QTableWidgetItem *item);
 
+    void on_btnRgClear_clicked();
+
+    void on_cbRgArtikel_currentTextChanged(const QString &name);
+
+    void on_sbRgCount_valueChanged(int value);
+
 private:
     void setCustomerColumnsWidth() const;
 
@@ -127,6 +133,7 @@ private:
     void clearCustomers();
     void clearArticles();
     void setArticleColumnsWidth() const;
+    void clearBillEdits();
 };
 
 #endif // MAINWINDOW_H
