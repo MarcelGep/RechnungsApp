@@ -13,11 +13,22 @@
 #define CUSTOMER_COLUMN_OFFSET 25
 #define CUSTOMER_ROW_HEIGHT 25
 #define ARTICLE_ROW_HEIGHT 25
+#define ARTICLEPOS_ROW_HEIGHT 25
 
 #define ARTIKEL "Artikel"
 #define KUNDEN "Kunden"
 #define RECHNUNG "Rechnungen"
 #define POSITIONEN "Positionen"
+
+enum ArtPosColumns
+{
+    ArtNrPos,
+    BeschreibungPos,
+    Anzahl,
+    EinheitPos,
+    EinzelPreis,
+    Summe
+};
 
 enum CustomerColumns
 {
@@ -115,6 +126,28 @@ private slots:
 
     void on_sbRgCount_valueChanged(int value);
 
+    void on_btnRgAddArticle_clicked();
+
+    void on_sbRgSinglePrice_valueChanged(double value);
+
+    void on_btnRgDeteleAllArticle_clicked();
+
+    void on_btnRgDeleteArticle_clicked();
+
+
+    void on_twRgArticles_itemSelectionChanged();
+
+    void on_cbRgArtikel_activated(int index);
+
+    void on_leRgName_textChanged(const QString &text);
+
+
+    void on_twRgArticles_itemClicked(QTableWidgetItem *item);
+
+    void on_btnCustomerBill_clicked();
+
+    void on_twCustomers_itemSelectionChanged();
+
 private:
     void setCustomerColumnsWidth() const;
 
@@ -134,6 +167,8 @@ private:
     void clearArticles();
     void setArticleColumnsWidth() const;
     void clearBillEdits();
+    void setArticlePosColumnsWidth() const;
+    void updateTotalPrice();
 };
 
 #endif // MAINWINDOW_H

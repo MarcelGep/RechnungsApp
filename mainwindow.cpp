@@ -42,6 +42,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twArticles->horizontalHeader()->setFont(fontArticles);
     ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->twArticles->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
+
+    // Setup article positions
+    ui->twRgArticles->setColumnCount(m_positionFields.size() - 1);
+    for ( int i = 1; i < m_positionFields.size(); i++)
+    {
+        ui->twRgArticles->setHorizontalHeaderItem(i-1, new QTableWidgetItem(m_positionFields[i]));
+    }
+    QFont fontArticlesPos("MS Shell Dlg 2", 8, QFont::Bold);
+    ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
+    ui->twRgArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->twRgArticles->horizontalHeader()->setSectionResizeMode(BeschreibungPos, QHeaderView::Stretch);
 }
 
 MainWindow::~MainWindow()
@@ -131,7 +142,7 @@ void MainWindow::on_btnDeleteCustomer_clicked()
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
         msg.setText("Möchten Sie den Kunden wirklich löschen?");
-        msg.setWindowTitle("Kunden löschen");
+        msg.setWindowTitle("Warnung");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setButtonText(QMessageBox::Yes, "Ja");
         msg.setButtonText(QMessageBox::No, "Nein");
@@ -172,9 +183,6 @@ void MainWindow::on_btnNewCustomer_clicked()
     ui->tabWidKunden->setCurrentIndex(EditTab);
 
     ui->twCustomers->clearSelection();
-
-    ui->btnEditCustomer->setEnabled(false);
-    ui->btnDeleteCustomer->setEnabled(false);
 }
 
 void MainWindow::on_btnEditCustomer_clicked()
@@ -339,6 +347,17 @@ void MainWindow::setArticleColumnsWidth() const
     }
 }
 
+void MainWindow::setArticlePosColumnsWidth() const
+{
+    ui->twRgArticles->resizeColumnsToContents();
+
+    for (int i = 0; i < ui->twRgArticles->columnCount(); i++)
+    {
+        int tempWidth = ui->twRgArticles->columnWidth(i);
+        ui->twRgArticles->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
+    }
+}
+
 void MainWindow::clearArticleEdits()
 {
     ui->leArtNr->clear();
@@ -388,13 +407,7 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
     }
     else if(index == OverviewTab)
     {
-    //        if(ui->twCustomers->selectedItems().count() >  0)
-    //        {
-    //            clearCustomerEdits();
-    //            ui->leKdNr->clear();
-    //            ui->twCustomers->clearSelection();
-    //            printAllCustomers();
-    //        }
+
     }
 }
 
@@ -410,6 +423,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
         {
             // Setup customer list
             printAllCustomers();
+            ui->btnCustomerBill->setEnabled(false);
         }
         break;
 
@@ -463,11 +477,13 @@ void MainWindow::on_tabMain_currentChanged(int index)
             }
 
             // save all exist articles to combobox
-            for (std::vector<Articles>::iterator it = m_articles.begin(); it != m_articles.end(); ++it)
+            for (std::vector<Articles>::iterator it = articles.begin(); it != articles.end(); ++it)
             {
                QString article = QString::number(it->getArtNr())+ " - " + it->getName();
                ui->cbRgArtikel->addItem(article);
             }
+
+            clearBillEdits();
         }
         break;
 
@@ -585,7 +601,7 @@ void MainWindow::on_btnArtDelete_clicked()
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
         msg.setText("Möchten Sie den Artikel wirklich löschen?");
-        msg.setWindowTitle("Artikel löschen");
+        msg.setWindowTitle("Warnung");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setButtonText(QMessageBox::Yes, "Ja");
         msg.setButtonText(QMessageBox::No, "Nein");
@@ -614,7 +630,7 @@ void MainWindow::on_btnArtDelAll_clicked()
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
         msg.setText("Möchten Sie ALLE Artikel wirklich löschen?");
-        msg.setWindowTitle("ALLE Artikel löschen");
+        msg.setWindowTitle("Warnung");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setButtonText(QMessageBox::Yes, "Ja");
         msg.setButtonText(QMessageBox::No, "Nein");
@@ -638,58 +654,218 @@ void MainWindow::on_twCustomers_itemClicked(QTableWidgetItem *item)
 {
     ui->btnEditCustomer->setEnabled(true);
     ui->btnDeleteCustomer->setEnabled(true);
-
-    // read customer from database
-//    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
-//    Articles article;
-//    if (!m_dbManager->readArticle(artNr, article))
-//    {
-//       qDebug() << DEBUG_TAG_MAIN << ": Error read customer!";
-//       return;
-//    }
-
-//    // print all customer to edits
-//    ui->Artikel_Erfassen->setEnabled(true);
-
-//    ui->leArtNr->setText(QString::number(article.getArtNr()));
-//    ui->leArtUnit->setText(article.getUnit());
-//    ui->leArtName->setText(article.getName());
-//    ui->leArtPrice->setText(QString::number(article.getPrice()));
-//    ui->ptArtDescription->setPlainText(article.getDescription());
+    ui->btnCustomerBill->setEnabled(true);
 }
 
 void MainWindow::on_btnRgClear_clicked()
 {
     clearBillEdits();
+    ui->btnRgClear->setEnabled(false);
+    ui->btnRgAddArticle->setEnabled(false);
 }
 
 void MainWindow::clearBillEdits()
 {
+    ui->cbRgArtikel->setCurrentIndex(-1);
     ui->leRgArtNr->clear();
     ui->leRgName->clear();
-    ui->sbRgCount->setValue(1);
-    ui->leRgSinglePrice->clear();
-    ui->leRgTotalPrice->clear();
-    ui->leRgUnit->clear();
+    ui->sbRgCount->setValue(0);
+    ui->sbRgSinglePrice->setValue(0);
+    ui->sbRgTotalPrice->setValue(0);
+    ui->leRgUnit->setText("Stück");
 }
 
 void MainWindow::on_cbRgArtikel_currentTextChanged(const QString &name)
 {
     QString artNr = name.split(" ").value(0);
 
-    Articles article;
-    m_dbManager->readArticle(artNr, article);
-
-    ui->leRgArtNr->setText(artNr);
-    ui->leRgName->setText(article.getName());
-    ui->leRgUnit->setText(article.getUnit());
-    ui->sbRgCount->setValue(1);
-    ui->leRgSinglePrice->setText(QString::number(article.getPrice(), 'f', 2));
-    ui->leRgTotalPrice->setText(QString::number(article.getPrice() * ui->sbRgCount->value(), 'f', 2));
+    if (!artNr.isEmpty())
+    {
+        Articles article;
+        m_dbManager->readArticle(artNr, article);
+        ui->leRgArtNr->setText(artNr);
+        ui->leRgName->setText(article.getName());
+        ui->leRgUnit->setText(article.getUnit());
+        ui->sbRgCount->setValue(1);
+        ui->sbRgSinglePrice->setValue(article.getPrice());
+        ui->sbRgTotalPrice->setValue(article.getPrice() * ui->sbRgCount->value());
+    }
 }
 
 void MainWindow::on_sbRgCount_valueChanged(int value)
 {
-    double totalPriceTemp = ui->leRgSinglePrice->text().toDouble() * value;
-    ui->leRgTotalPrice->setText(QString::number(totalPriceTemp, 'f', 2));
+    double totalPriceTemp = ui->sbRgSinglePrice->value() * value;
+    ui->sbRgTotalPrice->setValue(totalPriceTemp);
+}
+
+void MainWindow::on_btnRgAddArticle_clicked()
+{
+    QString artNr = ui->leRgArtNr->text();
+    QString name = ui->leRgName->text();
+    QString count = QString::number(ui->sbRgCount->value());
+    QString unit = ui->leRgUnit->text();
+    QString sPrice = QString::number(ui->sbRgSinglePrice->value(), 'f', 2) + " €";
+    QString tPrice = QString::number(ui->sbRgTotalPrice->value(), 'f', 2) + " €";
+
+    int row = ui->twRgArticles->rowCount();
+
+    ui->twRgArticles->insertRow(row);
+    ui->twRgArticles->setRowHeight(row, ARTICLEPOS_ROW_HEIGHT);
+    ui->twRgArticles->setItem(row, ArtNrPos, new QTableWidgetItem(artNr));
+    ui->twRgArticles->setItem(row, BeschreibungPos, new QTableWidgetItem(name));
+    ui->twRgArticles->setItem(row, Anzahl, new QTableWidgetItem(count));
+    ui->twRgArticles->setItem(row, EinheitPos, new QTableWidgetItem(unit));
+    ui->twRgArticles->setItem(row, EinzelPreis, new QTableWidgetItem(sPrice));
+    ui->twRgArticles->item(row, EinzelPreis)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    ui->twRgArticles->setItem(row, Summe, new QTableWidgetItem(tPrice));
+    ui->twRgArticles->item(row, Summe)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
+    // Set customer table column width offset
+    setArticlePosColumnsWidth();
+
+    // Update total price
+    updateTotalPrice();
+
+    // Clear bill edits
+    clearBillEdits();
+    ui->btnRgClear->setEnabled(false);
+    ui->btnRgAddArticle->setEnabled(false);
+}
+
+void MainWindow::updateTotalPrice()
+{
+    double summe = 0;
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        summe += ui->twRgArticles->item(i, Summe)->text().split(" ").value(0).toDouble();
+    }
+    ui->sbRgSumme->setValue(summe);
+}
+
+void MainWindow::on_sbRgSinglePrice_valueChanged(double value)
+{
+    ui->sbRgTotalPrice->setValue(value * ui->sbRgCount->value());
+}
+
+void MainWindow::on_btnRgDeteleAllArticle_clicked()
+{
+    QMessageBox msg;
+    msg.setWindowIcon(QPixmap("logo.png"));
+    msg.setText("Möchten Sie ALLE Positionen wirklich löschen?");
+    msg.setWindowTitle("Warnung");
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setButtonText(QMessageBox::Yes, "Ja");
+    msg.setButtonText(QMessageBox::No, "Nein");
+    msg.setDefaultButton(QMessageBox::No);
+    msg.setIcon(QMessageBox::Question);
+
+    if(msg.exec() == QMessageBox::Yes)
+    {
+        int rowCount = ui->twRgArticles->rowCount();
+        for (int i = 0; i < rowCount; i++)
+        {
+            ui->twRgArticles->removeRow(0);
+        }
+
+        updateTotalPrice();
+        QMessageBox::information(this, "Info", "Alle Positionen wurden erfolgreich gelöscht!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_btnRgDeleteArticle_clicked()
+{
+    if(ui->twRgArticles->selectedItems().count() >  0)
+    {
+        QMessageBox msg;
+        msg.setWindowIcon(QPixmap("logo.png"));
+        msg.setText("Möchten Sie die Position wirklich löschen?");
+        msg.setWindowTitle("Warnung");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setButtonText(QMessageBox::Yes, "Ja");
+        msg.setButtonText(QMessageBox::No, "Nein");
+        msg.setDefaultButton(QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+
+        if(msg.exec() == QMessageBox::Yes)
+        {
+            ui->twRgArticles->removeRow(ui->twRgArticles->currentRow());
+            ui->twRgArticles->clearSelection();
+            updateTotalPrice();
+            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        qDebug() << "No position selected!";
+        QMessageBox::warning(this, "Warnung", "Es wurde keine Position zum löschen ausgewählt!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_twRgArticles_itemSelectionChanged()
+{
+    if (ui->twRgArticles->selectedItems().count() > 0)
+    {
+        ui->btnRgDeleteArticle->setEnabled(true);
+    }
+    else
+    {
+        ui->btnRgDeleteArticle->setEnabled(false);
+    }
+}
+
+void MainWindow::on_cbRgArtikel_activated(int index)
+{
+    ui->btnRgClear->setEnabled(true);
+    ui->btnRgAddArticle->setEnabled(true);
+    ui->twRgArticles->clearSelection();
+}
+
+void MainWindow::on_leRgName_textChanged(const QString &text)
+{
+    if (!text.isEmpty())
+    {
+        ui->btnRgAddArticle->setEnabled(true);
+        ui->sbRgCount->setValue(1);
+    }
+    else
+    {
+        ui->btnRgAddArticle->setEnabled(false);
+        ui->sbRgCount->setValue(0);
+    }
+}
+
+void MainWindow::on_twRgArticles_itemClicked(QTableWidgetItem *item)
+{
+    int curRow = item->row();
+    ui->leRgArtNr->setText(ui->twRgArticles->item(curRow, ArtNrPos)->text());
+    ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
+    ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, Anzahl)->text().toDouble());
+    ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
+    ui->sbRgSinglePrice->setValue(ui->twRgArticles->item(curRow, EinzelPreis)->text().split(" ").value(0).toDouble());
+    ui->sbRgTotalPrice->setValue(ui->twRgArticles->item(curRow, Summe)->text().split(" ").value(0).toDouble());
+
+}
+
+void MainWindow::on_btnCustomerBill_clicked()
+{
+    int curRow = ui->twCustomers->currentRow();
+    int kdNr =  ui->twCustomers->item(curRow, KdNr)->text().toInt();
+    ui->tabMain->setCurrentIndex(CalculationsTab);
+
+    for (int i = 0; i < ui->cbRgCustomer->count(); i++)
+    {
+        int cbnr = ui->cbRgCustomer->itemText(i).split(" ").value(0).toInt();
+        if (kdNr == cbnr)
+        {
+            ui->cbRgCustomer->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
+void MainWindow::on_twCustomers_itemSelectionChanged()
+{
+    ui->btnEditCustomer->setEnabled(false);
+    ui->btnDeleteCustomer->setEnabled(false);
+    ui->btnCustomerBill->setEnabled(false);
 }
