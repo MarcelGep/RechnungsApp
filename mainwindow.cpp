@@ -652,9 +652,6 @@ void MainWindow::on_btnArtDelAll_clicked()
 
 void MainWindow::on_twCustomers_itemClicked(QTableWidgetItem *item)
 {
-    ui->btnEditCustomer->setEnabled(true);
-    ui->btnDeleteCustomer->setEnabled(true);
-    ui->btnCustomerBill->setEnabled(true);
 }
 
 void MainWindow::on_btnRgClear_clicked()
@@ -865,7 +862,16 @@ void MainWindow::on_btnCustomerBill_clicked()
 
 void MainWindow::on_twCustomers_itemSelectionChanged()
 {
-    ui->btnEditCustomer->setEnabled(false);
-    ui->btnDeleteCustomer->setEnabled(false);
-    ui->btnCustomerBill->setEnabled(false);
+    if (ui->twCustomers->selectedItems().count() > 0)
+    {
+        ui->btnEditCustomer->setEnabled(true);
+        ui->btnDeleteCustomer->setEnabled(true);
+        ui->btnCustomerBill->setEnabled(true);
+    }
+    else
+    {
+        ui->btnEditCustomer->setEnabled(false);
+        ui->btnDeleteCustomer->setEnabled(false);
+        ui->btnCustomerBill->setEnabled(false);
+    }
 }
