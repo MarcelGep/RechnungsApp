@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Images">
+        <file>logo/tpt_logo.png</file>
+    </qresource>
+</RCC>

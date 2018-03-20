@@ -44,3 +44,8 @@ QT+= \
 
 QT+= \
     sql
+
+QT += printsupport
+
+RESOURCES += \
+    resources.qrc

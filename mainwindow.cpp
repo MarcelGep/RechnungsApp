@@ -6,9 +6,21 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_painter(new QPainter()),
+    m_pdfPrinter(new QPrinter(/*QPrinter::HighResolution)*/)),
+    m_pdfWriter(new QPdfWriter(PATH_PDF))
 {
     ui->setupUi(this);
+
+    m_pdfWriter->setPageSize(QPagedPaintDevice::A4);
+    m_pdfWriter->setPageMargins(QMargins(30, 30, 30, 30));
+    m_pdfWriter->setResolution(400);
+
+    m_pdfPrinter->setOutputFormat(QPrinter::PdfFormat);
+    m_pdfPrinter->setOutputFileName(PATH_PDF);
+    m_pdfPrinter->setPaperSize(QPrinter::A4);
+    m_pdfPrinter->setPageMargins(QMarginsF(30, 30, 30, 30));
 
     m_dbManager = new DBManager(PATH_DATABASE);
 
@@ -19,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_positionFields = m_dbManager->readFieldNames(POSITIONEN);
 
     // Set active tabs
-    ui->tabMain->setCurrentIndex(EvidenceTab);
+    ui->tabMain->setCurrentIndex(CalculationsTab);
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
 
     // Setup customer list
@@ -61,6 +73,9 @@ MainWindow::~MainWindow()
 
     delete m_dbManager;
     delete ui;
+    delete m_pdfPrinter;
+    delete m_pdfWriter;
+    delete m_painter;
 }
 
 void MainWindow::on_btnSaveCustomer_clicked()
@@ -947,4 +962,74 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
         ui->btnRgDeteleAllArticle->setEnabled(true);
         ui->btnRgCreate->setEnabled(true);
     }
+}
+
+void MainWindow::on_btnRgCreate_clicked()
+{
+//    if (!m_painter->begin(m_pdfWriter))
+//    {
+//        qWarning("failed to open file, is it writeable?");
+//        return;
+//    }
+
+//    m_painter->setPen(Qt::black);
+//    m_painter->setFont(QFont("Times", 10));
+
+//    QRect r = m_painter->viewport();
+
+//    QString firstRow = "Erste Zeile Text!";
+//    QString secondRow = "Zweite Zeile Text!";
+
+//    QImage logo(":/Images/logo/tpt_logo.png");
+//    m_painter->drawImage(150, 150, logo);
+
+//    m_painter->drawText(r, Qt::AlignRight, firstRow);
+//    m_painter->drawText(r, Qt::AlignLeft, secondRow);
+
+//    m_painter->end();
+
+
+
+    QFont headerFont("Times New Roman", 8);
+    QFont titleFont("Times New Roman", 14, QFont::Bold);
+
+    if (!m_painter->begin(m_pdfPrinter))
+    {
+        qWarning("failed to open file, is it writeable?");
+        return;
+    }
+
+    QString sender;
+    sender += "TPT Schaude\n";
+    sender += "Annina Schaude\n";
+    sender += "Ennostr. 10\n";
+    sender += "89604 Ennahofen\n";
+    sender += "Tel: 07384/294550";
+
+    QString reciever;
+    reciever += "Firma\n";
+    reciever += "Name\n";
+    reciever += "Straße\n";
+    reciever += "PLZ - Ort\n";
+    reciever += "Telefon";
+
+    QImage logo(":/Images/logo/tpt_logo.png");
+    m_painter->drawImage(400, 150, logo);
+
+    QRect r = m_painter->viewport();
+    m_painter->drawText(r, Qt::AlignLeft, reciever);
+    m_painter->drawText(r, Qt::AlignRight, sender);
+
+
+    if (!m_pdfPrinter->newPage())
+    {
+        qWarning("failed in flushing page to disk, disk full?");
+        return;
+    }
+
+    m_painter->drawText(10, 40, "Erste Zeile!");
+    m_painter->drawText(10, 50, "Zweite Zeile!");
+
+
+    m_painter->end();
 }

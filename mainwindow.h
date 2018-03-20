@@ -3,10 +3,15 @@
 
 #include <QMainWindow>
 #include <QTableWidgetItem>
+#include <QtPrintSupport/QPrinter>
+#include <QPainter>
+#include <QImage>
+#include <QPdfWriter>
 
 #include "dbmanager.h"
 
 #define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
+#define PATH_PDF "..\\RechnungsApp/invoice/output_file.pdf"
 
 #define DEBUG_TAG_MAIN "MainWindow"
 
@@ -107,54 +112,30 @@ private slots:
     void on_btnRgAngebot_clicked();
     void on_btnRgGutschrift_clicked();
     void on_btnArtSave_clicked();
-
     void on_twArticles_itemClicked(QTableWidgetItem *item);
-
     void on_btnArtNew_clicked();
-
     void on_btnArtCancel_clicked();
-
     void on_btnArtDelete_clicked();
-
     void on_btnArtDelAll_clicked();
-
     void on_twCustomers_itemClicked(QTableWidgetItem *item);
-
     void on_btnRgClear_clicked();
-
     void on_cbRgArtikel_currentTextChanged(const QString &name);
-
     void on_sbRgCount_valueChanged(int value);
-
     void on_btnRgAddArticle_clicked();
-
     void on_sbRgSinglePrice_valueChanged(double value);
-
     void on_btnRgDeteleAllArticle_clicked();
-
     void on_btnRgDeleteArticle_clicked();
-
-
     void on_twRgArticles_itemSelectionChanged();
-
     void on_cbRgArtikel_activated(int index);
-
     void on_leRgName_textChanged(const QString &text);
-
-
     void on_twRgArticles_itemClicked(QTableWidgetItem *item);
-
     void on_btnCustomerBill_clicked();
-
     void on_twCustomers_itemSelectionChanged();
-
     void on_leRgArtNr_returnPressed();
-
     void on_sbRgCount_editingFinished();
-
     void on_leRgUnit_returnPressed();
-
     void on_twRgArticles_itemChanged(QTableWidgetItem *item);
+    void on_btnRgCreate_clicked();
 
 private:
     void setCustomerColumnsWidth() const;
@@ -162,6 +143,9 @@ private:
 private:
     Ui::MainWindow *ui;
     DBManager* m_dbManager;
+    QPrinter* m_pdfPrinter;
+    QPainter* m_painter;
+    QPdfWriter* m_pdfWriter;
 
     QMap<int, QString> m_customerFields;
     QMap<int, QString> m_articleFields;
