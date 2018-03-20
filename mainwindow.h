@@ -148,6 +148,14 @@ private slots:
 
     void on_twCustomers_itemSelectionChanged();
 
+    void on_leRgArtNr_returnPressed();
+
+    void on_sbRgCount_editingFinished();
+
+    void on_leRgUnit_returnPressed();
+
+    void on_twRgArticles_itemChanged(QTableWidgetItem *item);
+
 private:
     void setCustomerColumnsWidth() const;
 

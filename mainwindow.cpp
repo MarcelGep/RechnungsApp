@@ -659,6 +659,7 @@ void MainWindow::on_btnRgClear_clicked()
     clearBillEdits();
     ui->btnRgClear->setEnabled(false);
     ui->btnRgAddArticle->setEnabled(false);
+    ui->leRgArtNr->setFocus();
 }
 
 void MainWindow::clearBillEdits()
@@ -703,6 +704,29 @@ void MainWindow::on_btnRgAddArticle_clicked()
     QString unit = ui->leRgUnit->text();
     QString sPrice = QString::number(ui->sbRgSinglePrice->value(), 'f', 2) + " €";
     QString tPrice = QString::number(ui->sbRgTotalPrice->value(), 'f', 2) + " €";
+
+    // search for exist entries
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        if (artNr == ui->twRgArticles->item(i, ArtNrPos)->text())
+        {
+            int ret = QMessageBox::question(this,
+                                            "Vorsicht",
+                                            "Der Artikel befindet sich bereits in der Liste!\n\n"
+                                            "Soll die Stückzahl addiert werden?",
+                                            QMessageBox::Yes | QMessageBox:: No,
+                                            QMessageBox::No);
+
+            if (ret == QMessageBox::Yes)
+            {
+                int count = ui->twRgArticles->item(i, Anzahl)->text().toInt();
+                ui->twRgArticles->item(i, Anzahl)->setText(QString::number(count + ui->sbRgCount->value()));
+            }
+
+            clearBillEdits();
+            return;
+        }
+    }
 
     int row = ui->twRgArticles->rowCount();
 
@@ -765,6 +789,8 @@ void MainWindow::on_btnRgDeteleAllArticle_clicked()
         }
 
         updateTotalPrice();
+        ui->btnRgDeteleAllArticle->setEnabled(false);
+        ui->btnRgCreate->setEnabled(false);
         QMessageBox::information(this, "Info", "Alle Positionen wurden erfolgreich gelöscht!", QMessageBox::Ok);
     }
 }
@@ -822,11 +848,13 @@ void MainWindow::on_leRgName_textChanged(const QString &text)
     if (!text.isEmpty())
     {
         ui->btnRgAddArticle->setEnabled(true);
+        ui->btnRgClear->setEnabled(true);
         ui->sbRgCount->setValue(1);
     }
     else
     {
         ui->btnRgAddArticle->setEnabled(false);
+        ui->btnRgClear->setEnabled(false);
         ui->sbRgCount->setValue(0);
     }
 }
@@ -873,5 +901,50 @@ void MainWindow::on_twCustomers_itemSelectionChanged()
         ui->btnEditCustomer->setEnabled(false);
         ui->btnDeleteCustomer->setEnabled(false);
         ui->btnCustomerBill->setEnabled(false);
+    }
+}
+
+void MainWindow::on_leRgArtNr_returnPressed()
+{
+    QString artNr = ui->leRgArtNr->text();
+
+    Articles article;
+    if (m_dbManager->readArticle(artNr, article))
+    {
+        ui->leRgName->setText(article.getName());
+        ui->leRgUnit->setText(article.getUnit());
+        ui->sbRgCount->setValue(1);
+        ui->sbRgSinglePrice->setValue(article.getPrice());
+        ui->sbRgTotalPrice->setValue(article.getPrice() * 1);
+
+        ui->sbRgCount->setFocus();
+        ui->sbRgCount->selectAll();
+        ui->btnRgClear->setEnabled(true);
+    }
+    else
+    {
+        QMessageBox::warning(this, "Warnung", "Es wurde kein Aritkel gefunden!", QMessageBox::Ok);
+        ui->leRgArtNr->clear();
+    }
+}
+
+void MainWindow::on_sbRgCount_editingFinished()
+{
+    ui->leRgUnit->setFocus();
+    ui->leRgUnit->selectAll();
+}
+
+void MainWindow::on_leRgUnit_returnPressed()
+{
+    this->on_btnRgAddArticle_clicked();
+    ui->leRgArtNr->setFocus();
+}
+
+void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
+{
+    if (ui->twRgArticles->rowCount() > 0)
+    {
+        ui->btnRgDeteleAllArticle->setEnabled(true);
+        ui->btnRgCreate->setEnabled(true);
     }
 }

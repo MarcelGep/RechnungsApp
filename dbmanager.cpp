@@ -471,7 +471,7 @@ bool DBManager::readArticle(QString articleID, Articles &article)
         QSqlQuery query;
         query.prepare("SELECT * FROM Artikel WHERE ArtNr = " + articleID);
 
-        if(!query.exec())
+        if (!query.exec())
         {
             qDebug() << DEBUG_TAG << ": " << query.lastError();
             return false;
@@ -484,13 +484,18 @@ bool DBManager::readArticle(QString articleID, Articles &article)
             int idPrice = query.record().indexOf("Preis");
             int idDescription = query.record().indexOf("Beschreibung");
 
-            while (query.next())
+            if (query.next())
             {
                 article.setArtNr(query.value(idArtNr).toInt());
                 article.setUnit(query.value(idUnit).toString());
                 article.setName(query.value(idName).toString());
                 article.setPrice(query.value(idPrice).toDouble());
                 article.setDescription(query.value(idDescription).toString());
+            }
+            else
+            {
+                qDebug() << DEBUG_TAG << ": No article found!";
+                return false;
             }
         }
     }
