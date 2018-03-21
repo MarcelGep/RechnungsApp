@@ -1,3 +1,4 @@
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <qmessagebox.h>
@@ -7,9 +8,9 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_painter(new QPainter()),
-    m_pdfPrinter(new QPrinter(/*QPrinter::HighResolution)*/)),
-    m_pdfWriter(new QPdfWriter(PATH_PDF))
+    m_pdfPrinter(new QPrinter(QPrinter::PrinterResolution)),
+    m_pdfWriter(new QPdfWriter(PATH_PDF)),
+    m_painter(new QPainter())
 {
     ui->setupUi(this);
 
@@ -989,15 +990,11 @@ void MainWindow::on_btnRgCreate_clicked()
 //    m_painter->end();
 
 
-
-    QFont headerFont("Times New Roman", 8);
-    QFont titleFont("Times New Roman", 14, QFont::Bold);
-
-    if (!m_painter->begin(m_pdfPrinter))
-    {
-        qWarning("failed to open file, is it writeable?");
-        return;
-    }
+//    if (!m_painter->begin(m_pdfPrinter))
+//    {
+//        qWarning("failed to open file, is it writeable?");
+//        return;
+//    }
 
     QString sender;
     sender += "TPT Schaude\n";
@@ -1006,30 +1003,68 @@ void MainWindow::on_btnRgCreate_clicked()
     sender += "89604 Ennahofen\n";
     sender += "Tel: 07384/294550";
 
-    QString reciever;
-    reciever += "Firma\n";
-    reciever += "Name\n";
-    reciever += "Straße\n";
-    reciever += "PLZ - Ort\n";
-    reciever += "Telefon";
+    QString receiver;
+    receiver += "Firma\n";
+    receiver += "Name\n";
+    receiver += "Straße\n";
+    receiver += "PLZ - Ort\n";
+    receiver += "Telefon";
+
+    QFont headerFont("Times New Roman", 11);
+    QFont titleFont("Times New Roman", 14, QFont::Bold);
+
+    QTextCharFormat txtformat = QTextCharFormat();
+    QTextDocument doc;
+    doc.setPageSize(m_pdfPrinter->pageRect().size());
+    txtformat.setFont(headerFont);
+
+    QString html =
+    "<div align=right>"
+       "Ennahofen, 21.03.2018"
+    "</div>"
+    "<div align=left>"
+       "Kunde Firma<br>"
+       "Kunde Name<br>"
+       "Kunde Straße<br>"
+       "Kunde Ort"
+    "</div>"
+    "<div align=right>"
+       "TPT Schaude<br>"
+       "Annina Schaude<br>"
+       "Ennostr. 10<br>"
+       "89604 Ennahofen"
+    "</div>"
+
+    "<h2 align=left>Betreffszeile xxx</h2>"
+    "<p align=justify>"
+        "Test!"
+    "</p>"
+
+    "<div style=\"text-align:left;display:inline;border:1px solid red\">Text left!</div>"
+    "<div style=\"text-align:right;display:inline;border:1px solid red\">Text right!</div>";
 
     QImage logo(":/Images/logo/tpt_logo.png");
     m_painter->drawImage(400, 150, logo);
 
-    QRect r = m_painter->viewport();
-    m_painter->drawText(r, Qt::AlignLeft, reciever);
-    m_painter->drawText(r, Qt::AlignRight, sender);
+    doc.setHtml(html);
+
+    doc.print(m_pdfPrinter);
 
 
-    if (!m_pdfPrinter->newPage())
-    {
-        qWarning("failed in flushing page to disk, disk full?");
-        return;
-    }
-
-    m_painter->drawText(10, 40, "Erste Zeile!");
-    m_painter->drawText(10, 50, "Zweite Zeile!");
+//    QRect r = m_painter->viewport();
+//    m_painter->drawText(r, Qt::AlignLeft, receiver);
+//    m_painter->drawText(r, Qt::AlignRight, sender);
 
 
-    m_painter->end();
+//    if (!m_pdfPrinter->newPage())
+//    {
+//        qWarning("failed in flushing page to disk, disk full?");
+//        return;
+//    }
+
+//    m_painter->drawText(10, 40, "Erste Zeile!");
+//    m_painter->drawText(10, 50, "Zweite Zeile!");
+
+
+   // m_painter->end();
 }

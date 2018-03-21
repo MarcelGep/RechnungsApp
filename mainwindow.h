@@ -144,8 +144,8 @@ private:
     Ui::MainWindow *ui;
     DBManager* m_dbManager;
     QPrinter* m_pdfPrinter;
-    QPainter* m_painter;
     QPdfWriter* m_pdfWriter;
+    QPainter* m_painter;
 
     QMap<int, QString> m_customerFields;
     QMap<int, QString> m_articleFields;
