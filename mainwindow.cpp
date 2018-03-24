@@ -8,15 +8,15 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_pdfPrinter(new QPrinter(QPrinter::PrinterResolution)),
-    m_pdfWriter(new QPdfWriter(PATH_PDF)),
+    m_pdfPrinter(new QPrinter(QPrinter::HighResolution)),
+//    m_pdfWriter(new QPdfWriter(PATH_PDF)),
     m_painter(new QPainter())
 {
     ui->setupUi(this);
 
-    m_pdfWriter->setPageSize(QPagedPaintDevice::A4);
-    m_pdfWriter->setPageMargins(QMargins(30, 30, 30, 30));
-    m_pdfWriter->setResolution(400);
+//    m_pdfWriter->setPageSize(QPagedPaintDevice::A4);
+//    m_pdfWriter->setPageMargins(QMargins(30, 30, 30, 30));
+//    m_pdfWriter->setResolution(400);
 
     m_pdfPrinter->setOutputFormat(QPrinter::PdfFormat);
     m_pdfPrinter->setOutputFileName(PATH_PDF);
@@ -75,7 +75,7 @@ MainWindow::~MainWindow()
     delete m_dbManager;
     delete ui;
     delete m_pdfPrinter;
-    delete m_pdfWriter;
+    //delete m_pdfWriter;
     delete m_painter;
 }
 
@@ -967,104 +967,157 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgCreate_clicked()
 {
-//    if (!m_painter->begin(m_pdfWriter))
-//    {
-//        qWarning("failed to open file, is it writeable?");
-//        return;
-//    }
-
-//    m_painter->setPen(Qt::black);
-//    m_painter->setFont(QFont("Times", 10));
-
-//    QRect r = m_painter->viewport();
-
-//    QString firstRow = "Erste Zeile Text!";
-//    QString secondRow = "Zweite Zeile Text!";
-
-//    QImage logo(":/Images/logo/tpt_logo.png");
-//    m_painter->drawImage(150, 150, logo);
-
-//    m_painter->drawText(r, Qt::AlignRight, firstRow);
-//    m_painter->drawText(r, Qt::AlignLeft, secondRow);
-
-//    m_painter->end();
-
-
-//    if (!m_painter->begin(m_pdfPrinter))
-//    {
-//        qWarning("failed to open file, is it writeable?");
-//        return;
-//    }
-
     QString sender;
     sender += "TPT Schaude\n";
     sender += "Annina Schaude\n";
     sender += "Ennostr. 10\n";
-    sender += "89604 Ennahofen\n";
-    sender += "Tel: 07384/294550";
+    sender += "89604 Ennahofen\n\n";
+    sender += "Tel: 07384/294550\n";
+    sender += "E-Mail: info@tpt-schaude.de";
+
+    QString senderSmall("TPT Schaude | Ennostr. 10 | 89604 Ennahofen");
 
     QString receiver;
-    receiver += "Firma\n";
-    receiver += "Name\n";
-    receiver += "Straße\n";
-    receiver += "PLZ - Ort\n";
-    receiver += "Telefon";
+    receiver += "Musterfirma GmbH\n";
+    receiver += "Max Mustermann\n";
+    receiver += "Musterallee 99\n";
+    receiver += "12345 - Musterhausen\n";
 
-    QFont headerFont("Times New Roman", 11);
-    QFont titleFont("Times New Roman", 14, QFont::Bold);
+    QString subject("Rechnung");
 
-    QTextCharFormat txtformat = QTextCharFormat();
-    QTextDocument doc;
-    doc.setPageSize(m_pdfPrinter->pageRect().size());
-    txtformat.setFont(headerFont);
+    QString invoiceNrLabel("Rechnungs-Nr.:");
+    QString invoiceDateLabel("Rechnungsdatum:");
+    QString deliveryDateLabel("Lieferdatum:");
+    QString deliveryNrLabel("Lieferschein-Nr.:");
+    QString customerNrLabel("Kunden-Nr.:");
 
-    QString html =
-    "<div align=right>"
-       "Ennahofen, 21.03.2018"
-    "</div>"
-    "<div align=left>"
-       "Kunde Firma<br>"
-       "Kunde Name<br>"
-       "Kunde Straße<br>"
-       "Kunde Ort"
-    "</div>"
-    "<div align=right>"
-       "TPT Schaude<br>"
-       "Annina Schaude<br>"
-       "Ennostr. 10<br>"
-       "89604 Ennahofen"
-    "</div>"
+    QString freeText("Wir bedanken uns für die gute Zusammenarbeit und stellen "
+                     "Ihnen wie vereinbart folgende Produkte und Lieferungen in Rechnung");
 
-    "<h2 align=left>Betreffszeile xxx</h2>"
-    "<p align=justify>"
-        "Test!"
-    "</p>"
+    // Header fonts
+    QFont font("Times");
+    font.setPixelSize(190);
 
-    "<div style=\"text-align:left;display:inline;border:1px solid red\">Text left!</div>"
-    "<div style=\"text-align:right;display:inline;border:1px solid red\">Text right!</div>";
+    QFont senderSmallFont("Times");
+    senderSmallFont.setPixelSize(125);
 
+    QFont subjectFont("Times");
+    subjectFont.setPixelSize(250);
+    subjectFont.setBold(true);
+
+    // Start m_painter
+    if (!m_painter->begin(m_pdfPrinter))
+    {
+        qWarning("failed to open file, is it writeable?");
+        return;
+    }
+
+    // Create company Logo
     QImage logo(":/Images/logo/tpt_logo.png");
-    m_painter->drawImage(400, 150, logo);
+    QImage scaledLogo = logo.scaled(logo.width() * 1.5, logo.height() * 1.5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    doc.setHtml(html);
+    // Define coordinates
+    int w = m_pdfPrinter->paperRect().width();
+    int h = m_pdfPrinter->paperRect().height();
+    int x = 0;
+    int y = 0;
+    int lMargin = (w * 0.14) / 2;
+    int rMargin = w * 0.16;
+    int hMargin = (h * 0.03) / 2;
+    int spaceData = 100;
 
-    doc.print(m_pdfPrinter);
+    int x_posLeft = x + lMargin;
+    int x_posRight = w - rMargin;
+    int x_posLogo = (w - scaledLogo.width() - rMargin);
+    int x_posSender = x_posLogo + (scaledLogo.width() / 2) / 4;
+    int y_posTop = hMargin;
+    int y_posLine = y_posTop + scaledLogo.height();
+    int y_posSender = y_posLine + 500;
+    int y_posSenderSmall = y_posLine + 540;
+    int y_posReceiver = y_posSenderSmall + 300;
+    int y_posSubject = y_posReceiver + (w / 5) + 500;
+
+    // Set Font Metrics
+    QFontMetrics metricFont(font);
+    QFontMetrics metricSmallFont(senderSmallFont);
+    QFontMetrics metricSubjectFont(subjectFont);
+
+    m_painter->setFont(senderSmallFont);
+
+    // Draw Company Logo
+    QRect rectLogo(x_posLogo, y_posTop, scaledLogo.width(), scaledLogo.height());
+    m_painter->drawRect(rectLogo);
+    m_painter->drawImage(rectLogo, scaledLogo);
+
+    // Separation Line
+    m_painter->drawLine(lMargin, y_posLine + 150, w - rMargin, y_posLine + 150);
+
+    // Small Sender
+    QRect rectSenderSmall(x_posLeft, y_posSenderSmall, metricSmallFont.width(senderSmall), metricSmallFont.height());
+    m_painter->drawRect(rectSenderSmall);
+    m_painter->drawText(rectSenderSmall, senderSmall);
+
+    m_painter->setFont(subjectFont);
+
+    // Subject Line
+    QRect rectSubject(x_posLeft, y_posSubject, w - rMargin - lMargin, metricSubjectFont.height());
+    m_painter->drawRect(rectSubject);
+    m_painter->drawText(rectSubject, Qt::AlignTop | Qt::AlignLeft, subject);
+
+    m_painter->setFont(font);
+
+    // Sender
+    QRect rectSender(x_posSender, y_posSender, (x_posRight - x_posSender), metricFont.height() * 10);
+    m_painter->drawRect(rectSender);
+    m_painter->drawText(rectSender, Qt::AlignTop | Qt::AlignLeft, sender);
+
+    // Receiver
+    QRect rectReceiver(x_posLeft, y_posReceiver, w / 3, metricFont.height() * 8);
+    m_painter->drawRect(rectReceiver);
+    m_painter->drawText(rectReceiver, Qt::AlignTop | Qt::AlignLeft, receiver);
+
+    y = y_posSubject;
+    y += 500;
+
+    // Invoice & Delivery No.
+    QRect rectRgLfNrLabel(x_posLeft, y, metricFont.width(deliveryNrLabel), metricFont.height() * 2);
+    m_painter->drawRect(rectRgLfNrLabel);
+    m_painter->drawText(rectRgLfNrLabel, Qt::AlignLeft | Qt::AlignTop, invoiceNrLabel);
+    m_painter->drawText(rectRgLfNrLabel, Qt::AlignLeft | Qt::AlignBottom, deliveryNrLabel);
+
+    QRect rectRgLfNrData(x_posLeft + metricFont.width(deliveryNrLabel) + spaceData, y, 1400, metricFont.height() * 2);
+    m_painter->drawRect(rectRgLfNrData);
+    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignTop, "1001");
+    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignBottom, "2345678");
+
+    // Invoice & Delivery Dates & Customer Nr.
+    QRect rectRgLfDateLabel(x_posSender, y, metricFont.width(invoiceDateLabel), metricFont.height() * 3);
+    m_painter->drawRect(rectRgLfDateLabel);
+    m_painter->drawText(rectRgLfDateLabel, Qt::AlignLeft | Qt::AlignTop, invoiceDateLabel);
+    m_painter->drawText(rectRgLfDateLabel, Qt::AlignLeft | Qt::AlignVCenter, deliveryDateLabel);
+    m_painter->drawText(rectRgLfDateLabel, Qt::AlignLeft | Qt::AlignBottom, customerNrLabel);
+
+    QRect rectRgLfDateData(x_posSender + metricFont.width(invoiceDateLabel) + spaceData, y, (x_posRight - x_posSender) - metricFont.width(invoiceDateLabel) - 100, metricFont.height() * 3);
+    m_painter->drawRect(rectRgLfDateData);
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignTop, "01.01.2001");
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignVCenter, "01.01.2001");
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignBottom, "250001");
+
+    y += 1100;
+
+    // Free Text
+    QRect rectFreeText(x_posLeft, y, x_posRight - x_posLeft, 500);
+    m_painter->drawRect(rectFreeText);
+    m_painter->drawText(rectFreeText, freeText);
+
+    // Position List
 
 
-//    QRect r = m_painter->viewport();
-//    m_painter->drawText(r, Qt::AlignLeft, receiver);
-//    m_painter->drawText(r, Qt::AlignRight, sender);
 
 
-//    if (!m_pdfPrinter->newPage())
-//    {
-//        qWarning("failed in flushing page to disk, disk full?");
-//        return;
-//    }
-
-//    m_painter->drawText(10, 40, "Erste Zeile!");
-//    m_painter->drawText(10, 50, "Zweite Zeile!");
 
 
-   // m_painter->end();
+
+
+    m_painter->end();
 }
