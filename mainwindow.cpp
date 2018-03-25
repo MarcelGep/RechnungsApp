@@ -14,10 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    m_pdfWriter->setPageSize(QPagedPaintDevice::A4);
-//    m_pdfWriter->setPageMargins(QMargins(30, 30, 30, 30));
-//    m_pdfWriter->setResolution(400);
-
     m_pdfPrinter->setOutputFormat(QPrinter::PdfFormat);
     m_pdfPrinter->setOutputFileName(PATH_PDF);
     m_pdfPrinter->setPaperSize(QPrinter::A4);
@@ -1115,7 +1111,12 @@ void MainWindow::on_btnRgCreate_clicked()
     m_painter->drawRect(rectFreeText);
     m_painter->drawText(rectFreeText, freeText);
 
+    y += 800;
+
     // Position List
+    QRect rectPosListLabel(x_posLeft, y, (x_posRight - x_posLeft), metricFont.height());
+    m_painter->drawRect(rectPosListLabel);
+    m_painter->drawText(rectPosListLabel, Qt::AlignLeft | Qt::AlignTop, "Pos. Art-Nr. Bezeichnung Menge Einheit");
 
 
 
@@ -1123,13 +1124,15 @@ void MainWindow::on_btnRgCreate_clicked()
 
 
 
-    y += 5500;
+//    y += 4900;
 
-    // Conclusion part
-    QRect rectConclusion(x_posLeft, y, x_posRight - x_posLeft, metricFont.height() * 4);
-    m_painter->drawRect(rectConclusion);
-    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, u_st);
-    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, thanks);
+//    m_painter->begin(m_pdfPrinter);
+
+//    // Conclusion part
+//    QRect rectConclusion(x_posLeft, y, x_posRight - x_posLeft, metricFont.height() * 4);
+//    m_painter->drawRect(rectConclusion);
+//    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, u_st);
+//    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, thanks);
 
     m_painter->end();
 }
