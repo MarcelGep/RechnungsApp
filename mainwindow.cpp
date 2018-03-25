@@ -967,6 +967,7 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgCreate_clicked()
 {
+    // Data Strings
     QString sender;
     sender += "TPT Schaude\n";
     sender += "Annina Schaude\n";
@@ -993,6 +994,10 @@ void MainWindow::on_btnRgCreate_clicked()
 
     QString freeText("Wir bedanken uns für die gute Zusammenarbeit und stellen "
                      "Ihnen wie vereinbart folgende Produkte und Lieferungen in Rechnung");
+
+    QString u_st("Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.");
+
+    QString thanks("Vielen Dank für Ihre Bestellung!");
 
     // Header fonts
     QFont font("Times");
@@ -1118,6 +1123,13 @@ void MainWindow::on_btnRgCreate_clicked()
 
 
 
+    y += 5500;
+
+    // Conclusion part
+    QRect rectConclusion(x_posLeft, y, x_posRight - x_posLeft, metricFont.height() * 4);
+    m_painter->drawRect(rectConclusion);
+    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, u_st);
+    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, thanks);
 
     m_painter->end();
 }
