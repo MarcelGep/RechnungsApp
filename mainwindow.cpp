@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     m_pdfPrinter(new QPrinter(QPrinter::HighResolution)),
-//    m_pdfWriter(new QPdfWriter(PATH_PDF)),
     m_painter(new QPainter())
 {
     ui->setupUi(this);
