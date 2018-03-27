@@ -32,7 +32,9 @@ enum ArtPosColumns
     Anzahl,
     EinheitPos,
     EinzelPreis,
-    Summe
+    Summe,
+
+    ArtPosColumnsCount
 };
 
 enum CustomerColumns

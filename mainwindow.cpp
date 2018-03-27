@@ -70,7 +70,6 @@ MainWindow::~MainWindow()
     delete m_dbManager;
     delete ui;
     delete m_pdfPrinter;
-    //delete m_pdfWriter;
     delete m_painter;
 }
 
@@ -1110,22 +1109,106 @@ void MainWindow::on_btnRgCreate_clicked()
     m_painter->drawRect(rectFreeText);
     m_painter->drawText(rectFreeText, freeText);
 
-    y += 800;
 
     // Position List
-    QRect rectPosListLabel(x_posLeft, y, (x_posRight - x_posLeft), metricFont.height());
-    m_painter->drawRect(rectPosListLabel);
-    m_painter->drawText(rectPosListLabel, Qt::AlignLeft | Qt::AlignTop, "Pos. Art-Nr. Bezeichnung Menge Einheit");
+
+    /* Header */
 
 
 
+    /* Data */
+    x = x_posLeft;
+    y += 800;
+
+    QStringList slArtNr;
+    QStringList slDescription;
+    QStringList slCount;
+    QStringList slUnit;
+    QStringList slPrice;
+    QStringList slSumme;
+
+    QString maxLenArtNr = "ArtNr";
+    QString maxLenDescription = "Beschreibung";
+    QString maxLenCount = "Anzahl";
+    QString maxLenUnit = "Einheit";
+    QString maxLenPrice = "Einzelpreis";
+    QString maxLenSumme = "Gesamtpreis";
+
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        slArtNr.append(ui->twRgArticles->item(i, ArtNr)->text());
+        slDescription.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
+        slCount.append(ui->twRgArticles->item(i, Anzahl)->text());
+        slUnit.append(ui->twRgArticles->item(i, EinheitPos)->text());
+        slPrice.append(ui->twRgArticles->item(i, EinzelPreis)->text());
+        slSumme.append(ui->twRgArticles->item(i, Summe)->text());
+    }
+
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        if (slArtNr[i].length() > maxLenArtNr.length())
+            maxLenArtNr = slArtNr[i];
+
+        if (slDescription[i].length() > maxLenDescription.length())
+            maxLenDescription = slDescription[i];
+
+        if (slCount[i].length() > maxLenCount.length())
+            maxLenCount = slCount[i];
+
+        if (slUnit[i].length() > maxLenUnit.length())
+            maxLenUnit = slUnit[i];
+
+        if (slPrice[i].length() > maxLenPrice.length())
+            maxLenPrice = slPrice[i];
+
+        if (slSumme[i].length() > maxLenSumme.length())
+            maxLenSumme = slSumme[i];
+    }
+
+    QString artNrStr = slArtNr.join("\n\n");
+    QString descriptionStr = slDescription.join("\n\n");
+    QString countStr = slCount.join("\n\n");
+    QString unitStr = slUnit.join("\n\n");
+    QString priceStr = slPrice.join("\n\n");
+    QString summeStr = slSumme.join("\n\n");
 
 
+    QRect rectArtNr(x, y, metricFont.width(maxLenArtNr) + 100, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectArtNr);
+    m_painter->drawText(rectArtNr, Qt::AlignLeft | Qt::TextWordWrap, artNrStr);
+
+    x += rectArtNr.width() + 200;
+
+    QRect rectDescription(x, y, metricFont.width(maxLenDescription) + 1200, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectDescription);
+    m_painter->drawText(rectDescription, Qt::AlignLeft | Qt::TextWordWrap, descriptionStr);
+
+    x += rectDescription.width() + 200;
+
+    QRect rectCount(x, y, metricFont.width(maxLenCount) + 100, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectCount);
+    m_painter->drawText(rectCount, Qt::AlignRight | Qt::TextWordWrap, countStr);
+
+    x += rectCount.width() + 200;
+
+    QRect rectUnit(x, y, metricFont.width(maxLenUnit) + 100, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectUnit);
+    m_painter->drawText(rectUnit, Qt::AlignLeft | Qt::TextWordWrap, unitStr);
+
+    x += rectUnit.width() + 200;
+
+    QRect rectPrice(x, y, metricFont.width(maxLenPrice) + 100, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectPrice);
+    m_painter->drawText(rectPrice, Qt::AlignRight | Qt::TextWordWrap, priceStr);
+
+    x += rectPrice.width() + 200;
+
+    QRect rectSumme(x, y, metricFont.width(maxLenSumme) + 100, metricFont.height() * (ui->twRgArticles->rowCount() + 1));
+    m_painter->drawRect(rectSumme);
+    m_painter->drawText(rectSumme, Qt::AlignRight | Qt::TextWordWrap, summeStr);
 
 
-//    y += 4900;
-
-//    m_painter->begin(m_pdfPrinter);
+//    y += rectArtNr.height() + 400;
 
 //    // Conclusion part
 //    QRect rectConclusion(x_posLeft, y, x_posRight - x_posLeft, metricFont.height() * 4);
