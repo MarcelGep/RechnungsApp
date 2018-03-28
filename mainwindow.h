@@ -25,14 +25,19 @@
 #define RECHNUNG "Rechnungen"
 #define POSITIONEN "Positionen"
 
+#define DEFAULT_FONT_SIZE 160
+#define SUBJECT_FONT_SIZE 220
+#define SENDER_SMALL_FONT_SIZE 115
+
 enum ArtPosColumns
 {
+    PosNr,
     ArtNrPos,
     BeschreibungPos,
-    Anzahl,
+    AnzahlPos,
     EinheitPos,
-    EinzelPreis,
-    Summe,
+    EinzelPreisPos,
+    SummePos,
 
     ArtPosColumnsCount
 };
@@ -93,7 +98,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     void printAllCustomers();
@@ -146,8 +151,8 @@ private:
     Ui::MainWindow *ui;
     DBManager* m_dbManager;
     QPrinter* m_pdfPrinter;
-//    QPdfWriter* m_pdfWriter;
     QPainter* m_painter;
+    int m_posNr;
 
     QMap<int, QString> m_customerFields;
     QMap<int, QString> m_articleFields;
