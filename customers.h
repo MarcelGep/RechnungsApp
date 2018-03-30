@@ -56,9 +56,6 @@ class Customers
         double getKontostand() const;
         void setKontostand(double value);
 
-        std::vector<QString> getEntries() const;
-        void setEntries(const std::vector<QString> &value);
-
         QString getLand() const;
         void setLand(const QString &value);
 
@@ -70,8 +67,6 @@ class Customers
 
         int getKdnr() const;
         void setKdnr(int value);
-
-        void setTableColumns();
 
         QString getWebsite() const;
         void setWebsite(const QString &value);
@@ -92,8 +87,6 @@ private:
         double rabatt;
         double kontostand;
         QString info;
-
-        std::vector<QString> m_entries;
 };
 
 #endif // CUSTOMERS_H

@@ -5,6 +5,9 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 
+#include <QPrintDialog>
+#include <QPrintPreviewDialog>
+
 //#define BORDER_ACTIVE
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -23,31 +26,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_dbManager = new DBManager(PATH_DATABASE);
 
-    // Read table fields from DB
-    m_customerFields = m_dbManager->readFieldNames(KUNDEN);
-    m_articleFields = m_dbManager->readFieldNames(ARTIKEL);
-    m_calculationFields = m_dbManager->readFieldNames(RECHNUNG);
-    m_positionFields = m_dbManager->readFieldNames(POSITIONEN);
+    // Read settings from DB
+    m_dbManager->readSettings(m_settings);
 
     // Set active tabs
     ui->tabMain->setCurrentIndex(CalculationsTab);
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
 
     // Setup customer list
-    ui->twCustomers->setColumnCount(m_customerFields.size() - 1);
-    for ( int i = 0; i < m_customerFields.size(); i++)
+    ui->twCustomers->setColumnCount(m_dbManager->getCustomerFields().size() - 1);
+    for ( int i = 0; i < m_dbManager->getCustomerFields().size(); i++)
     {
-        ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_customerFields[i]));
+        ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getCustomerFields()[i]));
     }
     QFont fontCustomer("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twCustomers->horizontalHeader()->setFont(fontCustomer);
     ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 
     // Setup article list
-    ui->twArticles->setColumnCount(m_articleFields.size());
-    for ( int i = 0; i < m_articleFields.size(); i++)
+    ui->twArticles->setColumnCount(m_dbManager->getArticleFields().size());
+    for ( int i = 0; i < m_dbManager->getArticleFields().size(); i++)
     {
-        ui->twArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_articleFields[i]));
+        ui->twArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getArticleFields()[i]));
     }
     QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twArticles->horizontalHeader()->setFont(fontArticles);
@@ -55,10 +55,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twArticles->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
 
     // Setup article positions
-    ui->twRgArticles->setColumnCount(m_positionFields.size());
-    for ( int i = 0; i < m_positionFields.size(); i++)
+    ui->twRgArticles->setColumnCount(m_dbManager->getPositionFields().size());
+    for ( int i = 0; i < m_dbManager->getPositionFields().size(); i++)
     {
-        ui->twRgArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_positionFields[i]));
+        ui->twRgArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getPositionFields()[i]));
     }
     QFont fontArticlesPos("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
@@ -86,7 +86,7 @@ void MainWindow::on_btnSaveCustomer_clicked()
 
     int plz = 0;
     QString plz_str = ui->lePlz->text();
-    for (int i =0;i<plz_str.size();i++)
+    for (int i = 0; i< plz_str.size(); i++)
     {
         if (!(plz_str[i].isDigit()))
         {
@@ -468,13 +468,15 @@ void MainWindow::on_tabMain_currentChanged(int index)
             ui->cbRgCustomer->clear();
             ui->cbRgCustomer->addItems(entries);
 
-            // Fill subject line
+            // Fill invoice number
             int lastRgNr = m_dbManager->readLastID(RECHNUNG);
-            ui->leRgSubject->setText("Rechnung " + QString::number(lastRgNr));
+            ui->leRgNr->setText(QString::number(lastRgNr));
+
+            // Fill subject line
+            ui->leRgSubject->setText("Rechnung");
 
             // Fill date
-            QDate date;
-            ui->deRgDate->setDate(date.currentDate());
+            ui->deRgDate->setDate(m_settings.getDate());
 
             // Fill articles combobox
             // clear articles
@@ -501,6 +503,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
         break;
 
         case SettingsTab:
+            fillSettingsEdit();
             break;
 
         default:
@@ -510,9 +513,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
 
 void MainWindow::on_btnRgRechnung_clicked()
 {
-    int lastRgNr = m_dbManager->readLastID(RECHNUNG);
-
-    ui->leRgSubject->setText("Rechnung " + QString::number(lastRgNr));
+    ui->leRgSubject->setText("Rechnung");
     ui->btnRgRechnung->setChecked(true);
     ui->btnRgAngebot->setChecked(false);
     ui->btnRgGutschrift->setChecked(false);
@@ -520,7 +521,7 @@ void MainWindow::on_btnRgRechnung_clicked()
 
 void MainWindow::on_btnRgAngebot_clicked()
 {
-    ui->leRgSubject->setText("Angebot XXX");
+    ui->leRgSubject->setText("Angebot");
     ui->btnRgRechnung->setChecked(false);
     ui->btnRgAngebot->setChecked(true);
     ui->btnRgGutschrift->setChecked(false);
@@ -528,7 +529,7 @@ void MainWindow::on_btnRgAngebot_clicked()
 
 void MainWindow::on_btnRgGutschrift_clicked()
 {
-    ui->leRgSubject->setText("Gutschrift XXX");
+    ui->leRgSubject->setText("Gutschrift");
     ui->btnRgRechnung->setChecked(false);
     ui->btnRgAngebot->setChecked(false);
     ui->btnRgGutschrift->setChecked(true);
@@ -966,37 +967,35 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgCreate_clicked()
 {
-    // Data Strings
-    QString sender;
-    sender += "TPT Schaude\n";
-    sender += "Annina Schaude\n";
-    sender += "Ennostr. 10\n";
-    sender += "89604 Ennahofen\n\n";
-    sender += "Tel: 07384/294550\n";
-    sender += "E-Mail: info@tpt-schaude.de";
+    createInvoice();
+}
 
-    QString senderSmall("TPT Schaude | Ennostr. 10 | 89604 Ennahofen");
+void MainWindow::fillSettingsEdit()
+{
+    ui->ptSetKontakt->setPlainText(m_settings.getKontakt());
+    ui->ptSetAnschrift->setPlainText(m_settings.getAnschrift());
+    ui->ptSetKonto->setPlainText(m_settings.getKonto());
+    ui->ptSetUst->setPlainText(m_settings.getUst());
+    ui->ptSetThx->setPlainText(m_settings.getThx());
+    ui->ptSetFreeText->setPlainText(m_settings.getFreeText());
+}
 
+void MainWindow::createInvoice()
+{
     QString receiver;
-    receiver += "Musterfirma GmbH\n";
-    receiver += "Max Mustermann\n";
-    receiver += "Musterallee 99\n";
-    receiver += "12345 - Musterhausen\n";
-
-    QString subject("Rechnung");
+    QString KdNr = ui->cbRgCustomer->currentText().split(" ").value(0);
+    Customers customer;
+    m_dbManager->readCustomer(KdNr, customer);
+    receiver += customer.getFirma() + "\n";
+    receiver += customer.getName1() + " " + customer.getName2() + "\n";
+    receiver += customer.getStrasse() + "\n";
+    receiver += QString::number(customer.getPlz()) + " " + customer.getOrt();
 
     QString invoiceNrLabel("Rechnungs-Nr.:");
     QString invoiceDateLabel("Rechnungsdatum:");
     QString deliveryDateLabel("Lieferdatum:");
     QString deliveryNrLabel("Lieferschein-Nr.:");
     QString customerNrLabel("Kunden-Nr.:");
-
-    QString freeText("Wir bedanken uns für die gute Zusammenarbeit und stellen "
-                     "Ihnen wie vereinbart folgende Produkte und Lieferungen in Rechnung");
-
-    QString u_st("Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.");
-
-    QString thanks("Vielen Dank für Ihre Bestellung!");
 
     // Header fonts
     QFont font("Times");
@@ -1017,6 +1016,9 @@ void MainWindow::on_btnRgCreate_clicked()
     ustFont.setPixelSize(DEFAULT_FONT_SIZE);
     ustFont.setBold(true);
 
+    QFont accountFont("Times");
+    accountFont.setPixelSize(ACCOUNT_FONT_SIZE);
+
     // Start m_painter
     if (!m_painter->begin(m_pdfPrinter))
     {
@@ -1026,9 +1028,14 @@ void MainWindow::on_btnRgCreate_clicked()
 
     // Pens
     QPen penDefault = m_painter->pen();
+
     QPen penLine;
     penLine.setColor(Qt::black);
     penLine.setWidth(12);
+
+    QPen penLineThin;
+    penLineThin.setColor(Qt::black);
+    penLineThin.setWidth(8);
 
     // Create company Logo
     QImage logo(":/Images/logo/tpt_logo.png");
@@ -1041,8 +1048,8 @@ void MainWindow::on_btnRgCreate_clicked()
     int y = 0;
     int lMargin = w * 0.05;
     int rMargin = w * 0.04;
-    int tMargin = h * 0.02;
-    int bMargin = h * 0.02;
+    int tMargin = 0;
+    int bMargin = 0;
     int spaceData = 100;
     int tabWidth = 170;
 
@@ -1051,9 +1058,9 @@ void MainWindow::on_btnRgCreate_clicked()
     int x_posLogo = (w - scaledLogo.width() - rMargin);
     int x_posSender = x_posLogo + (scaledLogo.width() / 2) / 3;
     int y_posTop = tMargin;
-    int y_posLine = y_posTop + scaledLogo.height();
-    int y_posSender = y_posLine + 500;
-    int y_posSenderSmall = y_posLine + 540;
+    int y_posLine = y_posTop + scaledLogo.height() + 150;
+    int y_posSender = y_posLine + 300;
+    int y_posSenderSmall = y_posLine + 300;
     int y_posReceiver = y_posSenderSmall + 300;
     int y_posSubject = y_posReceiver + (w / 5) + 500;
     int pageContent = x_posRight - x_posLeft;
@@ -1063,6 +1070,7 @@ void MainWindow::on_btnRgCreate_clicked()
     QFontMetrics metricSmallFont(senderSmallFont);
     QFontMetrics metricSubjectFont(subjectFont);
     QFontMetrics metricPosHeaderFont(posHeaderFont);
+    QFontMetrics metricAccountFont(accountFont);
 
     m_painter->setFont(senderSmallFont);
 
@@ -1074,14 +1082,16 @@ void MainWindow::on_btnRgCreate_clicked()
     m_painter->drawImage(rectLogo, scaledLogo);
 
     // Separation Line
-    m_painter->drawLine(lMargin, y_posLine + 150, w - rMargin, y_posLine + 150);
+    m_painter->setPen(penLineThin);
+    m_painter->drawLine(x_posLeft, y_posLine, x_posRight, y_posLine);
+    m_painter->setPen(penDefault);
 
     // Small Sender
-    QRect rectSenderSmall(x_posLeft, y_posSenderSmall, metricSmallFont.width(senderSmall), metricSmallFont.height());
+    QRect rectSenderSmall(x_posLeft, y_posSenderSmall, metricSmallFont.width(m_settings.getAnschrift()), metricSmallFont.height());
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSenderSmall);
     #endif
-    m_painter->drawText(rectSenderSmall, senderSmall);
+    m_painter->drawText(rectSenderSmall, m_settings.getAnschrift());
 
     m_painter->setFont(subjectFont);
 
@@ -1090,7 +1100,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSubject);
     #endif
-    m_painter->drawText(rectSubject, Qt::AlignTop | Qt::AlignLeft, subject);
+    m_painter->drawText(rectSubject, Qt::AlignTop | Qt::AlignLeft, ui->leRgSubject->text());
 
     m_painter->setFont(font);
 
@@ -1099,7 +1109,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSender);
     #endif
-    m_painter->drawText(rectSender, Qt::AlignTop | Qt::AlignLeft, sender);
+    m_painter->drawText(rectSender, Qt::AlignTop | Qt::AlignLeft, m_settings.getKontakt());
 
     // Receiver
     QRect rectReceiver(x_posLeft, y_posReceiver, w / 3, metricFont.height() * 8);
@@ -1123,7 +1133,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectRgLfNrData);
     #endif
-    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignTop, "1001");
+    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignTop, ui->leRgNr->text());
     m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignBottom, "2345678");
 
     // Invoice & Delivery Dates & Customer Nr.
@@ -1139,9 +1149,9 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectRgLfDateData);
     #endif
-    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignTop, "01.01.2001");
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignTop, m_settings.getDateStr());
     m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignVCenter, "01.01.2001");
-    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignBottom, "250001");
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignBottom, ui->cbRgCustomer->currentText().split(" ").value(0));
 
     y += 1100;
 
@@ -1150,7 +1160,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectFreeText);
     #endif
-    m_painter->drawText(rectFreeText, freeText);
+    m_painter->drawText(rectFreeText, m_settings.getFreeText());
 
 
     // Position List
@@ -1195,8 +1205,8 @@ void MainWindow::on_btnRgCreate_clicked()
         slDescription.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
         slCount.append(QString::number(ui->twRgArticles->item(i, AnzahlPos)->text().toDouble(), 'f', 2).replace(".", ","));
         slUnit.append(ui->twRgArticles->item(i, EinheitPos)->text());
-        slPrice.append(ui->twRgArticles->item(i, EinzelPreisPos)->text().split(" ").value(0).replace(".", ","));
-        slSumme.append(ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).replace(".", ","));
+        slPrice.append(QLocale().toCurrencyString(ui->twRgArticles->item(i, EinzelPreisPos)->text().split(" ").value(0).toDouble()));
+        slSumme.append(QLocale().toCurrencyString(ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble()));
     }
 
     QString posNrStr = slPosNr.join("\n\n");
@@ -1212,7 +1222,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPosLabel);
     #endif
-    m_painter->drawText(rectPosLabel, Qt::AlignLeft, m_positionFields.value(PosNr));
+    m_painter->drawText(rectPosLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(PosNr));
     QRect rectPosNr(x, y, maxLenPosNr, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1227,7 +1237,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectArtNrLabel);
     #endif
-    m_painter->drawText(rectArtNrLabel, Qt::AlignLeft, m_positionFields.value(ArtNrPos));
+    m_painter->drawText(rectArtNrLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(ArtNrPos));
     QRect rectArtNr(x, y, maxLenArtNr, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1242,7 +1252,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectDescriptionLabel);
     #endif
-    m_painter->drawText(rectDescriptionLabel, Qt::AlignLeft, m_positionFields.value(BeschreibungPos));
+    m_painter->drawText(rectDescriptionLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(BeschreibungPos));
     QRect rectDescription(x, y, maxLenDescription, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1257,7 +1267,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectCountLabel);
     #endif
-    m_painter->drawText(rectCountLabel, Qt::AlignRight, m_positionFields.value(AnzahlPos));
+    m_painter->drawText(rectCountLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(AnzahlPos));
     QRect rectCount(x, y, maxLenCount, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1273,7 +1283,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectUnitLabel);
     #endif
-    m_painter->drawText(rectUnitLabel, Qt::AlignHCenter, m_positionFields.value(EinheitPos));
+    m_painter->drawText(rectUnitLabel, Qt::AlignHCenter, m_dbManager->getPositionFields().value(EinheitPos));
     QRect rectUnit(x, y, maxLenUnit, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1288,7 +1298,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPriceLabel);
     #endif
-    m_painter->drawText(rectPriceLabel, Qt::AlignRight, m_positionFields.value(EinzelPreisPos) + " (€)");
+    m_painter->drawText(rectPriceLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(EinzelPreisPos));
     QRect rectPrice(x, y, maxLenPrice, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1303,7 +1313,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSummeLabel);
     #endif
-    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_positionFields.value(SummePos)  + " (€)");
+    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(SummePos));
     QRect rectSumme(x, y, maxLenSumme, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
@@ -1311,7 +1321,7 @@ void MainWindow::on_btnRgCreate_clicked()
     #endif
     m_painter->drawText(rectSumme, Qt::AlignRight | Qt::TextWordWrap, summeStr);
 
-    y += rectSumme.height() + 400;
+    y += rectSumme.height() + 200;
 
     m_painter->setPen(penLine);
     m_painter->drawLine(x_totalLabel, y, x_posRight, y);
@@ -1320,7 +1330,8 @@ void MainWindow::on_btnRgCreate_clicked()
     y += 100;
 
     // Summe
-    QString totalStr = "€ " + QString::number(ui->sbRgSumme->value(), 'f', 2).replace(".", ",");
+    QString totalStr = QLocale().toCurrencyString(ui->sbRgSumme->value());
+    //QString totalStr = "€ " + QString::number(ui->sbRgSumme->value(), 'f', 2).replace(".", ",");
     QRect rectTotal(x_totalLabel, y, x_posRight - x_totalLabel, metricPosHeaderFont.height());
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectTotal);
@@ -1330,15 +1341,35 @@ void MainWindow::on_btnRgCreate_clicked()
     m_painter->drawText(rectTotal, Qt::AlignRight, totalStr);
     m_painter->setFont(font);
 
-    y = h - bMargin - metricFont.height() * 4;
 
     // Conclusion part
-    QRect rectConclusion(x_posLeft, y, pageContent, metricFont.height() * 4);
+    y = h - bMargin - (metricFont.height() * 3) - (metricAccountFont.height()) - 250;
+
+    /* USt & Thx */
+    QRect rectConclusion(x_posLeft, y, pageContent, metricFont.height() * 3);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectConclusion);
     #endif
-    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, u_st);
-    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, thanks);
+    m_painter->setFont(ustFont);
+    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, m_settings.getUst());
+    m_painter->setFont(font);
+    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, m_settings.getThx());
+
+    y += (metricFont.height() * 3) + 400;
+
+    m_painter->setPen(penLineThin);
+    m_painter->drawLine(x_posLeft, y, x_posRight, y);
+    m_painter->setPen(penDefault);
+
+    y += 100;
+
+    /* Account informations */
+    QRect rectAccountInfo(x_posLeft, y, pageContent, metricAccountFont.height());
+    #ifdef BORDER_ACTIVE
+        m_painter->drawRect(rectAccountInfo);
+    #endif
+    m_painter->setFont(accountFont);
+    m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, m_settings.getKonto());
 
     m_painter->end();
 }

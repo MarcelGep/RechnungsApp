@@ -19,8 +19,6 @@ Articles::Articles(const int &artnr,
     m_description = description;
     m_unit = unit;
     m_price = price;
-
-    setTableColumns();
 }
 
 Articles::~Articles()
@@ -76,25 +74,4 @@ double Articles::getPrice() const
 void Articles::setPrice(double price)
 {
     m_price = price;
-}
-
-std::vector<QString> Articles::getEntries() const
-{
-    return m_entries;
-}
-
-void Articles::setEntries(const std::vector<QString> &entries)
-{
-    m_entries = entries;
-}
-
-void Articles::setTableColumns()
-{
-    if (m_entries.size() > 0)
-        m_entries.clear();
-
-    m_entries.push_back("Einheit");
-    m_entries.push_back("Bezeichnung");
-    m_entries.push_back("Preis");
-    m_entries.push_back("Beschreibung");
 }

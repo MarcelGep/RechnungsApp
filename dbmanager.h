@@ -9,8 +9,15 @@
 
 #include "customers.h"
 #include "articles.h"
+#include "settings.h"
 
 #define DEBUG_TAG "DBManager"
+
+#define ARTIKEL     "Artikel"
+#define KUNDEN      "Kunden"
+#define RECHNUNG    "Rechnungen"
+#define POSITIONEN  "Positionen"
+#define SETTINGS    "Settings"
 
 class DBManager
 {
@@ -25,24 +32,33 @@ public:
     bool editCustomer(QString id, const Customers &customer);
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
-//    bool removeAllArticles();
     void closeDatabase();
     bool dbEntryExist(QString table, QString id);
     bool readCustomers(std::vector<Customers> &customers) const;
     int readLastID(QString table) const;
     bool readCustomer(QString customerID, Customers &customer);
-
     QSqlQueryModel *readDbData(QString table);
-
     bool addArticle(const Articles &article);
-    QMap<int, QString> readFieldNames(QString table);
     bool readArticles(std::vector<Articles> &articles) const;
     bool readArticle(QString articleID, Articles &article);
     bool editArticle(QString id, const Articles &article);
-public slots:
+    QMap<int, QString> getCustomerFields() const;
+    QMap<int, QString> getArticleFields() const;
+    QMap<int, QString> getCalculationFields() const;
+    QMap<int, QString> getPositionFields() const;
+    QMap<int, QString> getSettingsFields() const;
+    bool readSettings(Settings &settings);
     bool removeDBList(QString table);
+
 private:
     QSqlDatabase m_db;
+    QMap<int, QString> m_customerFields;
+    QMap<int, QString> m_articleFields;
+    QMap<int, QString> m_calculationFields;
+    QMap<int, QString> m_positionFields;
+    QMap<int, QString> m_settingsFields;
+    QString getDbIdent(QString table);
+    QMap<int, QString> readFieldNames(QString table);
 };
 
 #endif // DBMANAGER_H

@@ -32,19 +32,12 @@ public:
     double getPrice() const;
     void setPrice(double price);
 
-    void setTableColumns();
-
-    std::vector<QString> getEntries() const;
-    void setEntries(const std::vector<QString> &entries);
-
 private:
     int m_artnr;
     QString m_name;
     QString m_description;
     QString m_unit;
     double m_price;
-
-    std::vector<QString> m_entries;
 };
 
 #endif // ARTICLES_H

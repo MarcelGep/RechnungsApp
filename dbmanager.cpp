@@ -21,6 +21,12 @@ DBManager::DBManager(const QString &path)
     {
        qDebug() << DEBUG_TAG << ": Database Connection to " + fileInfo.absoluteFilePath() + " successfull!";
 
+       // Read table fields from DB
+       m_customerFields = readFieldNames(KUNDEN);
+       m_articleFields = readFieldNames(ARTIKEL);
+       m_calculationFields = readFieldNames(RECHNUNG);
+       m_positionFields = readFieldNames(POSITIONEN);
+       m_settingsFields = readFieldNames(SETTINGS);
     }
 }
 
@@ -69,22 +75,12 @@ int DBManager::readLastID(QString table) const
 
 bool DBManager::dbEntryExist(QString table, QString id)
 {
-    QString ident = "";
-    if (table == KUNDEN)
-        ident = "KdNr";
-    else if (table == ARTIKEL)
-        ident = "ArtNr";
-    else if (table == RECHNUNG)
-        ident = "RgnNr";
-    else if (table == POSITIONEN)
-        ident = "PosNr";
-    else
-        return false;
+    QString ident = getDbIdent(table);
 
     if (isOpen())
     {
         QSqlQuery querySearch;
-        querySearch.prepare("SELECT " + ident + " FROM " + table);
+        querySearch.prepare("SELECT \"" + ident + "\" FROM " + table);
         querySearch.exec();
 
         while(querySearch.next())
@@ -125,28 +121,21 @@ bool DBManager::isOpen() const
 //        return false;
 //    }
 //}
+
 bool DBManager::addArticle(const Articles& article)
 {
     bool success = false;
-    QString col_names;
-
-    std::vector<QString> entries = article.getEntries();
-
-    for(std::vector<QString>::iterator it = entries.begin(); it != entries.end(); it++)
-    {
-        if( !col_names.isEmpty() )
-        {
-          col_names  += ", ";
-        }
-
-        col_names += *it;
-    }
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Artikel (" + col_names + ") VALUES (:einheit, "
-                                                                    ":bezeichnung, "
-                                                                    ":preis, "
-                                                                    ":beschreibung)");
+    queryAdd.prepare("INSERT INTO Artikel (\"" + m_articleFields[Einheit] + "\", "
+                                         "\"" + m_articleFields[Bezeichnung] + "\", "
+                                         "\"" + m_articleFields[Preis] + "\", "
+                                         "\"" + m_articleFields[Beschreibung] + "\") "
+                             "VALUES (:einheit, "
+                                     ":bezeichnung, "
+                                     ":preis, "
+                                     ":beschreibung)");
+
     queryAdd.bindValue(":einheit", article.getUnit());
     queryAdd.bindValue(":bezeichnung", article.getName());
     queryAdd.bindValue(":preis", article.getPrice());
@@ -169,35 +158,36 @@ bool DBManager::addArticle(const Articles& article)
 bool DBManager::addCustomer(const Customers& customer)
 {
     bool success = false;
-    QString col_names;
-
-    std::vector<QString> entries = customer.getEntries();
-
-    for(std::vector<QString>::iterator it = entries.begin(); it != entries.end(); it++)
-    {
-        if( !col_names.isEmpty() )
-        {
-          col_names  += ", ";
-        }
-
-        col_names += *it;
-    }
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Kunden (" + col_names + ") VALUES (:firma, "
-                                                                    ":name1, "
-                                                                    ":name2, "
-                                                                    ":strasse, "
-                                                                    ":plz, "
-                                                                    ":ort, "
-                                                                    ":land, "
-                                                                    ":telefon, "
-                                                                    ":telefax, "
-                                                                    ":email, "
-                                                                    ":website, "
-                                                                    ":rabatt, "
-                                                                    ":kontostand, "
-                                                                    ":info)");
+    queryAdd.prepare("INSERT INTO Kunden (\"" + m_customerFields[Firma] + "\", "
+                                         "\"" + m_customerFields[Name1] + "\", "
+                                         "\"" + m_customerFields[Name2] + "\", "
+                                         "\"" + m_customerFields[Strasse] + "\", "
+                                         "\"" + m_customerFields[Plz] + "\", "
+                                         "\"" + m_customerFields[Ort] + "\", "
+                                         "\"" + m_customerFields[Land] + "\", "
+                                         "\"" + m_customerFields[Telefon] + "\", "
+                                         "\"" + m_customerFields[Telefax] + "\", "
+                                         "\"" + m_customerFields[Email] + "\", "
+                                         "\"" + m_customerFields[Website] + "\", "
+                                         "\"" + m_customerFields[Rabatt] + "\", "
+                                         "\"" + m_customerFields[Kontostand] + "\", "
+                                         "\"" + m_customerFields[Info] + "\") "
+                            "VALUES (:firma, "
+                                    ":name1, "
+                                    ":name2, "
+                                    ":strasse, "
+                                    ":plz, "
+                                    ":ort, "
+                                    ":land, "
+                                    ":telefon, "
+                                    ":telefax, "
+                                    ":email, "
+                                    ":website, "
+                                    ":rabatt, "
+                                    ":kontostand, "
+                                    ":info)");
     queryAdd.bindValue(":firma", customer.getFirma());
     queryAdd.bindValue(":name1", customer.getName1());
     queryAdd.bindValue(":name2", customer.getName2());
@@ -272,6 +262,31 @@ bool DBManager::removeDBList(QString table)
     return true;
 }
 
+QMap<int, QString> DBManager::getSettingsFields() const
+{
+    return m_settingsFields;
+}
+
+QMap<int, QString> DBManager::getPositionFields() const
+{
+    return m_positionFields;
+}
+
+QMap<int, QString> DBManager::getCalculationFields() const
+{
+    return m_calculationFields;
+}
+
+QMap<int, QString> DBManager::getArticleFields() const
+{
+    return m_articleFields;
+}
+
+QMap<int, QString> DBManager::getCustomerFields() const
+{
+    return m_customerFields;
+}
+
 bool DBManager::removeDbEntry(QString table, QString id)
 {
     if(!isOpen())
@@ -280,20 +295,10 @@ bool DBManager::removeDbEntry(QString table, QString id)
         return false;
     }
 
-    QString ident = "";
-    if (table == KUNDEN)
-        ident = "KdNr";
-    else if (table == ARTIKEL)
-        ident = "ArtNr";
-    else if (table == RECHNUNG)
-        ident = "RgnNr";
-    else if (table == POSITIONEN)
-        ident = "PosNr";
-    else
-        return false;
+    QString ident = getDbIdent(table);
 
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM " + table + " WHERE " + ident + " = " + id);
+    queryDelete.prepare("DELETE FROM " + table + " WHERE \"" + ident + "\" = " + id);
 
     if(!queryDelete.exec())
     {
@@ -323,7 +328,7 @@ void DBManager::removeBill(int billID)
     }
 
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM Rechnungen WHERE ID = '"+id+"'");
+    queryDelete.prepare("DELETE FROM Rechnungen WHERE \"" + m_calculationFields[0] + "\" = '"+id+"'");
 
     if(!queryDelete.exec())
     {
@@ -340,11 +345,11 @@ bool DBManager::editArticle(QString id, const Articles& article)
         QSqlQuery query;
 
         query.prepare("UPDATE Artikel SET "
-                              "Einheit=:einheit, "
-                              "Bezeichnung=:bezeichnung, "
-                              "Beschreibung=:beschreibung, "
-                              "Preis=:preis "
-                      "WHERE ArtNr='"+id+"'");
+                              "'"+m_articleFields[Einheit]+"' = :einheit, "
+                              "'"+m_articleFields[Bezeichnung]+"' = :bezeichnung, "
+                              "'"+m_articleFields[Beschreibung]+"' = :beschreibung, "
+                              "'"+m_articleFields[Preis]+"' = :preis "
+                      "WHERE \"" + m_articleFields[ArtNr] + "\" = '"+id+"'");
 
         query.bindValue(":einheit", article.getUnit());
         query.bindValue(":bezeichnung", article.getName());
@@ -372,21 +377,21 @@ bool DBManager::editCustomer(QString id, const Customers& customer)
         QSqlQuery query;
 
         query.prepare("UPDATE Kunden SET "
-                              "Firma=:firma, "
-                              "Name1=:name1, "
-                              "Name2=:name2, "
-                              "Strasse=:strasse, "
-                              "PLZ=:plz, "
-                              "Ort=:ort, "
-                              "Land=:land, "
-                              "Telefon=:telefon, "
-                              "Telefax=:telefax, "
-                              "Email=:email, "
-                              "Website=:website, "
-                              "Rabatt=:rabatt, "
-                              "Kontostand=:kontostand, "
-                              "Information=:info "
-                      "WHERE KdNr='"+id+"'");
+                              "'"+m_customerFields[Firma]+"'= :firma, "
+                              "'"+m_customerFields[Name1]+"' = :name1, "
+                              "'"+m_customerFields[Name2]+"' = :name2, "
+                              "'"+m_customerFields[Strasse]+"' = :strasse, "
+                              "'"+m_customerFields[Plz]+"' = :plz, "
+                              "'"+m_customerFields[Ort]+"' = :ort, "
+                              "'"+m_customerFields[Land]+"' = :land, "
+                              "'"+m_customerFields[Telefon]+"' = :telefon, "
+                              "'"+m_customerFields[Telefax]+"' = :telefax, "
+                              "'"+m_customerFields[Email]+"' = :email, "
+                              "'"+m_customerFields[Website]+"' = :website, "
+                              "'"+m_customerFields[Rabatt]+"' = :rabatt, "
+                              "'"+m_customerFields[Kontostand]+"' = :kontostand, "
+                              "'"+m_customerFields[Info]+"' = :info "
+                      "WHERE \"" + m_customerFields[KdNr] + "\" = '"+id+"'");
 
         query.bindValue(":firma", customer.getFirma());
         query.bindValue(":name1", customer.getName1());
@@ -445,13 +450,13 @@ QMap<int, QString> DBManager::readFieldNames(QString table)
 //{
 //    QString ident = "";
 //    if (table == KUNDEN)
-//        ident = "KdNr";
+//        ident = "Kd-Nr.";
 //    else if (table == ARTIKEL)
-//        ident = "ArtNr";
+//        ident = "Art-Nr.";
 //    else if (table == RECHNUNG)
 //        ident = "RgnNr";
 //    else if (table == POSITIONEN)
-//        ident = "PosNr";
+//        ident = "Pos.";
 //    else
 //        return -1;
 
@@ -464,12 +469,12 @@ QMap<int, QString> DBManager::readFieldNames(QString table)
 //    return query.lastInsertId().toInt();
 //}
 
-bool DBManager::readArticle(QString articleID, Articles &article)
+bool DBManager::readSettings(Settings &settings)
 {
     if (m_db.isOpen())
     {
         QSqlQuery query;
-        query.prepare("SELECT * FROM Artikel WHERE ArtNr = " + articleID);
+        query.prepare("SELECT * FROM Settings");
 
         if (!query.exec())
         {
@@ -478,11 +483,57 @@ bool DBManager::readArticle(QString articleID, Articles &article)
         }
         else
         {
-            int idArtNr = query.record().indexOf("ArtNr");
-            int idUnit = query.record().indexOf("Einheit");
-            int idName= query.record().indexOf("Bezeichnung");
-            int idPrice = query.record().indexOf("Preis");
-            int idDescription = query.record().indexOf("Beschreibung");
+            int idKontakt = query.record().indexOf(m_settingsFields[Kontakt]);
+            int idAnschrift = query.record().indexOf(m_settingsFields[Anschrift]);
+            int idKonto= query.record().indexOf(m_settingsFields[Konto]);
+            int idUst = query.record().indexOf(m_settingsFields[USt]);
+            int idThx = query.record().indexOf(m_settingsFields[Thx]);
+            int idFreeText = query.record().indexOf(m_settingsFields[FreeText]);
+
+            if (query.next())
+            {
+                settings.setKontakt(query.value(idKontakt).toString());
+                settings.setAnschrift(query.value(idAnschrift).toString());
+                settings.setKonto(query.value(idKonto).toString());
+                settings.setUst(query.value(idUst).toString());
+                settings.setThx(query.value(idThx).toString());
+                settings.setFreeText(query.value(idFreeText).toString());
+            }
+            else
+            {
+                qDebug() << DEBUG_TAG << ": No settings found!";
+                return false;
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
+
+    return true;
+}
+
+bool DBManager::readArticle(QString articleID, Articles &article)
+{
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Artikel WHERE \"" + m_articleFields[ArtNr] + "\" = " + articleID);
+
+        if (!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+            return false;
+        }
+        else
+        {
+            int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
+            int idUnit = query.record().indexOf(m_articleFields[Einheit]);
+            int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
+            int idPrice = query.record().indexOf(m_articleFields[Preis]);
+            int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
 
             if (query.next())
             {
@@ -513,7 +564,7 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
     if (m_db.isOpen())
     {
         QSqlQuery query;
-        query.prepare("SELECT * FROM Kunden WHERE KdNr = " + customerID);
+        query.prepare("SELECT * FROM Kunden WHERE \"" + m_customerFields[KdNr] + "\" = " + customerID);
 
         if(!query.exec())
         {
@@ -522,23 +573,23 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
         }
         else
         {
-            int idKdNr = query.record().indexOf("KdNr");
-            int idFirma = query.record().indexOf("Firma");
-            int idName1= query.record().indexOf("Name1");
-            int idName2 = query.record().indexOf("Name2");
-            int idStrasse = query.record().indexOf("Strasse");
-            int idPlz = query.record().indexOf("Plz");
-            int idOrt = query.record().indexOf("Ort");
-            int idLand= query.record().indexOf("Land");
-            int idTelefon = query.record().indexOf("Telefon");
-            int idTelefax= query.record().indexOf("Telefax");
-            int idEmail= query.record().indexOf("Email");
-            int idWebsite = query.record().indexOf("Website");
-            int idRabatt = query.record().indexOf("Rabatt");
-            int idKontostand = query.record().indexOf("Kontostand");
-            int idInfo = query.record().indexOf("Information");
+            int idKdNr = query.record().indexOf(m_customerFields[KdNr]);
+            int idFirma = query.record().indexOf(m_customerFields[Firma]);
+            int idName1= query.record().indexOf(m_customerFields[Name1]);
+            int idName2 = query.record().indexOf(m_customerFields[Name2]);
+            int idStrasse = query.record().indexOf(m_customerFields[Strasse]);
+            int idPlz = query.record().indexOf(m_customerFields[Plz]);
+            int idOrt = query.record().indexOf(m_customerFields[Ort]);
+            int idLand= query.record().indexOf(m_customerFields[Land]);
+            int idTelefon = query.record().indexOf(m_customerFields[Telefon]);
+            int idTelefax= query.record().indexOf(m_customerFields[Telefax]);
+            int idEmail= query.record().indexOf(m_customerFields[Email]);
+            int idWebsite = query.record().indexOf(m_customerFields[Website]);
+            int idRabatt = query.record().indexOf(m_customerFields[Rabatt]);
+            int idKontostand = query.record().indexOf(m_customerFields[Kontostand]);
+            int idInfo = query.record().indexOf(m_customerFields[Info]);
 
-            while (query.next())
+            if (query.next())
             {
                 customer.setKdnr(query.value(idKdNr).toInt());
                 customer.setFirma(query.value(idFirma).toString());
@@ -556,6 +607,11 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
                 customer.setKontostand(query.value(idKontostand).toDouble());
                 customer.setInfo(query.value(idInfo).toString());
             }
+            else
+            {
+                qDebug() << DEBUG_TAG << ": No Data in customer " + customerID + " !";
+                return false;
+            }
         }
     }
     else
@@ -570,7 +626,7 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
 bool DBManager::readArticles(std::vector<Articles> &articles) const
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM Artikel ORDER BY ArtNr ASC");
+    query.prepare("SELECT * FROM Artikel ORDER BY \"" + m_articleFields[ArtNr] + "\" ASC");
 
     if(!query.exec())
     {
@@ -578,11 +634,11 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
         return false;
     }
 
-    int idArtNr = query.record().indexOf("ArtNr");
-    int idUnit = query.record().indexOf("Einheit");
-    int idName= query.record().indexOf("Bezeichnung");
-    int idPrice = query.record().indexOf("Preis");
-    int idDescription = query.record().indexOf("Beschreibung");
+    int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
+    int idUnit = query.record().indexOf(m_articleFields[Einheit]);
+    int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
+    int idPrice = query.record().indexOf(m_articleFields[Preis]);
+    int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
 
     while (query.next())
     {
@@ -603,7 +659,7 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
 bool DBManager::readCustomers(std::vector<Customers> &customers) const
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM Kunden ORDER BY KdNr ASC");
+    query.prepare("SELECT * FROM Kunden ORDER BY \"" + m_customerFields[KdNr] + "\" ASC");
 
     if(!query.exec())
     {
@@ -611,21 +667,21 @@ bool DBManager::readCustomers(std::vector<Customers> &customers) const
         return false;
     }
 
-    int idKdNr = query.record().indexOf("KdNr");
-    int idFirma = query.record().indexOf("Firma");
-    int idName1= query.record().indexOf("Name1");
-    int idName2 = query.record().indexOf("Name2");
-    int idStrasse = query.record().indexOf("Strasse");
-    int idPlz = query.record().indexOf("Plz");
-    int idOrt = query.record().indexOf("Ort");
-    int idLand= query.record().indexOf("Land");
-    int idTelefon = query.record().indexOf("Telefon");
-    int idTelefax= query.record().indexOf("Telefax");
-    int idEmail= query.record().indexOf("Email");
-    int idWebsite = query.record().indexOf("Website");
-    int idRabatt = query.record().indexOf("Rabatt");
-    int idKontostand = query.record().indexOf("Kontostand");
-    int idInfo = query.record().indexOf("Information");
+    int idKdNr = query.record().indexOf(m_customerFields[KdNr]);
+    int idFirma = query.record().indexOf(m_customerFields[Firma]);
+    int idName1= query.record().indexOf(m_customerFields[Name1]);
+    int idName2 = query.record().indexOf(m_customerFields[Name2]);
+    int idStrasse = query.record().indexOf(m_customerFields[Strasse]);
+    int idPlz = query.record().indexOf(m_customerFields[Plz]);
+    int idOrt = query.record().indexOf(m_customerFields[Ort]);
+    int idLand= query.record().indexOf(m_customerFields[Land]);
+    int idTelefon = query.record().indexOf(m_customerFields[Telefon]);
+    int idTelefax= query.record().indexOf(m_customerFields[Telefax]);
+    int idEmail= query.record().indexOf(m_customerFields[Email]);
+    int idWebsite = query.record().indexOf(m_customerFields[Website]);
+    int idRabatt = query.record().indexOf(m_customerFields[Rabatt]);
+    int idKontostand = query.record().indexOf(m_customerFields[Kontostand]);
+    int idInfo = query.record().indexOf(m_customerFields[Info]);
 
     while (query.next())
     {
@@ -655,8 +711,10 @@ bool DBManager::readCustomers(std::vector<Customers> &customers) const
 
 QSqlQueryModel *DBManager::readDbData(QString table)
 {
+    QString ident = getDbIdent(table);
+
     QSqlQuery query;
-    query.prepare("SELECT * FROM '"+table+"' ORDER BY ID ASC");
+    query.prepare("SELECT * FROM '"+table+"' ORDER \"" + ident + "\" ASC");
 
     if(!query.exec())
     {
@@ -667,4 +725,19 @@ QSqlQueryModel *DBManager::readDbData(QString table)
     modal->setQuery(query);
 
     return modal;
+}
+
+QString DBManager::getDbIdent(QString table)
+{
+    QString ident = "";
+    if (table == KUNDEN)
+        ident = m_customerFields[KdNr];
+    else if (table == ARTIKEL)
+        ident = m_articleFields[ArtNr];
+    else if (table == RECHNUNG)
+        ident = m_calculationFields[0];
+    else if (table == POSITIONEN)
+        ident = m_positionFields[PosNr];
+
+    return ident;
 }

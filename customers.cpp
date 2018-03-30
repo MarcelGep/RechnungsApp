@@ -16,8 +16,6 @@ Customers::Customers()
     this->rabatt = 0;
     this->kontostand = 0;
     this->info = "";
-
-    setTableColumns();
 }
 
 Customers::Customers(const int &kdnr, const QString &firma,
@@ -49,33 +47,10 @@ Customers::Customers(const int &kdnr, const QString &firma,
     this->rabatt = rabatt;
     this->kontostand = kontostand;
     this->info = info;
-
-    setTableColumns();
 }
 
 Customers::~Customers()
 {
-}
-
-void Customers::setTableColumns()
-{
-    if (m_entries.size() > 0)
-        m_entries.clear();
-
-    m_entries.push_back("Firma");
-    m_entries.push_back("Name1");
-    m_entries.push_back("Name2");
-    m_entries.push_back("Strasse");
-    m_entries.push_back("PLZ");
-    m_entries.push_back("Ort");
-    m_entries.push_back("Land");
-    m_entries.push_back("Telefon");
-    m_entries.push_back("Telefax");
-    m_entries.push_back("Email");
-    m_entries.push_back("Website");
-    m_entries.push_back("Rabatt");
-    m_entries.push_back("Kontostand");
-    m_entries.push_back("Information");
 }
 
 QString Customers::getWebsite() const
@@ -186,16 +161,6 @@ double Customers::getKontostand() const
 void Customers::setKontostand(double value)
 {
     kontostand = value;
-}
-
-std::vector<QString> Customers::getEntries() const
-{
-    return m_entries;
-}
-
-void Customers::setEntries(const std::vector<QString> &value)
-{
-    m_entries = value;
 }
 
 QString Customers::getLand() const

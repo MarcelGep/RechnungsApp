@@ -15,19 +15,15 @@
 
 #define DEBUG_TAG_MAIN "MainWindow"
 
-#define CUSTOMER_COLUMN_OFFSET 25
-#define CUSTOMER_ROW_HEIGHT 25
-#define ARTICLE_ROW_HEIGHT 25
-#define ARTICLEPOS_ROW_HEIGHT 25
+#define CUSTOMER_COLUMN_OFFSET  25
+#define CUSTOMER_ROW_HEIGHT     25
+#define ARTICLE_ROW_HEIGHT      25
+#define ARTICLEPOS_ROW_HEIGHT   25
 
-#define ARTIKEL "Artikel"
-#define KUNDEN "Kunden"
-#define RECHNUNG "Rechnungen"
-#define POSITIONEN "Positionen"
-
-#define DEFAULT_FONT_SIZE 160
-#define SUBJECT_FONT_SIZE 220
-#define SENDER_SMALL_FONT_SIZE 115
+#define DEFAULT_FONT_SIZE       160
+#define SUBJECT_FONT_SIZE       220
+#define SENDER_SMALL_FONT_SIZE  115
+#define ACCOUNT_FONT_SIZE       100
 
 enum ArtPosColumns
 {
@@ -74,6 +70,16 @@ enum ArticleColumns
     ArticleColumnsCount
 };
 
+enum SettingsColumns
+{
+    Kontakt,
+    Anschrift,
+    Konto,
+    USt,
+    Thx,
+    FreeText,
+};
+
 enum CustomerTab
 {
     OverviewTab,
@@ -104,9 +110,10 @@ public:
     void printAllCustomers();
     void printCustomer(Customers customer);
     void clearCustomerEdits() const;
-
     void printAllArticles();
     void clearArticleEdits();
+    void createInvoice();
+
 private slots:
     void on_btnSaveCustomer_clicked();
     void on_btnDeleteCustomer_clicked();
@@ -146,6 +153,13 @@ private slots:
 
 private:
     void setCustomerColumnsWidth() const;
+    void clearCustomers();
+    void clearArticles();
+    void setArticleColumnsWidth() const;
+    void clearBillEdits();
+    void setArticlePosColumnsWidth() const;
+    void updateTotalPrice();
+    void fillSettingsEdit();
 
 private:
     Ui::MainWindow *ui;
@@ -153,21 +167,11 @@ private:
     QPrinter* m_pdfPrinter;
     QPainter* m_painter;
     int m_posNr;
-
-    QMap<int, QString> m_customerFields;
-    QMap<int, QString> m_articleFields;
-    QMap<int, QString> m_calculationFields;
-    QMap<int, QString> m_positionFields;
+    Settings m_settings;
 
     std::vector<Customers> m_customers;
     std::vector<Articles> m_articles;
 
-    void clearCustomers();
-    void clearArticles();
-    void setArticleColumnsWidth() const;
-    void clearBillEdits();
-    void setArticlePosColumnsWidth() const;
-    void updateTotalPrice();
 };
 
 #endif // MAINWINDOW_H

@@ -28,13 +28,15 @@ SOURCES += \
         mainwindow.cpp \
     dbmanager.cpp \
     customers.cpp \
-    articles.cpp
+    articles.cpp \
+    settings.cpp
 
 HEADERS += \
         mainwindow.h \
     dbmanager.h \
     customers.h \
-    articles.h
+    articles.h \
+    settings.h
 
 FORMS += \
         mainwindow.ui
