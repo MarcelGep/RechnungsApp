@@ -423,6 +423,63 @@ bool DBManager::editCustomer(QString id, const Customers& customer)
         return false;
 }
 
+bool DBManager::editSetting(QString typ, QString data)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        query.prepare("UPDATE Settings SET \"" + typ + "\" = :data");
+        query.bindValue(":data", data);
+
+        if(query.exec())
+        {
+            return true;
+        }
+        else
+        {
+            qDebug() << DEBUG_TAG << ": Edit Settings ERROR - " << query.lastError();
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
+bool DBManager::editSettings(Settings &settings)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        query.prepare("UPDATE Settings SET \"" + m_settingsFields[Kontakt] + "\" = :kontakt, "
+                                          "\"" + m_settingsFields[Anschrift] + "\" = :anschrift, "
+                                          "\"" + m_settingsFields[Konto] + "\" = :konto, "
+                                          "\"" + m_settingsFields[USt] + "\" = :ust, "
+                                          "\"" + m_settingsFields[Thx] + "\" = :thx, "
+                                          "\"" + m_settingsFields[FreeText] + "\" = :freetext");
+
+        query.bindValue(":kontakt", settings.getKontakt());
+        query.bindValue(":anschrift", settings.getAnschrift());
+        query.bindValue(":konto", settings.getKonto());
+        query.bindValue(":ust", settings.getUst());
+        query.bindValue(":thx", settings.getThx());
+        query.bindValue(":freetext", settings.getFreeText());
+
+        if(query.exec())
+        {
+            return true;
+        }
+        else
+        {
+            qDebug() << DEBUG_TAG << ": Edit Settings ERROR - " << query.lastError();
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
 QMap<int, QString> DBManager::readFieldNames(QString table)
 {
     QMap<int, QString> fields;
@@ -468,6 +525,40 @@ QMap<int, QString> DBManager::readFieldNames(QString table)
 
 //    return query.lastInsertId().toInt();
 //}
+
+bool DBManager::readSetting(QString typ, QString& data)
+{
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT \"" + typ + "\" FROM Settings");
+
+        if (!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+            return false;
+        }
+        else
+        {
+            if (query.next())
+            {
+                data = query.value(0).toString();
+            }
+            else
+            {
+                qDebug() << DEBUG_TAG << ": No phrase found!";
+                return false;
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
+
+    return true;
+}
 
 bool DBManager::readSettings(Settings &settings)
 {

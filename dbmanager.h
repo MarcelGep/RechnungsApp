@@ -49,7 +49,10 @@ public:
     QMap<int, QString> getSettingsFields() const;
     bool readSettings(Settings &settings);
     bool removeDBList(QString table);
+    bool editSettings(Settings &settings);
 
+    bool readSetting(QString typ, QString &data);
+    bool editSetting(QString typ, QString data);
 private:
     QSqlDatabase m_db;
     QMap<int, QString> m_customerFields;

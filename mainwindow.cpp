@@ -64,6 +64,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
     ui->twRgArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->twRgArticles->horizontalHeader()->setSectionResizeMode(BeschreibungPos, QHeaderView::Stretch);
+
+    // Fill pdf settings list
+    m_dbManager->getSettingsFields();
+    for (int i = 0; i < m_dbManager->getSettingsFields().size(); i++)
+    {
+        ui->lwSetPdfPhrases->addItem(m_dbManager->getSettingsFields().value(i));
+    }
 }
 
 MainWindow::~MainWindow()
@@ -972,12 +979,22 @@ void MainWindow::on_btnRgCreate_clicked()
 
 void MainWindow::fillSettingsEdit()
 {
-    ui->ptSetKontakt->setPlainText(m_settings.getKontakt());
-    ui->ptSetAnschrift->setPlainText(m_settings.getAnschrift());
-    ui->ptSetKonto->setPlainText(m_settings.getKonto());
-    ui->ptSetUst->setPlainText(m_settings.getUst());
-    ui->ptSetThx->setPlainText(m_settings.getThx());
-    ui->ptSetFreeText->setPlainText(m_settings.getFreeText());
+//    ui->teSetKontakt->setText(m_settings.getKontakt());
+//    ui->teSetAnschrift->setText(m_settings.getAnschrift());
+//    ui->teSetKonto->setText(m_settings.getKonto());
+//    ui->teSetUst->setText(m_settings.getUst());
+//    ui->teSetThx->setText(m_settings.getThx());
+//    ui->teSetFreeText->setText(m_settings.getFreeText());
+}
+
+void MainWindow::readSettingsEdit()
+{
+//    m_settings.setKontakt(ui->teSetKontakt->toPlainText());
+//    m_settings.setAnschrift(ui->teSetAnschrift->toPlainText());
+//    m_settings.setKonto(ui->teSetKonto->toPlainText());
+//    m_settings.setUst(ui->teSetUst->toPlainText());
+//    m_settings.setThx(ui->teSetThx->toPlainText());
+//    m_settings.setFreeText(ui->teSetFreeText->toPlainText());
 }
 
 void MainWindow::createInvoice()
@@ -1372,4 +1389,35 @@ void MainWindow::createInvoice()
     m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, m_settings.getKonto());
 
     m_painter->end();
+}
+
+void MainWindow::on_btnSetCancel_clicked()
+{
+    QString typ = ui->lwSetPdfPhrases->currentItem()->text();
+    QString data;
+    m_dbManager->readSetting(typ, data);
+    ui->teSetContent->setText(data);
+    ui->btnSetSave->setEnabled(false);
+    ui->btnSetCancel->setEnabled(false);
+}
+
+void MainWindow::on_btnSetSave_clicked()
+{
+    QString typ = ui->lwSetPdfPhrases->currentItem()->text();
+    m_dbManager->editSetting(typ ,ui->teSetContent->toPlainText());
+    ui->btnSetSave->setEnabled(false);
+    ui->btnSetCancel->setEnabled(false);
+}
+
+void MainWindow::on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item)
+{
+    QString data;
+    m_dbManager->readSetting(item->text(), data);
+    ui->teSetContent->setText(data);
+}
+
+void MainWindow::on_teSetContent_textChanged()
+{
+    ui->btnSetSave->setEnabled(true);
+    ui->btnSetCancel->setEnabled(true);
 }
