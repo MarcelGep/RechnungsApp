@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_dbManager = new DBManager(PATH_DATABASE);
 
     // Read settings from DB
-    m_dbManager->readSettings(m_settings);
+    //m_dbManager->readSettings(m_settings);
 
     // Set active tabs
     ui->tabMain->setCurrentIndex(CalculationsTab);
@@ -487,7 +487,8 @@ void MainWindow::on_tabMain_currentChanged(int index)
             ui->leRgSubject->setText("Rechnung");
 
             // Fill date
-            ui->deRgDate->setDate(m_settings.getDate());
+            QDate date;
+            ui->deRgDate->setDate(date.currentDate());
 
             // Fill articles combobox
             // clear articles
@@ -983,22 +984,12 @@ void MainWindow::on_btnRgCreate_clicked()
 
 void MainWindow::fillSettingsEdit()
 {
-//    ui->teSetKontakt->setText(m_settings.getKontakt());
-//    ui->teSetAnschrift->setText(m_settings.getAnschrift());
-//    ui->teSetKonto->setText(m_settings.getKonto());
-//    ui->teSetUst->setText(m_settings.getUst());
-//    ui->teSetThx->setText(m_settings.getThx());
-//    ui->teSetFreeText->setText(m_settings.getFreeText());
+
 }
 
 void MainWindow::readSettingsEdit()
 {
-//    m_settings.setKontakt(ui->teSetKontakt->toPlainText());
-//    m_settings.setAnschrift(ui->teSetAnschrift->toPlainText());
-//    m_settings.setKonto(ui->teSetKonto->toPlainText());
-//    m_settings.setUst(ui->teSetUst->toPlainText());
-//    m_settings.setThx(ui->teSetThx->toPlainText());
-//    m_settings.setFreeText(ui->teSetFreeText->toPlainText());
+
 }
 
 void MainWindow::createInvoice()
@@ -1108,11 +1099,11 @@ void MainWindow::createInvoice()
     m_painter->setPen(penDefault);
 
     // Small Sender
-    QRect rectSenderSmall(x_posLeft, y_posSenderSmall, metricSmallFont.width(m_settings.getAnschrift()), metricSmallFont.height());
+    QRect rectSenderSmall(x_posLeft, y_posSenderSmall, metricSmallFont.width(getSettings(Anschrift)), metricSmallFont.height());
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSenderSmall);
     #endif
-    m_painter->drawText(rectSenderSmall, m_settings.getAnschrift());
+    m_painter->drawText(rectSenderSmall, getSettings(Anschrift));
 
     m_painter->setFont(subjectFont);
 
@@ -1130,7 +1121,7 @@ void MainWindow::createInvoice()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSender);
     #endif
-    m_painter->drawText(rectSender, Qt::AlignTop | Qt::AlignLeft, m_settings.getKontakt());
+    m_painter->drawText(rectSender, Qt::AlignTop | Qt::AlignLeft, getSettings(Kontakt));
 
     // Receiver
     QRect rectReceiver(x_posLeft, y_posReceiver, w / 3, metricFont.height() * 8);
@@ -1181,7 +1172,7 @@ void MainWindow::createInvoice()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectFreeText);
     #endif
-    m_painter->drawText(rectFreeText, m_settings.getFreeText());
+    m_painter->drawText(rectFreeText, getSettings(FreeText));
 
 
     // Position List
@@ -1390,7 +1381,7 @@ void MainWindow::createInvoice()
         m_painter->drawRect(rectAccountInfo);
     #endif
     m_painter->setFont(accountFont);
-    m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, m_settings.getKonto());
+    m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, getSettings(Konto));
 
     m_painter->end();
 }
@@ -1436,4 +1427,9 @@ void MainWindow::on_teSetContent_selectionChanged()
 {
     ui->btnSetSave->setEnabled(true);
     ui->btnSetCancel->setEnabled(true);
+}
+
+void MainWindow::on_deRgDate_dateChanged(const QDate &date)
+{
+    m_settings.setDate(date);
 }

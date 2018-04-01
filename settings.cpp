@@ -10,10 +10,6 @@ Settings::Settings()
     m_thx = "";
     m_freeText = "";
 
-    // current date
-    m_date = m_date.currentDate();
-    m_dateStr = (m_date.toString("dd.MM.yyyy"));
-
     // invoice labels
     invoiceNrLabel = "Rechnungs-Nr.:";
     invoiceDateLabel = "Rechnungsdatum:";
@@ -95,6 +91,7 @@ QDate Settings::getDate() const
 void Settings::setDate(const QDate &date)
 {
     m_date = date;
+    setDateStr(date.toString("dd.MM.yyyy"));
 }
 
 QString Settings::getDateStr() const

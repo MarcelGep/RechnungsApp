@@ -156,6 +156,8 @@ private slots:
     void on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item);
     void on_teSetContent_selectionChanged();
 
+    void on_deRgDate_dateChanged(const QDate &date);
+
 private:
     void setCustomerColumnsWidth() const;
     void clearCustomers();
