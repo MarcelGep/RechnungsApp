@@ -69,7 +69,11 @@ MainWindow::MainWindow(QWidget *parent) :
     m_dbManager->getSettingsFields();
     for (int i = 0; i < m_dbManager->getSettingsFields().size(); i++)
     {
-        ui->lwSetPdfPhrases->addItem(m_dbManager->getSettingsFields().value(i));
+        QListWidgetItem *item = new QListWidgetItem();
+        item->setSizeHint(QSize(0, 30));
+        item->setText(m_dbManager->getSettingsFields().value(i));
+        ui->lwSetPdfPhrases->addItem(item);
+
     }
 }
 
@@ -1368,9 +1372,9 @@ void MainWindow::createInvoice()
         m_painter->drawRect(rectConclusion);
     #endif
     m_painter->setFont(ustFont);
-    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, m_settings.getUst());
+    m_painter->drawText(rectConclusion, Qt::AlignTop | Qt::AlignLeft, getSettings(USt));
     m_painter->setFont(font);
-    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, m_settings.getThx());
+    m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, getSettings(Thx));
 
     y += (metricFont.height() * 3) + 400;
 
@@ -1391,32 +1395,44 @@ void MainWindow::createInvoice()
     m_painter->end();
 }
 
+QString MainWindow::getSettings(SettingsColumns typ)
+{
+    QString data;
+    m_dbManager->readSetting(m_dbManager->getSettingsFields().value(typ), data);
+    return data;
+}
+
 void MainWindow::on_btnSetCancel_clicked()
 {
+    ui->btnSetSave->setEnabled(false);
+    ui->btnSetCancel->setEnabled(false);
+
     QString typ = ui->lwSetPdfPhrases->currentItem()->text();
     QString data;
     m_dbManager->readSetting(typ, data);
     ui->teSetContent->setText(data);
-    ui->btnSetSave->setEnabled(false);
-    ui->btnSetCancel->setEnabled(false);
 }
 
 void MainWindow::on_btnSetSave_clicked()
 {
-    QString typ = ui->lwSetPdfPhrases->currentItem()->text();
-    m_dbManager->editSetting(typ ,ui->teSetContent->toPlainText());
     ui->btnSetSave->setEnabled(false);
     ui->btnSetCancel->setEnabled(false);
+
+    QString typ = ui->lwSetPdfPhrases->currentItem()->text();
+    m_dbManager->editSetting(typ ,ui->teSetContent->toPlainText());
 }
 
 void MainWindow::on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item)
 {
+    ui->btnSetSave->setEnabled(false);
+    ui->btnSetCancel->setEnabled(false);
+
     QString data;
     m_dbManager->readSetting(item->text(), data);
     ui->teSetContent->setText(data);
 }
 
-void MainWindow::on_teSetContent_textChanged()
+void MainWindow::on_teSetContent_selectionChanged()
 {
     ui->btnSetSave->setEnabled(true);
     ui->btnSetCancel->setEnabled(true);

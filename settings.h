@@ -35,14 +35,13 @@ class Settings
         QString getDateStr() const;
         void setDateStr(const QString &dateStr);
 
-private:
+    private:
         QString m_kontakt;
         QString m_anschrift;
         QString m_konto;
         QString m_ust;
         QString m_thx;
         QString m_freeText;
-
 
         QString invoiceNrLabel;
         QString deliveryNrLabel;
@@ -52,7 +51,6 @@ private:
 
         QString m_dateStr;
         QDate m_date;
-
 };
 
 #endif // SETTINGS_H

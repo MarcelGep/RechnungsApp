@@ -154,7 +154,7 @@ private slots:
     void on_btnSetCancel_clicked();
     void on_btnSetSave_clicked();
     void on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item);
-    void on_teSetContent_textChanged();
+    void on_teSetContent_selectionChanged();
 
 private:
     void setCustomerColumnsWidth() const;
@@ -178,6 +178,7 @@ private:
     std::vector<Articles> m_articles;
 
     void readSettingsEdit();
+    QString getSettings(SettingsColumns typ);
 };
 
 #endif // MAINWINDOW_H
