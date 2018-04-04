@@ -16,6 +16,8 @@
 
 #define DEBUG_TAG_MAIN "MainWindow"
 
+#define INVOICE_COLUMN_OFFSET   25
+#define INVOICE_ROW_HEIGHT      25
 #define CUSTOMER_COLUMN_OFFSET  25
 #define CUSTOMER_ROW_HEIGHT     25
 #define ARTICLE_ROW_HEIGHT      25
@@ -96,6 +98,22 @@ enum MainTab
     SettingsTab
 };
 
+enum InvoiceColumns
+{
+    Invoice_RgNr,
+    Invoice_KdNr,
+    Invoice_RgDate,
+    Invoice_SubDate,
+    Invoice_Amount,
+    Invoice_Description,
+    Invoice_Positions,
+    Invoice_USt,
+    Invoice_Skonto,
+    Invoice_Currency,
+
+    InvoiceColumsCount
+};
+
 namespace Ui {
 class MainWindow;
 }
@@ -115,6 +133,7 @@ public:
     void clearArticleEdits();
     void createInvoice();
 
+    void printAllInvoices();
 private slots:
     void on_btnSaveCustomer_clicked();
     void on_btnDeleteCustomer_clicked();
@@ -178,9 +197,12 @@ private:
 
     std::vector<Customers> m_customers;
     std::vector<Articles> m_articles;
+    std::vector<Invoices> m_invoices;
 
     void readSettingsEdit();
     QString getSettings(SettingsColumns typ);
+    void clearInvoices();
+    void setInvoicesColumnsWidth() const;
 };
 
 #endif // MAINWINDOW_H

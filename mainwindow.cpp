@@ -54,6 +54,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->twArticles->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
 
+    // Setup invoice list
+    ui->twRgList->setColumnCount(m_dbManager->getInvoiceFields().size());
+    for ( int i = 0; i < m_dbManager->getInvoiceFields().size(); i++)
+    {
+        ui->twRgList->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getInvoiceFields()[i]));
+    }
+    QFont fontInvoices("MS Shell Dlg 2", 8, QFont::Bold);
+    ui->twRgList->horizontalHeader()->setFont(fontInvoices);
+    ui->twRgList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    ui->twRgList->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
+
     // Setup article positions
     ui->twRgArticles->setColumnCount(m_dbManager->getPositionFields().size());
     for ( int i = 0; i < m_dbManager->getPositionFields().size(); i++)
@@ -297,6 +308,15 @@ void MainWindow::clearArticles()
     m_articles.clear();
 }
 
+void MainWindow::clearInvoices()
+{
+    while (ui->twRgList->rowCount() > 0)
+    {
+        ui->twRgList->removeRow(0);
+    }
+    m_invoices.clear();
+}
+
 void MainWindow::clearCustomers()
 {
     while (ui->twCustomers->rowCount() > 0)
@@ -304,6 +324,44 @@ void MainWindow::clearCustomers()
         ui->twCustomers->removeRow(0);
     }
     m_customers.clear();
+}
+
+void MainWindow::printAllInvoices()
+{
+    // clear invoice list
+    if(ui->twRgList->rowCount() > 0)
+        clearInvoices();
+
+    // read invoices from database
+    if (!m_dbManager->readInvoices(m_invoices))
+    {
+       qDebug() << DEBUG_TAG_MAIN << ": Error read invoices!";
+       return;
+    }
+
+    // print all exist customers to list
+    for (std::vector<Invoices>::iterator it = m_invoices.begin(); it != m_invoices.end(); ++it)
+    {
+       int row = ui->twRgList->rowCount();
+       ui->twRgList->insertRow(row);
+       ui->twRgList->setRowHeight(row, INVOICE_ROW_HEIGHT);
+       ui->twRgList->setItem(row, Invoice_RgNr, new QTableWidgetItem(QString::number(it->rgnr())));
+       ui->twRgList->setItem(row, Invoice_KdNr, new QTableWidgetItem(QString::number(it->kdnr())));
+       ui->twRgList->setItem(row, Invoice_RgDate, new QTableWidgetItem(it->rgdate()));
+       ui->twRgList->setItem(row, Invoice_SubDate, new QTableWidgetItem(it->subdate()));
+       ui->twRgList->setItem(row, Invoice_Amount, new QTableWidgetItem(QString::number(it->amount())));
+       ui->twRgList->setItem(row, Invoice_Description, new QTableWidgetItem(it->description()));
+       ui->twRgList->setItem(row, Invoice_USt, new QTableWidgetItem(QString::number(it->ust())));
+       ui->twRgList->setItem(row, Invoice_Skonto, new QTableWidgetItem(QString::number(it->skonto())));
+       ui->twRgList->setItem(row, Invoice_Currency, new QTableWidgetItem(it->currency()));
+       //ui->twRgList->item(row, Kontostand)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    }
+
+    // Set customer table column width offset
+    setInvoicesColumnsWidth();
+
+    qDebug() << DEBUG_TAG_MAIN << ": Print all invoices!";
+
 }
 
 void MainWindow::printAllCustomers()
@@ -347,6 +405,17 @@ void MainWindow::printAllCustomers()
     setCustomerColumnsWidth();
 
     qDebug() << DEBUG_TAG_MAIN << ": Print all customers!";
+}
+
+void MainWindow::setInvoicesColumnsWidth() const
+{
+    ui->twRgList->resizeColumnsToContents();
+
+    for (int i = 0; i < ui->twRgList->columnCount(); i++)
+    {
+        int tempWidth = ui->twRgList->columnWidth(i);
+        ui->twRgList->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
+    }
 }
 
 void MainWindow::setCustomerColumnsWidth() const
@@ -480,7 +549,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
             ui->cbRgCustomer->addItems(entries);
 
             // Fill invoice number
-            int lastRgNr = m_dbManager->readLastID(RECHNUNG);
+            int lastRgNr = m_dbManager->readLastID(RECHNUNGEN);
             ui->leRgNr->setText(QString::number(lastRgNr));
 
             // Fill subject line
@@ -511,6 +580,9 @@ void MainWindow::on_tabMain_currentChanged(int index)
             }
 
             clearBillEdits();
+
+            // Read invoices
+            printAllInvoices();
         }
         break;
 

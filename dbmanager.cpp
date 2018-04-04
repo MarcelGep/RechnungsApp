@@ -24,7 +24,7 @@ DBManager::DBManager(const QString &path)
        // Read table fields from DB
        m_customerFields = readFieldNames(KUNDEN);
        m_articleFields = readFieldNames(ARTIKEL);
-       m_calculationFields = readFieldNames(RECHNUNG);
+       m_invoiceFields = readFieldNames(RECHNUNGEN);
        m_positionFields = readFieldNames(POSITIONEN);
        m_settingsFields = readFieldNames(SETTINGS);
     }
@@ -217,6 +217,57 @@ bool DBManager::addCustomer(const Customers& customer)
     return success;
 }
 
+bool DBManager::readInvoices(std::vector<Invoices> &invoices)
+{
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Rechnungen ORDER BY \"" + m_invoiceFields[Invoice_RgNr] + "\" ASC");
+
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": No table in database!" << " " << query.lastError();
+            return false;
+        }
+        else
+        {
+            int idRgNr = query.record().indexOf(m_invoiceFields[Invoice_RgNr]);
+            int idKdNr = query.record().indexOf(m_invoiceFields[Invoice_KdNr]);
+            int idRgDate= query.record().indexOf(m_invoiceFields[Invoice_RgDate]);
+            int idSubDate = query.record().indexOf(m_invoiceFields[Invoice_SubDate]);
+            int idAmount = query.record().indexOf(m_invoiceFields[Invoice_Amount]);
+            int idDescription = query.record().indexOf(m_invoiceFields[Invoice_Description]);
+            int idUst = query.record().indexOf(m_invoiceFields[Invoice_USt]);
+            int idSkonto = query.record().indexOf(m_invoiceFields[Invoice_Skonto]);
+            int idCurrency = query.record().indexOf(m_invoiceFields[Invoice_Currency]);
+
+            while (query.next())
+            {
+                Invoices invoice;
+                invoice.setRgnr(query.value(idRgNr).toInt());
+                invoice.setKdnr(query.value(idKdNr).toInt());
+                invoice.setRgdate(query.value(idRgDate).toString());
+                invoice.setSubdate(query.value(idSubDate).toString());
+                invoice.setAmount(query.value(idAmount).toDouble());
+                invoice.setDescription(query.value(idDescription).toString());
+                invoice.setUst(query.value(idUst).toDouble());
+                invoice.setSkonto(query.value(idSkonto).toDouble());
+                invoice.setCurrency(query.value(idCurrency).toString());
+
+                invoices.push_back(invoice);
+            }
+            qDebug() << DEBUG_TAG << ": Read all invoices successfull!";
+        }
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
+
+    return true;
+}
+
 bool DBManager::addBill(QString datum, double betrag)
 {
     bool success = false;
@@ -272,9 +323,9 @@ QMap<int, QString> DBManager::getPositionFields() const
     return m_positionFields;
 }
 
-QMap<int, QString> DBManager::getCalculationFields() const
+QMap<int, QString> DBManager::getInvoiceFields() const
 {
-    return m_calculationFields;
+    return m_invoiceFields;
 }
 
 QMap<int, QString> DBManager::getArticleFields() const
@@ -328,7 +379,7 @@ void DBManager::removeBill(int billID)
     }
 
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM Rechnungen WHERE \"" + m_calculationFields[0] + "\" = '"+id+"'");
+    queryDelete.prepare("DELETE FROM Rechnungen WHERE \"" + m_invoiceFields[0] + "\" = '"+id+"'");
 
     if(!queryDelete.exec())
     {
@@ -562,48 +613,7 @@ bool DBManager::readSetting(QString typ, QString& data)
 
 bool DBManager::readSettings(Settings &settings)
 {
-    if (m_db.isOpen())
-    {
-        QSqlQuery query;
-        query.prepare("SELECT * FROM Settings");
 
-        if (!query.exec())
-        {
-            qDebug() << DEBUG_TAG << ": " << query.lastError();
-            return false;
-        }
-        else
-        {
-            int idKontakt = query.record().indexOf(m_settingsFields[Kontakt]);
-            int idAnschrift = query.record().indexOf(m_settingsFields[Anschrift]);
-            int idKonto= query.record().indexOf(m_settingsFields[Konto]);
-            int idUst = query.record().indexOf(m_settingsFields[USt]);
-            int idThx = query.record().indexOf(m_settingsFields[Thx]);
-            int idFreeText = query.record().indexOf(m_settingsFields[FreeText]);
-
-            if (query.next())
-            {
-                settings.setKontakt(query.value(idKontakt).toString());
-                settings.setAnschrift(query.value(idAnschrift).toString());
-                settings.setKonto(query.value(idKonto).toString());
-                settings.setUst(query.value(idUst).toString());
-                settings.setThx(query.value(idThx).toString());
-                settings.setFreeText(query.value(idFreeText).toString());
-            }
-            else
-            {
-                qDebug() << DEBUG_TAG << ": No settings found!";
-                return false;
-            }
-        }
-    }
-    else
-    {
-        qDebug() << "Database is not open!";
-        return false;
-    }
-
-    return true;
 }
 
 bool DBManager::readArticle(QString articleID, Articles &article)
@@ -825,8 +835,8 @@ QString DBManager::getDbIdent(QString table)
         ident = m_customerFields[KdNr];
     else if (table == ARTIKEL)
         ident = m_articleFields[ArtNr];
-    else if (table == RECHNUNG)
-        ident = m_calculationFields[0];
+    else if (table == RECHNUNGEN)
+        ident = m_invoiceFields[0];
     else if (table == POSITIONEN)
         ident = m_positionFields[PosNr];
 

@@ -29,14 +29,16 @@ SOURCES += \
     dbmanager.cpp \
     customers.cpp \
     articles.cpp \
-    settings.cpp
+    settings.cpp \
+    invoices.cpp
 
 HEADERS += \
         mainwindow.h \
     dbmanager.h \
     customers.h \
     articles.h \
-    settings.h
+    settings.h \
+    invoices.h
 
 FORMS += \
         mainwindow.ui

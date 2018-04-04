@@ -10,12 +10,13 @@
 #include "customers.h"
 #include "articles.h"
 #include "settings.h"
+#include "invoices.h"
 
 #define DEBUG_TAG "DBManager"
 
 #define ARTIKEL     "Artikel"
 #define KUNDEN      "Kunden"
-#define RECHNUNG    "Rechnungen"
+#define RECHNUNGEN    "Rechnungen"
 #define POSITIONEN  "Positionen"
 #define SETTINGS    "Settings"
 
@@ -44,7 +45,7 @@ public:
     bool editArticle(QString id, const Articles &article);
     QMap<int, QString> getCustomerFields() const;
     QMap<int, QString> getArticleFields() const;
-    QMap<int, QString> getCalculationFields() const;
+    QMap<int, QString> getInvoiceFields() const;
     QMap<int, QString> getPositionFields() const;
     QMap<int, QString> getSettingsFields() const;
     bool readSettings(Settings &settings);
@@ -53,11 +54,12 @@ public:
 
     bool readSetting(QString typ, QString &data);
     bool editSetting(QString typ, QString data);
+    bool readInvoices(std::vector<Invoices> &invoices);
 private:
     QSqlDatabase m_db;
     QMap<int, QString> m_customerFields;
     QMap<int, QString> m_articleFields;
-    QMap<int, QString> m_calculationFields;
+    QMap<int, QString> m_invoiceFields;
     QMap<int, QString> m_positionFields;
     QMap<int, QString> m_settingsFields;
     QString getDbIdent(QString table);
