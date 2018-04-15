@@ -122,6 +122,81 @@ bool DBManager::isOpen() const
 //    }
 //}
 
+bool DBManager::addInvoice(const Invoices& invoice)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd;
+    queryAdd.prepare("INSERT INTO Rechnungen (\"" + m_invoiceFields[Invoice_KdNr] + "\", "
+                                             "\"" + m_invoiceFields[Invoice_RgDate] + "\", "
+                                             "\"" + m_invoiceFields[Invoice_Amount] + "\", "
+                                             "\"" + m_invoiceFields[Invoice_USt] + "\", "
+                                             "\"" + m_invoiceFields[Invoice_Skonto] + "\", "
+                                             "\"" + m_invoiceFields[Invoice_Currency] + "\") "
+                             "VALUES (:kdnr, "
+                                     ":rgdate, "
+                                     ":amount, "
+                                     ":ust, "
+                                     ":skonto, "
+                                     ":currency)");
+
+    queryAdd.bindValue(":kdnr", invoice.kdnr());
+    queryAdd.bindValue(":rgdate", invoice.rgdate());
+    queryAdd.bindValue(":amount", invoice.amount());
+    queryAdd.bindValue(":ust", invoice.ust());
+    queryAdd.bindValue(":skonto", invoice.skonto());
+    queryAdd.bindValue(":currency", invoice.currency());
+
+    if(queryAdd.exec())
+    {
+        success = true;
+        qDebug() << DEBUG_TAG << ": Invoice added to database!";
+
+    }
+    else
+    {
+        qDebug() << DEBUG_TAG << ": Add invoice to database failed - " << queryAdd.lastError();
+    }
+
+    return success;
+}
+
+bool DBManager::addPosition(const Positions& position)
+{
+    bool success = false;
+
+    QSqlQuery queryAdd;
+    queryAdd.prepare("INSERT INTO Positionen (\"" + m_positionFields[Position_Pos] + "\", "
+                                             "\"" + m_positionFields[Position_RgNr] + "\", "
+                                             "\"" + m_positionFields[Position_ArNr] + "\", "
+                                             "\"" + m_positionFields[Position_Menge] + "\", "
+                                             "\"" + m_positionFields[Position_Gesamt] + "\") "
+                             "VALUES (:pos, "
+                                     ":rgnr, "
+                                     ":artnr, "
+                                     ":menge, "
+                                     ":gesamt)");
+
+    queryAdd.bindValue(":pos", position.getPos());
+    queryAdd.bindValue(":rgnr", position.getRgnr());
+    queryAdd.bindValue(":artnr", position.getArtnr());
+    queryAdd.bindValue(":menge", position.getMenge());
+    queryAdd.bindValue(":gesamt", position.getTotal());
+
+    if(queryAdd.exec())
+    {
+        success = true;
+        qDebug() << DEBUG_TAG << ": Position added to database!";
+
+    }
+    else
+    {
+        qDebug() << DEBUG_TAG << ": Add position to database failed - " << queryAdd.lastError();
+    }
+
+    return success;
+}
+
 bool DBManager::addArticle(const Articles& article)
 {
     bool success = false;
@@ -234,9 +309,7 @@ bool DBManager::readInvoices(std::vector<Invoices> &invoices)
             int idRgNr = query.record().indexOf(m_invoiceFields[Invoice_RgNr]);
             int idKdNr = query.record().indexOf(m_invoiceFields[Invoice_KdNr]);
             int idRgDate= query.record().indexOf(m_invoiceFields[Invoice_RgDate]);
-            int idSubDate = query.record().indexOf(m_invoiceFields[Invoice_SubDate]);
             int idAmount = query.record().indexOf(m_invoiceFields[Invoice_Amount]);
-            int idDescription = query.record().indexOf(m_invoiceFields[Invoice_Description]);
             int idUst = query.record().indexOf(m_invoiceFields[Invoice_USt]);
             int idSkonto = query.record().indexOf(m_invoiceFields[Invoice_Skonto]);
             int idCurrency = query.record().indexOf(m_invoiceFields[Invoice_Currency]);
@@ -247,9 +320,7 @@ bool DBManager::readInvoices(std::vector<Invoices> &invoices)
                 invoice.setRgnr(query.value(idRgNr).toInt());
                 invoice.setKdnr(query.value(idKdNr).toInt());
                 invoice.setRgdate(query.value(idRgDate).toString());
-                invoice.setSubdate(query.value(idSubDate).toString());
                 invoice.setAmount(query.value(idAmount).toDouble());
-                invoice.setDescription(query.value(idDescription).toString());
                 invoice.setUst(query.value(idUst).toDouble());
                 invoice.setSkonto(query.value(idSkonto).toDouble());
                 invoice.setCurrency(query.value(idCurrency).toString());
@@ -266,29 +337,6 @@ bool DBManager::readInvoices(std::vector<Invoices> &invoices)
     }
 
     return true;
-}
-
-bool DBManager::addBill(QString datum, double betrag)
-{
-    bool success = false;
-
-    QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Rechnungen (Datum, Betrag) VALUES (:datum, :betrag)");
-    queryAdd.bindValue(":Datum", datum);
-    queryAdd.bindValue(":Betrag", betrag);
-
-    if(queryAdd.exec())
-    {
-        success = true;
-        qDebug() << DEBUG_TAG << ": Bill added to database!";
-
-    }
-    else
-    {
-        qDebug() << DEBUG_TAG << ": Add bill to database failed - " << queryAdd.lastError();
-    }
-
-    return success;
 }
 
 bool DBManager::removeDBList(QString table)
@@ -806,6 +854,57 @@ bool DBManager::readCustomers(std::vector<Customers> &customers) const
         customers.push_back(customer);
     }
     qDebug() << DEBUG_TAG << ": Read all customers successfull!";
+
+    return true;
+}
+
+bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) const
+{
+    QSqlQuery query;
+    QString test = "SELECT * FROM Positionen, Artikel WHERE RgNr = '"+rgnr+"' AND Positionen.'Art-Nr.' = Artikel.'Art-Nr.'";
+    query.prepare("SELECT * FROM Positionen, Artikel "
+                  "WHERE RgNr = '"+rgnr+"' AND Positionen.'Art-Nr.' = Artikel.'Art-Nr.'");
+
+    if(!query.exec())
+    {
+        qDebug() << DEBUG_TAG << ": " << query.lastError();
+        return false;
+    }
+
+    int idPos = query.record().indexOf(m_positionFields[Position_Pos]);
+    int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
+    int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
+    int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
+    int idUnit = query.record().indexOf(m_articleFields[Einheit]);
+    int idPrice = query.record().indexOf(m_articleFields[Preis]);
+    int idTotal = query.record().indexOf(m_positionFields[Position_Gesamt]);
+    int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
+
+    while (query.next())
+    {
+        Positions position;
+        Articles article;
+
+        position.setPos(query.value(idPos).toInt());
+        position.setArtnr(query.value(idArtNr).toInt());
+        position.setMenge(query.value(idCount).toInt());
+        position.setTotal(query.value(idTotal).toDouble());
+
+        article.setName(query.value(idName).toString());
+        article.setUnit(query.value(idUnit).toString());
+        article.setPrice(query.value(idPrice).toDouble());
+        article.setDescription(query.value(idDescription).toString());
+
+        //position.getArticle().setName(query.value(idName).toString());
+        //position.getArticle().setUnit(query.value(idUnit).toString());
+        //position.getArticle().setPrice(query.value(idPrice).toDouble());
+        //position.getArticle().setDescription(query.value(idDescription).toString());
+
+        position.setArticle(article);
+
+        positions.push_back(position);
+    }
+    qDebug() << DEBUG_TAG << ": Read all positions successfull!";
 
     return true;
 }

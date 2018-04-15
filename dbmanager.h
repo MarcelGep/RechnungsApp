@@ -11,6 +11,7 @@
 #include "articles.h"
 #include "settings.h"
 #include "invoices.h"
+#include "positions.h"
 
 #define DEBUG_TAG "DBManager"
 
@@ -55,6 +56,9 @@ public:
     bool readSetting(QString typ, QString &data);
     bool editSetting(QString typ, QString data);
     bool readInvoices(std::vector<Invoices> &invoices);
+    bool addPosition(const Positions &position);
+    bool addInvoice(const Invoices &invoice);
+    bool readPositions(std::vector<Positions> &positions, QString rgnr) const;
 private:
     QSqlDatabase m_db;
     QMap<int, QString> m_customerFields;

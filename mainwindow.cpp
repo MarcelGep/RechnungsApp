@@ -29,10 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Read settings from DB
     //m_dbManager->readSettings(m_settings);
 
-    // Set active tabs
-    ui->tabMain->setCurrentIndex(CalculationsTab);
-    ui->tabWidKunden->setCurrentIndex(OverviewTab);
-
     // Setup customer list
     ui->twCustomers->setColumnCount(m_dbManager->getCustomerFields().size() - 1);
     for ( int i = 0; i < m_dbManager->getCustomerFields().size(); i++)
@@ -66,11 +62,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->twRgList->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
 
     // Setup article positions
-    ui->twRgArticles->setColumnCount(m_dbManager->getPositionFields().size());
-    for ( int i = 0; i < m_dbManager->getPositionFields().size(); i++)
-    {
-        ui->twRgArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getPositionFields()[i]));
-    }
+    ui->twRgArticles->setColumnCount(ArtPosColumnsCount);
+
+    ui->twRgArticles->setHorizontalHeaderItem(0, new QTableWidgetItem("Pos."));
+    ui->twRgArticles->setHorizontalHeaderItem(1, new QTableWidgetItem("Art-Nr."));
+    ui->twRgArticles->setHorizontalHeaderItem(2, new QTableWidgetItem("Beschreibung"));
+    ui->twRgArticles->setHorizontalHeaderItem(3, new QTableWidgetItem("Menge"));
+    ui->twRgArticles->setHorizontalHeaderItem(4, new QTableWidgetItem("Einheit"));
+    ui->twRgArticles->setHorizontalHeaderItem(5, new QTableWidgetItem("E-Preis"));
+    ui->twRgArticles->setHorizontalHeaderItem(6, new QTableWidgetItem("Gesamt"));
+
     QFont fontArticlesPos("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
     ui->twRgArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -86,6 +87,10 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->lwSetPdfPhrases->addItem(item);
 
     }
+
+    // Set active tabs
+    ui->tabWidgetMain->setCurrentIndex(CalculationsTab);
+    ui->tabWidKunden->setCurrentIndex(OverviewTab);
 }
 
 MainWindow::~MainWindow()
@@ -348,13 +353,14 @@ void MainWindow::printAllInvoices()
        ui->twRgList->setItem(row, Invoice_RgNr, new QTableWidgetItem(QString::number(it->rgnr())));
        ui->twRgList->setItem(row, Invoice_KdNr, new QTableWidgetItem(QString::number(it->kdnr())));
        ui->twRgList->setItem(row, Invoice_RgDate, new QTableWidgetItem(it->rgdate()));
-       ui->twRgList->setItem(row, Invoice_SubDate, new QTableWidgetItem(it->subdate()));
-       ui->twRgList->setItem(row, Invoice_Amount, new QTableWidgetItem(QString::number(it->amount())));
-       ui->twRgList->setItem(row, Invoice_Description, new QTableWidgetItem(it->description()));
-       ui->twRgList->setItem(row, Invoice_USt, new QTableWidgetItem(QString::number(it->ust())));
-       ui->twRgList->setItem(row, Invoice_Skonto, new QTableWidgetItem(QString::number(it->skonto())));
+       ui->twRgList->setItem(row, Invoice_Amount, new QTableWidgetItem(QString::number(it->amount(), 'f', 2) + " €"));
+       ui->twRgList->item(row, Invoice_Amount)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twRgList->setItem(row, Invoice_USt, new QTableWidgetItem(QString::number(it->ust(), 'f', 1) + " %"));
+       ui->twRgList->item(row, Invoice_USt)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twRgList->setItem(row, Invoice_Skonto, new QTableWidgetItem(QString::number(it->skonto(), 'f', 1) + " %"));
+       ui->twRgList->item(row, Invoice_Skonto)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
        ui->twRgList->setItem(row, Invoice_Currency, new QTableWidgetItem(it->currency()));
-       //ui->twRgList->item(row, Kontostand)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twRgList->item(row, Invoice_Currency)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
 
     // Set customer table column width offset
@@ -504,8 +510,7 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
     }
 }
 
-
-void MainWindow::on_tabMain_currentChanged(int index)
+void MainWindow::on_tabWidgetMain_currentChanged(int index)
 {
     switch(index)
     {
@@ -550,7 +555,7 @@ void MainWindow::on_tabMain_currentChanged(int index)
 
             // Fill invoice number
             int lastRgNr = m_dbManager->readLastID(RECHNUNGEN);
-            ui->leRgNr->setText(QString::number(lastRgNr));
+            ui->leRgNr->setText(QString::number(lastRgNr + 1));
 
             // Fill subject line
             ui->leRgSubject->setText("Rechnung");
@@ -580,9 +585,6 @@ void MainWindow::on_tabMain_currentChanged(int index)
             }
 
             clearBillEdits();
-
-            // Read invoices
-            printAllInvoices();
         }
         break;
 
@@ -836,9 +838,9 @@ void MainWindow::on_btnRgAddArticle_clicked()
     ui->twRgArticles->setItem(row, AnzahlPos, new QTableWidgetItem(count));
     ui->twRgArticles->setItem(row, EinheitPos, new QTableWidgetItem(unit));
     ui->twRgArticles->setItem(row, EinzelPreisPos, new QTableWidgetItem(sPrice));
-    ui->twRgArticles->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    //ui->twRgArticles->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     ui->twRgArticles->setItem(row, SummePos, new QTableWidgetItem(tPrice));
-    ui->twRgArticles->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    //ui->twRgArticles->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
     // Set customer table column width offset
     setArticlePosColumnsWidth();
@@ -855,9 +857,11 @@ void MainWindow::on_btnRgAddArticle_clicked()
 void MainWindow::updateTotalPrice()
 {
     double summe = 0;
-    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    int rowCount = ui->twRgArticles->rowCount();
+    for (int i = 0; i < rowCount; i++)
     {
-        summe += ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble();
+        double sum = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble();
+        summe += sum;
     }
     ui->sbRgSumme->setValue(summe);
 }
@@ -975,7 +979,8 @@ void MainWindow::on_btnCustomerBill_clicked()
 {
     int curRow = ui->twCustomers->currentRow();
     int kdNr =  ui->twCustomers->item(curRow, KdNr)->text().toInt();
-    ui->tabMain->setCurrentIndex(CalculationsTab);
+    ui->tabWidgetMain->setCurrentIndex(CalculationsTab);
+    ui->tabWidgetInvoice->setCurrentIndex(0);
 
     for (int i = 0; i < ui->cbRgCustomer->count(); i++)
     {
@@ -1051,6 +1056,33 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgCreate_clicked()
 {
+    // Add positions to DB
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        int pos = ui->twRgArticles->item(i, PosNr)->text().toInt();
+        int rgnr = ui->leRgNr->text().toInt();
+        int artnr = ui->twRgArticles->item(i, ArtNrPos)->text().toInt();
+        int menge = ui->twRgArticles->item(i, AnzahlPos)->text().toInt();
+        double total = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble();
+
+        Positions position(pos, rgnr, artnr, menge, total);
+
+        m_dbManager->addPosition(position);
+    }
+
+    // Add invoice to DB
+    int kdnr = ui->cbRgCustomer->currentText().split(" ").value(0).toInt();
+    QString rgdate = ui->deRgDate->text();
+    double amount = ui->sbRgSumme->value();
+    int ust = ui->sbRgUst->value();
+    int skonto = ui->sbRgSkonto->value();
+    QString currency = ui->leRgCurrency->text();
+
+    Invoices invoice(0, kdnr, rgdate, amount, ust, skonto, currency);
+
+    m_dbManager->addInvoice(invoice);
+
+    // Create the invoice to PDF
     createInvoice();
 }
 
@@ -1267,7 +1299,8 @@ void MainWindow::createInvoice()
     /* Data */
     QStringList slPosNr;
     QStringList slArtNr;
-    QStringList slDescription;
+    QStringList slLabel;
+    //QStringList slDescription;
     QStringList slCount;
     QStringList slUnit;
     QStringList slPrice;
@@ -1286,7 +1319,8 @@ void MainWindow::createInvoice()
     {
         slPosNr.append(ui->twRgArticles->item(i, PosNr)->text());
         slArtNr.append(ui->twRgArticles->item(i, ArtNrPos)->text());
-        slDescription.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
+        slLabel.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
+        //slDescription.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
         slCount.append(QString::number(ui->twRgArticles->item(i, AnzahlPos)->text().toDouble(), 'f', 2).replace(".", ","));
         slUnit.append(ui->twRgArticles->item(i, EinheitPos)->text());
         slPrice.append(QLocale().toCurrencyString(ui->twRgArticles->item(i, EinzelPreisPos)->text().split(" ").value(0).toDouble()));
@@ -1295,7 +1329,8 @@ void MainWindow::createInvoice()
 
     QString posNrStr = slPosNr.join("\n\n");
     QString artNrStr = slArtNr.join("\n\n");
-    QString descriptionStr = slDescription.join("\n\n");
+    QString labelStr = slLabel.join("\n\n");
+    //QString descriptionStr = slDescription.join("\n\n");
     QString countStr = slCount.join("\n\n");
     QString unitStr = slUnit.join("\n\n");
     QString priceStr = slPrice.join("\n\n");
@@ -1342,7 +1377,7 @@ void MainWindow::createInvoice()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectDescription);
     #endif
-    m_painter->drawText(rectDescription, Qt::AlignLeft | Qt::TextWordWrap, descriptionStr);
+    m_painter->drawText(rectDescription, Qt::AlignLeft | Qt::TextWordWrap, labelStr);
 
     x += rectDescription.width() + tabWidth;
 
@@ -1504,4 +1539,37 @@ void MainWindow::on_teSetContent_selectionChanged()
 void MainWindow::on_deRgDate_dateChanged(const QDate &date)
 {
     m_settings.setDate(date);
+}
+
+void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
+{
+    QString rgnr = ui->twRgList->item(item->row(), 0)->text();
+
+    m_positions.clear();
+
+    // read invoice positions from database
+    if (!m_dbManager->readPositions(m_positions, rgnr))
+    {
+       qDebug() << DEBUG_TAG_MAIN << ": Error read invoice positions!";
+       return;
+    }
+
+    WindowPositions wp(this, m_positions);
+    wp.setWindowTitle("Detailansicht der Rechnung " + rgnr);
+    if(wp.exec() == QDialog::Rejected)
+        return;
+}
+
+void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
+{
+    switch(index)
+    {
+        case CreateInvoiceTab:
+            break;
+
+        case InvoicesTab:
+            // Read invoices
+            printAllInvoices();
+            break;
+    }
 }

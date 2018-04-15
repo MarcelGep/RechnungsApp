@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QPdfWriter>
 #include <QListWidgetItem>
+#include <windowPositions.h>
 
 #include "dbmanager.h"
 
@@ -16,12 +17,13 @@
 
 #define DEBUG_TAG_MAIN "MainWindow"
 
-#define INVOICE_COLUMN_OFFSET   25
-#define INVOICE_ROW_HEIGHT      25
-#define CUSTOMER_COLUMN_OFFSET  25
-#define CUSTOMER_ROW_HEIGHT     25
-#define ARTICLE_ROW_HEIGHT      25
-#define ARTICLEPOS_ROW_HEIGHT   25
+#define INVOICE_COLUMN_OFFSET    25
+#define CUSTOMER_COLUMN_OFFSET   25
+#define INVOICE_POSITIONS_OFFSET 25
+#define INVOICE_ROW_HEIGHT       25
+#define CUSTOMER_ROW_HEIGHT      25
+#define ARTICLE_ROW_HEIGHT       25
+#define ARTICLEPOS_ROW_HEIGHT    25
 
 #define DEFAULT_FONT_SIZE       160
 #define SUBJECT_FONT_SIZE       220
@@ -98,20 +100,34 @@ enum MainTab
     SettingsTab
 };
 
+enum InvoiceTabs
+{
+    CreateInvoiceTab,
+    InvoicesTab
+};
+
 enum InvoiceColumns
 {
     Invoice_RgNr,
     Invoice_KdNr,
     Invoice_RgDate,
-    Invoice_SubDate,
     Invoice_Amount,
-    Invoice_Description,
-    Invoice_Positions,
     Invoice_USt,
     Invoice_Skonto,
     Invoice_Currency,
 
     InvoiceColumsCount
+};
+
+enum PositionColumns
+{
+    Position_Pos,
+    Position_ArNr,
+    Position_RgNr,
+    Position_Menge,
+    Position_Gesamt,
+
+    PositionColumns_Count
 };
 
 namespace Ui {
@@ -134,6 +150,7 @@ public:
     void createInvoice();
 
     void printAllInvoices();
+
 private slots:
     void on_btnSaveCustomer_clicked();
     void on_btnDeleteCustomer_clicked();
@@ -141,7 +158,6 @@ private slots:
     void on_btnEditCustomer_clicked();
     void on_tabWidKunden_tabBarClicked(int index);
     void on_btnCancelCustomer_clicked();
-    void on_tabMain_currentChanged(int index);
     void on_btnRgRechnung_clicked();
     void on_btnRgAngebot_clicked();
     void on_btnRgGutschrift_clicked();
@@ -174,8 +190,11 @@ private slots:
     void on_btnSetSave_clicked();
     void on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item);
     void on_teSetContent_selectionChanged();
-
     void on_deRgDate_dateChanged(const QDate &date);
+    void on_twRgList_itemClicked(QTableWidgetItem *item);
+    void on_tabWidgetMain_currentChanged(int index);
+
+    void on_tabWidgetInvoice_currentChanged(int index);
 
 private:
     void setCustomerColumnsWidth() const;
@@ -198,11 +217,15 @@ private:
     std::vector<Customers> m_customers;
     std::vector<Articles> m_articles;
     std::vector<Invoices> m_invoices;
+    std::vector<Positions> m_positions;
 
     void readSettingsEdit();
     QString getSettings(SettingsColumns typ);
     void clearInvoices();
     void setInvoicesColumnsWidth() const;
+    void clearPositions();
+    void printPositions(QString rgnr);
+    void setPositionsColumnsWidth() const;
 };
 
 #endif // MAINWINDOW_H

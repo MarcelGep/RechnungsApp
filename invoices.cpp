@@ -6,8 +6,6 @@ Invoices::Invoices()
     m_kdnr = 0;
     m_amount = 0;
     m_rgdate = "";
-    m_subdate = "";
-    m_description = "";
     m_ust = 0;
     m_skonto = 0;
     m_currency = "";
@@ -16,9 +14,7 @@ Invoices::Invoices()
 Invoices::Invoices(int rgnr,
                    int kdnr,
                    QString rgdate,
-                   QString subdate,
-                   double amount,
-                   QString description,
+                   double summe,
                    double ust,
                    double skonto,
                    QString currency)
@@ -26,9 +22,7 @@ Invoices::Invoices(int rgnr,
     m_rgnr = rgnr;
     m_kdnr = kdnr;
     m_rgdate = rgdate;
-    m_subdate = subdate;
-    m_amount = amount;
-    m_description = description;
+    m_amount = summe;
     m_ust = ust;
     m_skonto = skonto;
     m_currency = currency;
@@ -69,16 +63,6 @@ void Invoices::setRgdate(const QString &rgdate)
     m_rgdate = rgdate;
 }
 
-QString Invoices::subdate() const
-{
-    return m_subdate;
-}
-
-void Invoices::setSubdate(const QString &subdate)
-{
-    m_subdate = subdate;
-}
-
 double Invoices::amount() const
 {
     return m_amount;
@@ -89,32 +73,22 @@ void Invoices::setAmount(double amount)
     m_amount = amount;
 }
 
-QString Invoices::description() const
-{
-    return m_description;
-}
-
-void Invoices::setDescription(const QString &description)
-{
-    m_description = description;
-}
-
-double Invoices::ust() const
+int Invoices::ust() const
 {
     return m_ust;
 }
 
-void Invoices::setUst(double ust)
+void Invoices::setUst(int ust)
 {
     m_ust = ust;
 }
 
-double Invoices::skonto() const
+int Invoices::skonto() const
 {
     return m_skonto;
 }
 
-void Invoices::setSkonto(double skonto)
+void Invoices::setSkonto(int skonto)
 {
     m_skonto = skonto;
 }

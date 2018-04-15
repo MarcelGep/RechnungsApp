@@ -12,9 +12,7 @@ class Invoices
         Invoices(int rgnr,
                  int kdnr,
                  QString rgdate,
-                 QString subdate,
-                 double amount,
-                 QString description,
+                 double summe,
                  double ust,
                  double skonto,
                  QString currency);
@@ -30,20 +28,14 @@ class Invoices
         QString rgdate() const;
         void setRgdate(const QString &rgdate);
 
-        QString subdate() const;
-        void setSubdate(const QString &subdate);
-
         double amount() const;
         void setAmount(double amount);
 
-        QString description() const;
-        void setDescription(const QString &description);
+        int ust() const;
+        void setUst(int ust);
 
-        double ust() const;
-        void setUst(double ust);
-
-        double skonto() const;
-        void setSkonto(double skonto);
+        int skonto() const;
+        void setSkonto(int skonto);
 
         QString currency() const;
         void setCurrency(const QString &currency);
@@ -52,11 +44,9 @@ private:
         int m_rgnr;
         int m_kdnr;
         QString m_rgdate;
-        QString m_subdate;
         double m_amount;
-        QString m_description;
-        double m_ust;
-        double m_skonto;
+        int m_ust;
+        int m_skonto;
         QString m_currency;
 
 };
