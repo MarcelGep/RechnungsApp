@@ -1645,3 +1645,8 @@ void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem *item)
 {
     on_btnEditCustomer_clicked();
 }
+
+void MainWindow::on_actionProgramm_beenden_triggered()
+{
+    qApp->quit();
+}

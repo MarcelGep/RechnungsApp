@@ -201,6 +201,8 @@ private slots:
 
     void on_twCustomers_itemDoubleClicked(QTableWidgetItem *item);
 
+    void on_actionProgramm_beenden_triggered();
+
 private:
     void setCustomerColumnsWidth() const;
     void clearCustomers();
