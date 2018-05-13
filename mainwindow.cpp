@@ -585,6 +585,11 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
             }
 
             clearBillEdits();
+
+            if (ui->tabWidgetInvoice->currentIndex() == 1)
+            {
+                printAllInvoices();
+            }
         }
         break;
 
@@ -1084,6 +1089,19 @@ void MainWindow::on_btnRgCreate_clicked()
 
     // Create the invoice to PDF
     createInvoice();
+
+    // Clean article positions table
+    int rowCount = ui->twRgArticles->rowCount();
+    for (int i = 0; i < rowCount; i++)
+    {
+        ui->twRgArticles->removeRow(0);
+    }
+
+    updateTotalPrice();
+    ui->btnRgDeteleAllArticle->setEnabled(false);
+    ui->btnRgCreate->setEnabled(false);
+    m_posNr = 0;
+    QMessageBox::information(this, "Info", "Rechnung wurde erstellt!", QMessageBox::Ok);
 }
 
 void MainWindow::fillSettingsEdit()
@@ -1541,8 +1559,26 @@ void MainWindow::on_deRgDate_dateChanged(const QDate &date)
     m_settings.setDate(date);
 }
 
-void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
+void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
 {
+    switch(index)
+    {
+        case CreateInvoiceTab:
+            break;
+
+        case InvoicesTab:
+            // Read invoices
+            printAllInvoices();
+
+            ui->btnRgDetails->setEnabled(false);
+            ui->btnRgDelete->setEnabled(false);
+            break;
+    }
+}
+
+void MainWindow::on_btnRgDetails_clicked()
+{
+    QTableWidgetItem* item = ui->twRgList->selectedItems().value(0);
     QString rgnr = ui->twRgList->item(item->row(), 0)->text();
 
     m_positions.clear();
@@ -1560,16 +1596,52 @@ void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
         return;
 }
 
-void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
+void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
 {
-    switch(index)
+    if (item != NULL)
     {
-        case CreateInvoiceTab:
-            break;
-
-        case InvoicesTab:
-            // Read invoices
-            printAllInvoices();
-            break;
+        ui->btnRgDetails->setEnabled(true);
+        ui->btnRgDelete->setEnabled(true);
     }
+    else
+    {
+        ui->btnRgDetails->setEnabled(false);
+        ui->btnRgDelete->setEnabled(false);
+    }
+}
+
+void MainWindow::on_btnRgDelete_clicked()
+{
+    QMessageBox msg;
+    msg.setWindowIcon(QPixmap("logo.png"));
+    msg.setText("Möchten Sie die Rechnung wirklich löschen?");
+    msg.setWindowTitle("Warnung");
+    msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msg.setButtonText(QMessageBox::Yes, "Ja");
+    msg.setButtonText(QMessageBox::No, "Nein");
+    msg.setDefaultButton(QMessageBox::No);
+    msg.setIcon(QMessageBox::Question);
+
+    if(msg.exec() == QMessageBox::Yes)
+    {
+        QTableWidgetItem* item = ui->twRgList->selectedItems().value(0);
+        QString rgnr = ui->twRgList->item(item->row(), 0)->text();
+
+        m_dbManager->removeDbEntry(RECHNUNGEN, rgnr);
+        m_dbManager->removeDbEntries(POSITIONEN, m_dbManager->getInvoiceFields()[Invoice_RgNr], rgnr);
+
+        printAllInvoices();
+
+        QMessageBox::information(this, "Info", "Die Rechnung wurde gelöscht!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem *item)
+{
+    on_btnRgDetails_clicked();
+}
+
+void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem *item)
+{
+    on_btnEditCustomer_clicked();
 }

@@ -191,10 +191,15 @@ private slots:
     void on_lwSetPdfPhrases_itemClicked(QListWidgetItem *item);
     void on_teSetContent_selectionChanged();
     void on_deRgDate_dateChanged(const QDate &date);
-    void on_twRgList_itemClicked(QTableWidgetItem *item);
     void on_tabWidgetMain_currentChanged(int index);
-
     void on_tabWidgetInvoice_currentChanged(int index);
+    void on_btnRgDetails_clicked();
+    void on_twRgList_itemClicked(QTableWidgetItem *item);
+    void on_btnRgDelete_clicked();
+
+    void on_twRgList_itemDoubleClicked(QTableWidgetItem *item);
+
+    void on_twCustomers_itemDoubleClicked(QTableWidgetItem *item);
 
 private:
     void setCustomerColumnsWidth() const;

@@ -5,4 +5,20 @@
         <file>logo/tpt_logo_header.png</file>
         <file>logo/tpt_logo_header.svg</file>
     </qresource>
+    <qresource prefix="/Icons">
+        <file>icons/customer_add.png</file>
+        <file>icons/customer_delete.png</file>
+        <file>icons/customer_edit.png</file>
+        <file>icons/customer_saved.png</file>
+        <file>icons/customer_search.png</file>
+        <file>icons/customers.png</file>
+        <file>icons/invoice_new.png</file>
+        <file>icons/cancel.png</file>
+        <file>icons/save.png</file>
+        <file>icons/articles_delete.png</file>
+        <file>icons/articles_deleteall.png</file>
+        <file>icons/article_new.png</file>
+        <file>icons/details.png</file>
+        <file>icons/invoice_delete.png</file>
+    </qresource>
 </RCC>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>RechnungsApp</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
@@ -45,16 +45,11 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
       </property>
-      <widget class="QWidget" name="tabEvidence">
-       <attribute name="title">
-        <string>Belege</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabCustomers">
        <attribute name="title">
         <string>Kunden</string>
@@ -81,7 +76,32 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Anlegen</string>
+              <string> Anlegen</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/customer_add.png</normaloff>:/Icons/icons/customer_add.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <property name="autoDefault">
+              <bool>false</bool>
+             </property>
+             <property name="default">
+              <bool>false</bool>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -97,7 +117,17 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Löschen</string>
+              <string> Löschen</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/customer_delete.png</normaloff>:/Icons/icons/customer_delete.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -113,7 +143,17 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Ändern</string>
+              <string> Ändern</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/customer_edit.png</normaloff>:/Icons/icons/customer_edit.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
              </property>
             </widget>
            </item>
@@ -161,7 +201,11 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Rechnung schreiben</string>
+              <string> Rechnung schreiben</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/invoice_new.png</normaloff>:/Icons/icons/invoice_new.png</iconset>
              </property>
             </widget>
            </item>
@@ -184,7 +228,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidKunden">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabCustomersView">
            <property name="sizePolicy">
@@ -737,7 +781,11 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Speichern</string>
+                  <string> Speichern</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/Icons/icons/save.png</normaloff>:/Icons/icons/save.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -750,7 +798,11 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>Abbrechen</string>
+                  <string> Abbrechen</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/Icons/icons/cancel.png</normaloff>:/Icons/icons/cancel.png</iconset>
                  </property>
                 </widget>
                </item>
@@ -1234,14 +1286,22 @@
              <item row="5" column="1">
               <widget class="QPushButton" name="btnArtSave">
                <property name="text">
-                <string>Speichern</string>
+                <string> Speichern</string>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/Icons/icons/save.png</normaloff>:/Icons/icons/save.png</iconset>
                </property>
               </widget>
              </item>
              <item row="5" column="2">
               <widget class="QPushButton" name="btnArtCancel">
                <property name="text">
-                <string>Abbrechen</string>
+                <string> Abbrechen</string>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/Icons/icons/cancel.png</normaloff>:/Icons/icons/cancel.png</iconset>
                </property>
               </widget>
              </item>
@@ -1274,21 +1334,33 @@
            <item>
             <widget class="QPushButton" name="btnArtDelAll">
              <property name="text">
-              <string>Alle Artikel löschen</string>
+              <string> Alle Artikel löschen</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/articles_deleteall.png</normaloff>:/Icons/icons/articles_deleteall.png</iconset>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="btnArtDelete">
              <property name="text">
-              <string>Artikel löschen</string>
+              <string> Artikel löschen</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/articles_delete.png</normaloff>:/Icons/icons/articles_delete.png</iconset>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="btnArtNew">
              <property name="text">
-              <string>Neuen Artikel anlegen</string>
+              <string> Artikel anlegen</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/Icons/icons/article_new.png</normaloff>:/Icons/icons/article_new.png</iconset>
              </property>
             </widget>
            </item>
@@ -1318,7 +1390,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidgetInvoice">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabCreateInvoice">
            <attribute name="title">
@@ -2227,30 +2299,111 @@
            <attribute name="title">
             <string>Erstellte Rechnungen</string>
            </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <layout class="QVBoxLayout" name="verticalLayout_13">
             <item>
-             <widget class="QTableWidget" name="twRgList">
-              <property name="focusPolicy">
-               <enum>Qt::ClickFocus</enum>
+             <widget class="QGroupBox" name="Aktion_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
               </property>
-              <property name="editTriggers">
-               <set>QAbstractItemView::NoEditTriggers</set>
+              <property name="title">
+               <string>Aktion</string>
               </property>
-              <property name="alternatingRowColors">
-               <bool>false</bool>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <item>
+                  <widget class="QPushButton" name="btnRgDetails">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string> Details</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/Icons/icons/details.png</normaloff>:/Icons/icons/details.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnRgDelete">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="text">
+                    <string> Löschen</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/Icons/icons/invoice_delete.png</normaloff>:/Icons/icons/invoice_delete.png</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_17">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="title">
+               <string>Rechnungen</string>
               </property>
-              <property name="selectionMode">
-               <enum>QAbstractItemView::SingleSelection</enum>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectRows</enum>
-              </property>
-              <property name="cornerButtonEnabled">
-               <bool>false</bool>
-              </property>
-              <attribute name="verticalHeaderVisible">
-               <bool>false</bool>
-              </attribute>
+              <layout class="QHBoxLayout" name="horizontalLayout_11">
+               <item>
+                <widget class="QTableWidget" name="twRgList">
+                 <property name="focusPolicy">
+                  <enum>Qt::ClickFocus</enum>
+                 </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::NoEditTriggers</set>
+                 </property>
+                 <property name="alternatingRowColors">
+                  <bool>false</bool>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectRows</enum>
+                 </property>
+                 <property name="cornerButtonEnabled">
+                  <bool>false</bool>
+                 </property>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>
@@ -2315,7 +2468,11 @@
                       <bool>false</bool>
                      </property>
                      <property name="text">
-                      <string>Speichern</string>
+                      <string> Speichern</string>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="resources.qrc">
+                       <normaloff>:/Icons/icons/save.png</normaloff>:/Icons/icons/save.png</iconset>
                      </property>
                     </widget>
                    </item>
@@ -2325,7 +2482,11 @@
                       <bool>false</bool>
                      </property>
                      <property name="text">
-                      <string>Abbrechen</string>
+                      <string> Abbrechen</string>
+                     </property>
+                     <property name="icon">
+                      <iconset resource="resources.qrc">
+                       <normaloff>:/Icons/icons/cancel.png</normaloff>:/Icons/icons/cancel.png</iconset>
                      </property>
                     </widget>
                    </item>
@@ -2452,11 +2613,6 @@
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="tab_2">
-              <attribute name="title">
-               <string>Tab 2</string>
-              </attribute>
-             </widget>
             </widget>
            </item>
           </layout>
@@ -2503,7 +2659,7 @@
      <x>0</x>
      <y>0</y>
      <width>1362</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -2564,6 +2720,8 @@
   <tabstop>btnRgDeleteArticle</tabstop>
   <tabstop>btnRgCreate</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

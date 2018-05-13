@@ -17,7 +17,7 @@
 
 #define ARTIKEL     "Artikel"
 #define KUNDEN      "Kunden"
-#define RECHNUNGEN    "Rechnungen"
+#define RECHNUNGEN  "Rechnungen"
 #define POSITIONEN  "Positionen"
 #define SETTINGS    "Settings"
 
@@ -59,6 +59,8 @@ public:
     bool addPosition(const Positions &position);
     bool addInvoice(const Invoices &invoice);
     bool readPositions(std::vector<Positions> &positions, QString rgnr) const;
+    bool removeDbEntries(QString table, QString ident, QString id);
+
 private:
     QSqlDatabase m_db;
     QMap<int, QString> m_customerFields;

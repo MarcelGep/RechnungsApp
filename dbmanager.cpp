@@ -410,6 +410,28 @@ bool DBManager::removeDbEntry(QString table, QString id)
     return true;
 }
 
+bool DBManager::removeDbEntries(QString table, QString ident, QString id)
+{
+    if(!isOpen())
+    {
+        qDebug() << DEBUG_TAG << ": Database not open!";
+        return false;
+    }
+
+    QSqlQuery queryDelete;
+    queryDelete.prepare("DELETE FROM " + table + " WHERE \"" + ident + "\" = " + id);
+
+    if(!queryDelete.exec())
+    {
+        qDebug() << DEBUG_TAG << ": Remove database entry failed: " << queryDelete.lastError();
+        return false;
+    }
+    else
+        qDebug() << DEBUG_TAG << ": Remove database entry successfull!";
+
+    return true;
+}
+
 void DBManager::removeBill(int billID)
 {
     QString id = QString::number(billID);
@@ -935,7 +957,7 @@ QString DBManager::getDbIdent(QString table)
     else if (table == ARTIKEL)
         ident = m_articleFields[ArtNr];
     else if (table == RECHNUNGEN)
-        ident = m_invoiceFields[0];
+        ident = m_invoiceFields[Invoice_RgNr];
     else if (table == POSITIONEN)
         ident = m_positionFields[PosNr];
 
