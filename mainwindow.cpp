@@ -224,27 +224,33 @@ void MainWindow::on_btnNewCustomer_clicked()
 
     ui->tabWidKunden->setCurrentIndex(EditTab);
 
+    QPixmap pixmap = QPixmap(":/Icons/icons/customer_add.png");
+    ui->lb_logoAddEdit->setPixmap(pixmap);
+
     ui->twCustomers->clearSelection();
 }
 
 void MainWindow::on_btnEditCustomer_clicked()
 {
     if(ui->twCustomers->selectedItems().count() >  0)
-        {
-            ui->tabWidKunden->setCurrentIndex(EditTab);
-            ui->leKdNr->clear();
+    {
+        ui->tabWidKunden->setCurrentIndex(EditTab);
+        ui->leKdNr->clear();
 
-            QString kdnr = ui->twCustomers->item(ui->twCustomers->currentRow(), KdNr)->text();
-            Customers customer;
-            m_dbManager->readCustomer(kdnr, customer);
+        QString kdnr = ui->twCustomers->item(ui->twCustomers->currentRow(), KdNr)->text();
+        Customers customer;
+        m_dbManager->readCustomer(kdnr, customer);
 
-            printCustomer(customer);
-        }
-        else
-        {
-            qDebug() << "No customer selected!";
-            QMessageBox::warning(this, "Warnung", "Es wurde kein Kunde zum bearbeiten ausgewählt!", QMessageBox::Ok);
-        }
+        printCustomer(customer);
+
+        QPixmap pixmap = QPixmap(":/Icons/icons/customer_edit.png");
+        ui->lb_logoAddEdit->setPixmap(pixmap);
+    }
+    else
+    {
+        qDebug() << "No customer selected!";
+        QMessageBox::warning(this, "Warnung", "Es wurde kein Kunde zum bearbeiten ausgewählt!", QMessageBox::Ok);
+    }
 }
 
 void MainWindow::on_btnCancelCustomer_clicked()
@@ -499,11 +505,17 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
             m_dbManager->readCustomer(kdnr, customer);
 
             printCustomer(customer);
+
+            QPixmap pixmap = QPixmap(":/Icons/icons/customer_edit.png");
+            ui->lb_logoAddEdit->setPixmap(pixmap);
         }
         else
         {
             int lastID = m_dbManager->readLastID(KUNDEN);
             ui->leKdNr->setText(QString::number(lastID + 1));
+
+            QPixmap pixmap = QPixmap(":/Icons/icons/customer_add.png");
+            ui->lb_logoAddEdit->setPixmap(pixmap);
         }
     }
     else if(index == OverviewTab)
