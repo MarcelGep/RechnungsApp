@@ -683,7 +683,7 @@ bool DBManager::readSetting(QString typ, QString& data)
 
 bool DBManager::readSettings(Settings &settings)
 {
-
+    return false;
 }
 
 bool DBManager::readArticle(QString articleID, Articles &article)

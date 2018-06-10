@@ -88,8 +88,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     }
 
-    // Set active tabs
-    ui->tabWidgetMain->setCurrentIndex(CalculationsTab);
+    // Set CustomersTab as default tab
+    ui->tabWidgetMain->setCurrentIndex(CustomersTab);
+    printAllCustomers();
+
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
 }
 
@@ -514,9 +516,6 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
 {
     switch(index)
     {
-        case EvidenceTab:
-            break;
-
         case CustomersTab:
         {
             // Setup customer list

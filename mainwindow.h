@@ -12,8 +12,15 @@
 
 #include "dbmanager.h"
 
-#define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
-#define PATH_PDF "..\\RechnungsApp/invoice/output_file.pdf"
+#ifdef QT_DEBUG
+    #define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
+    #define PATH_PDF "..\\RechnungsApp/invoice/output_file.pdf"
+#endif
+
+#ifdef QT_NO_DEBUG
+    #define PATH_DATABASE "database/mainDatabase.db"
+    #define PATH_PDF "invoice/output_file.pdf"
+#endif
 
 #define DEBUG_TAG_MAIN "MainWindow"
 
@@ -93,7 +100,6 @@ enum CustomerTab
 
 enum MainTab
 {
-    EvidenceTab,
     CustomersTab,
     ArticlesTab,
     CalculationsTab,
