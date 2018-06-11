@@ -465,16 +465,6 @@ void MainWindow::setArticlePosColumnsWidth() const
     }
 }
 
-void MainWindow::clearArticleEdits()
-{
-    ui->leArtNr->clear();
-    ui->leArtName->clear();
-    ui->leArtPrice->clear();
-    ui->leArtUnit->clear();
-    ui->ptArtDescription->clear();
-    ui->Artikel_Erfassen->setEnabled(false);
-}
-
 void MainWindow::clearCustomerEdits() const
 {
     ui->leKdNr->clear();
@@ -539,7 +529,6 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
         case ArticlesTab:
         {
             // Setup article list
-            clearArticleEdits();
             printAllArticles();
         }
         break;
@@ -637,77 +626,14 @@ void MainWindow::on_btnRgGutschrift_clicked()
     ui->btnRgGutschrift->setChecked(true);
 }
 
-void MainWindow::on_btnArtSave_clicked()
-{
-    int artnr = ui->leArtNr->text().toInt();
-    QString unit = ui->leArtUnit->text();
-    QString name = ui->leArtName->text();
-    double price = ui->leArtPrice->text().toDouble();
-    QString description = ui->ptArtDescription->toPlainText();
-
-    Articles article(artnr, name, description, unit, price);
-
-    if (m_dbManager->dbEntryExist(ARTIKEL, QString::number(artnr)))
-    {
-        // edit data entry
-        if (m_dbManager->editArticle(QString::number(artnr), article))
-        {
-            printAllArticles();
-            QMessageBox::information(this, "Info", "Der Artikel wurde erfolgreich bearbeitet!", QMessageBox::Ok);
-            clearArticleEdits();
-        }
-        else
-            QMessageBox::critical(this, "Error", "Fehler beim bearbeiten des Artikels!", QMessageBox::Ok);
-    }
-    else
-    {
-        // add data entry
-        if (m_dbManager->addArticle(article))
-        {
-            printAllArticles();
-            clearArticleEdits();
-            QMessageBox::information(this, "Info", "Der Artikel wurde erfolgreich angelegt!", QMessageBox::Ok);
-            ui->Artikel_Erfassen->setEnabled(false);
-        }
-        else
-            QMessageBox::critical(this, "Error", "Fehler beim erstellen des Artikels!", QMessageBox::Ok);
-    }
-}
-
-void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
-{
-    // read article from database
-    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
-    Articles article;
-    if (!m_dbManager->readArticle(artNr, article))
-    {
-       qDebug() << DEBUG_TAG_MAIN << ": Error read customer!";
-       return;
-    }
-
-    // print all customer to edits
-    ui->Artikel_Erfassen->setEnabled(true);
-
-    ui->leArtNr->setText(QString::number(article.getArtNr()));
-    ui->leArtUnit->setText(article.getUnit());
-    ui->leArtName->setText(article.getName());
-    ui->leArtPrice->setText(QString::number(article.getPrice()));
-    ui->ptArtDescription->setPlainText(article.getDescription());
-}
-
 void MainWindow::on_btnArtNew_clicked()
 {
-    clearArticleEdits();
-    ui->Artikel_Erfassen->setEnabled(true);
     ui->twArticles->clearSelection();
-    ui->leArtNr->setText(QString::number(m_dbManager->readLastID(ARTIKEL) + 1));
 }
 
 void MainWindow::on_btnArtCancel_clicked()
 {
     ui->twArticles->clearSelection();
-    clearArticleEdits();
-    ui->Artikel_Erfassen->setEnabled(false);
 }
 
 void MainWindow::on_btnArtDelete_clicked()
@@ -988,7 +914,6 @@ void MainWindow::on_twRgArticles_itemClicked(QTableWidgetItem *item)
     ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
     ui->sbRgSinglePrice->setValue(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0).toDouble());
     ui->sbRgTotalPrice->setValue(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0).toDouble());
-
 }
 
 void MainWindow::on_btnCustomerBill_clicked()
@@ -1660,4 +1585,22 @@ void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem *item)
 void MainWindow::on_actionProgramm_beenden_triggered()
 {
     qApp->quit();
+}
+
+void MainWindow::on_twArticles_itemDoubleClicked(QTableWidgetItem *item)
+{
+    // read article from database
+    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
+    Articles article;
+    if (!m_dbManager->readArticle(artNr, article))
+    {
+       qDebug() << DEBUG_TAG_MAIN << ": Error read customer!";
+       return;
+    }
+
+    WindowArticle wa(this, &article, m_dbManager);
+    wa.setWindowTitle("Artikel bearbeiten");
+
+    if(wa.exec() == QDialog::Accepted)
+        printAllArticles();
 }

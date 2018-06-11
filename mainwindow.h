@@ -8,7 +8,9 @@
 #include <QImage>
 #include <QPdfWriter>
 #include <QListWidgetItem>
+
 #include <windowPositions.h>
+#include <windowArticle.h>
 
 #include "dbmanager.h"
 
@@ -152,7 +154,6 @@ public:
     void printCustomer(Customers customer);
     void clearCustomerEdits() const;
     void printAllArticles();
-    void clearArticleEdits();
     void createInvoice();
 
     void printAllInvoices();
@@ -167,8 +168,6 @@ private slots:
     void on_btnRgRechnung_clicked();
     void on_btnRgAngebot_clicked();
     void on_btnRgGutschrift_clicked();
-    void on_btnArtSave_clicked();
-    void on_twArticles_itemClicked(QTableWidgetItem *item);
     void on_btnArtNew_clicked();
     void on_btnArtCancel_clicked();
     void on_btnArtDelete_clicked();
@@ -208,6 +207,8 @@ private slots:
     void on_twCustomers_itemDoubleClicked(QTableWidgetItem *item);
 
     void on_actionProgramm_beenden_triggered();
+
+    void on_twArticles_itemDoubleClicked(QTableWidgetItem *item);
 
 private:
     void setCustomerColumnsWidth() const;
