@@ -15,6 +15,14 @@ public:
     explicit StartApp(QWidget *parent = nullptr);
     ~StartApp();
 
+private slots:
+    void on_btnExit_clicked();
+
+private slots:
+    void on_btnCreateDatabase_clicked();
+    void on_btnOpenDatabase_clicked();
+    void on_btnOpenExistDatabase_clicked();
+    
 private:
     Ui::StartApp *ui;
 };

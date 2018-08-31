@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QPdfWriter>
 #include <QListWidgetItem>
+#include <QFileDialog>
 
 #include <windowPositions.h>
 #include <windowArticle.h>
@@ -16,12 +17,14 @@
 
 #ifdef QT_DEBUG
     #define PATH_DATABASE "..\\RechnungsApp/database/mainDatabase.db"
-    #define PATH_PDF "..\\RechnungsApp/invoice/output_file.pdf"
+    #define PATH_DATABASE_CLEAN "database/mainDatabase_clean.db"
+    #define PATH_PDF "..\\RechnungsApp/invoice/"
 #endif
 
 #ifdef QT_NO_DEBUG
     #define PATH_DATABASE "database/mainDatabase.db"
-    #define PATH_PDF "invoice/output_file.pdf"
+    #define PATH_DATABASE_CLEAN "database/mainDatabase_clean.db"
+    #define PATH_PDF "invoice/"
 #endif
 
 #define DEBUG_TAG_MAIN "MainWindow"
@@ -75,11 +78,11 @@ enum CustomerColumns
 
 enum ArticleColumns
 {
-    ArtNr,
-    Einheit,
-    Bezeichnung,
-    Beschreibung,
-    Preis,
+    Article_ArtNr,
+    Article_Einheit,
+    Article_Bezeichnung,
+    Article_Beschreibung,
+    Article_Preis,
 
     ArticleColumnsCount
 };
@@ -129,8 +132,8 @@ enum InvoiceColumns
 
 enum PositionColumns
 {
-    Position_Pos,
-    Position_ArNr,
+    Position_PosNr,
+    Position_ArtNr,
     Position_RgNr,
     Position_Menge,
     Position_Gesamt,
@@ -147,7 +150,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void printAllCustomers();
@@ -169,7 +172,6 @@ private slots:
     void on_btnRgAngebot_clicked();
     void on_btnRgGutschrift_clicked();
     void on_btnArtNew_clicked();
-    void on_btnArtCancel_clicked();
     void on_btnArtDelete_clicked();
     void on_btnArtDelAll_clicked();
     void on_twCustomers_itemClicked(QTableWidgetItem *item);
@@ -177,7 +179,6 @@ private slots:
     void on_cbRgArtikel_currentTextChanged(const QString &name);
     void on_sbRgCount_valueChanged(int value);
     void on_btnRgAddArticle_clicked();
-    void on_sbRgSinglePrice_valueChanged(double value);
     void on_btnRgDeteleAllArticle_clicked();
     void on_btnRgDeleteArticle_clicked();
     void on_twRgArticles_itemSelectionChanged();
@@ -206,9 +207,27 @@ private slots:
 
     void on_twCustomers_itemDoubleClicked(QTableWidgetItem *item);
 
-    void on_actionProgramm_beenden_triggered();
-
     void on_twArticles_itemDoubleClicked(QTableWidgetItem *item);
+
+    void on_btnArtEdit_clicked();
+
+    void on_twArticles_itemClicked(QTableWidgetItem *item);
+
+    void on_cbRgArtikel_activated(const QString &arg1);
+
+    void on_leRgSinglePrice_returnPressed();
+
+    void on_cbLiefDate_stateChanged();
+
+    void on_actionExit_triggered();
+
+    void on_actionDbSave_triggered();
+
+    void on_actionDbRestore_triggered();
+
+    void on_leRgSinglePrice_textChanged(const QString &arg1);
+
+    void on_actionUeber_triggered();
 
 private:
     void setCustomerColumnsWidth() const;
@@ -223,8 +242,6 @@ private:
 private:
     Ui::MainWindow *ui;
     DBManager* m_dbManager;
-    QPrinter* m_pdfPrinter;
-    QPainter* m_painter;
     int m_posNr;
     Settings m_settings;
 
@@ -240,6 +257,11 @@ private:
     void clearPositions();
     void printPositions(QString rgnr);
     void setPositionsColumnsWidth() const;
+
+
+    void articleEdit(QTableWidgetItem *item);
+    void articleDelete();
+    void articleAdd();
 };
 
 #endif // MAINWINDOW_H
