@@ -1,6 +1,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "startapp.h"
+
 #include <qmessagebox.h>
 #include <QStandardItemModel>
 #include <QStandardItem>
@@ -8,26 +10,26 @@
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 
-//#define BORDER_ACTIVE
+#define BORDER_ACTIVE
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_pdfPrinter(new QPrinter(QPrinter::HighResolution)),
-    m_painter(new QPainter()),
     m_posNr(0)
 {
     ui->setupUi(this);
 
-    m_pdfPrinter->setOutputFormat(QPrinter::PdfFormat);
-    m_pdfPrinter->setOutputFileName(PATH_PDF);
-    m_pdfPrinter->setPaperSize(QPrinter::A4);
-    m_pdfPrinter->setPageMargins(QMarginsF(30, 30, 30, 30));
+//    StartApp start;
+//    int res = start.exec();
+//    if(res == QDialog::Rejected)
+//        return;
+//    else if(res == QDialog::Accepted)
+//    {
+//        m_dbManager = new DBManager(PATH_DATABASE);
+//        QMessageBox::information(this, "Info", "Die Datenbank wurde erfolgreich geladen!", QMessageBox::Ok);
+//    }
 
     m_dbManager = new DBManager(PATH_DATABASE);
-
-    // Read settings from DB
-    //m_dbManager->readSettings(m_settings);
 
     // Setup customer list
     ui->twCustomers->setColumnCount(m_dbManager->getCustomerFields().size() - 1);
@@ -48,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twArticles->horizontalHeader()->setFont(fontArticles);
     ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twArticles->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
+    ui->twArticles->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
 
     // Setup invoice list
     ui->twRgList->setColumnCount(m_dbManager->getInvoiceFields().size());
@@ -59,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QFont fontInvoices("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twRgList->horizontalHeader()->setFont(fontInvoices);
     ui->twRgList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twRgList->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
+    ui->twRgList->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
 
     // Setup article positions
     ui->twRgArticles->setColumnCount(ArtPosColumnsCount);
@@ -97,12 +99,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    m_dbManager->closeDatabase();
-
     delete m_dbManager;
     delete ui;
-    delete m_pdfPrinter;
-    delete m_painter;
 }
 
 void MainWindow::on_btnSaveCustomer_clicked()
@@ -255,8 +253,8 @@ void MainWindow::on_btnEditCustomer_clicked()
 
 void MainWindow::on_btnCancelCustomer_clicked()
 {
-    //ui->twCustomers->clearSelection();
     ui->tabWidKunden->setCurrentIndex(OverviewTab);
+    ui->twCustomers->clearSelection();
     clearCustomerEdits();
 }
 
@@ -298,12 +296,12 @@ void MainWindow::printAllArticles()
        int row = ui->twArticles->rowCount();
        ui->twArticles->insertRow(row);
        ui->twArticles->setRowHeight(row, ARTICLE_ROW_HEIGHT);
-       ui->twArticles->setItem(row, ArtNr, new QTableWidgetItem(QString::number(it->getArtNr())));
-       ui->twArticles->setItem(row, Einheit, new QTableWidgetItem(it->getUnit()));
-       ui->twArticles->setItem(row, Bezeichnung, new QTableWidgetItem(it->getName()));
-       ui->twArticles->setItem(row, Beschreibung, new QTableWidgetItem(it->getDescription()));
-       ui->twArticles->setItem(row, Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
-       ui->twArticles->item(row, Preis)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+       ui->twArticles->setItem(row, Article_ArtNr, new QTableWidgetItem(QString::number(it->getArtNr())));
+       ui->twArticles->setItem(row, Article_Einheit, new QTableWidgetItem(it->getUnit()));
+       ui->twArticles->setItem(row, Article_Bezeichnung, new QTableWidgetItem(it->getName()));
+       ui->twArticles->setItem(row, Article_Beschreibung, new QTableWidgetItem(it->getDescription()));
+       ui->twArticles->setItem(row, Article_Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
+       ui->twArticles->item(row, Article_Preis)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     }
 
     // Set articles table column width offset
@@ -522,7 +520,7 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
         {
             // Setup customer list
             printAllCustomers();
-            ui->btnCustomerBill->setEnabled(false);
+            ui->btnCustomerBill->setEnabled(false);            
         }
         break;
 
@@ -564,6 +562,9 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
             QDate date;
             ui->deRgDate->setDate(date.currentDate());
 
+            // Fill delivery date
+            ui->deLiefDate->setDate(date.currentDate());
+
             // Fill articles combobox
             // clear articles
             if(ui->cbRgArtikel->count() > 0)
@@ -586,10 +587,14 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
 
             clearBillEdits();
 
-            if (ui->tabWidgetInvoice->currentIndex() == 1)
-            {
-                printAllInvoices();
-            }
+            ui->tabWidgetInvoice->setCurrentIndex(0);
+//            if (ui->tabWidgetInvoice->currentIndex() == 1)
+//            {
+//                printAllInvoices();
+//            }
+
+            // clear customer
+            ui->cbRgCustomer->setCurrentIndex(-1);
         }
         break;
 
@@ -628,41 +633,12 @@ void MainWindow::on_btnRgGutschrift_clicked()
 
 void MainWindow::on_btnArtNew_clicked()
 {
-    ui->twArticles->clearSelection();
-}
-
-void MainWindow::on_btnArtCancel_clicked()
-{
-    ui->twArticles->clearSelection();
+    articleAdd();
 }
 
 void MainWindow::on_btnArtDelete_clicked()
 {
-    if(ui->twArticles->selectedItems().count() >  0)
-    {
-        QMessageBox msg;
-        msg.setWindowIcon(QPixmap("logo.png"));
-        msg.setText("Möchten Sie den Artikel wirklich löschen?");
-        msg.setWindowTitle("Warnung");
-        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msg.setButtonText(QMessageBox::Yes, "Ja");
-        msg.setButtonText(QMessageBox::No, "Nein");
-        msg.setDefaultButton(QMessageBox::No);
-        msg.setIcon(QMessageBox::Question);
-
-        if(msg.exec() == QMessageBox::Yes)
-        {
-            QString id = ui->twArticles->item(ui->twArticles->currentRow(), 0)->text();
-            m_dbManager->removeDbEntry(ARTIKEL, id);
-            printAllArticles();
-            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
-        }
-    }
-    else
-    {
-        qDebug() << "No article selected!";
-        QMessageBox::warning(this, "Warnung", "Es wurde kein Artikel zum löschen ausgewählt!", QMessageBox::Ok);
-    }
+    articleDelete();
 }
 
 void MainWindow::on_btnArtDelAll_clicked()
@@ -710,8 +686,8 @@ void MainWindow::clearBillEdits()
     ui->leRgArtNr->clear();
     ui->leRgName->clear();
     ui->sbRgCount->setValue(0);
-    ui->sbRgSinglePrice->setValue(0);
-    ui->sbRgTotalPrice->setValue(0);
+    ui->leRgSinglePrice->clear();
+    ui->leRgTotalPrice->clear();
     ui->leRgUnit->setText("Stück");
 }
 
@@ -727,15 +703,16 @@ void MainWindow::on_cbRgArtikel_currentTextChanged(const QString &name)
         ui->leRgName->setText(article.getName());
         ui->leRgUnit->setText(article.getUnit());
         ui->sbRgCount->setValue(1);
-        ui->sbRgSinglePrice->setValue(article.getPrice());
-        ui->sbRgTotalPrice->setValue(article.getPrice() * ui->sbRgCount->value());
+        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()));
+        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * ui->sbRgCount->value()));
     }
 }
 
 void MainWindow::on_sbRgCount_valueChanged(int value)
 {
-    double totalPriceTemp = ui->sbRgSinglePrice->value() * value;
-    ui->sbRgTotalPrice->setValue(totalPriceTemp);
+    QString singlePrice = ui->leRgSinglePrice->text().split(" ").value(0);
+    double totalPriceTemp = singlePrice.replace(".", "").replace(",",".").toDouble() * value;
+    ui->leRgTotalPrice->setText(QLocale().toCurrencyString(totalPriceTemp));
 }
 
 void MainWindow::on_btnRgAddArticle_clicked()
@@ -744,8 +721,8 @@ void MainWindow::on_btnRgAddArticle_clicked()
     QString name = ui->leRgName->text();
     QString count = QString::number(ui->sbRgCount->value());
     QString unit = ui->leRgUnit->text();
-    QString sPrice = QString::number(ui->sbRgSinglePrice->value(), 'f', 2) + " €";
-    QString tPrice = QString::number(ui->sbRgTotalPrice->value(), 'f', 2) + " €";
+    QString sPrice = ui->leRgSinglePrice->text();
+    QString tPrice = ui->leRgTotalPrice->text();
 
     // search for exist entries
     for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
@@ -802,15 +779,14 @@ void MainWindow::updateTotalPrice()
     int rowCount = ui->twRgArticles->rowCount();
     for (int i = 0; i < rowCount; i++)
     {
-        double sum = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble();
+        QString sumStr = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0);
+        sumStr = sumStr.replace(".", "");
+        sumStr = sumStr.replace(",", ".");
+
+        double sum = sumStr.toDouble();
         summe += sum;
     }
-    ui->sbRgSumme->setValue(summe);
-}
-
-void MainWindow::on_sbRgSinglePrice_valueChanged(double value)
-{
-    ui->sbRgTotalPrice->setValue(value * ui->sbRgCount->value());
+    ui->leRgSumme->setText(QLocale().toCurrencyString(summe));
 }
 
 void MainWindow::on_btnRgDeteleAllArticle_clicked()
@@ -912,8 +888,8 @@ void MainWindow::on_twRgArticles_itemClicked(QTableWidgetItem *item)
     ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
     ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, AnzahlPos)->text().toDouble());
     ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
-    ui->sbRgSinglePrice->setValue(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0).toDouble());
-    ui->sbRgTotalPrice->setValue(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0).toDouble());
+    ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
+    ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
 }
 
 void MainWindow::on_btnCustomerBill_clicked()
@@ -960,8 +936,8 @@ void MainWindow::on_leRgArtNr_returnPressed()
         ui->leRgName->setText(article.getName());
         ui->leRgUnit->setText(article.getUnit());
         ui->sbRgCount->setValue(1);
-        ui->sbRgSinglePrice->setValue(article.getPrice());
-        ui->sbRgTotalPrice->setValue(article.getPrice() * 1);
+        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()));
+        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * 1));
 
         ui->sbRgCount->setFocus();
         ui->sbRgCount->selectAll();
@@ -982,8 +958,8 @@ void MainWindow::on_sbRgCount_editingFinished()
 
 void MainWindow::on_leRgUnit_returnPressed()
 {
-    this->on_btnRgAddArticle_clicked();
-    ui->leRgArtNr->setFocus();
+    ui->leRgSinglePrice->setFocus();
+    ui->leRgSinglePrice->selectAll();
 }
 
 void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
@@ -997,6 +973,19 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgCreate_clicked()
 {
+    // check all inputs
+    if( ui->cbRgCustomer->currentIndex() == -1)
+    {
+        QMessageBox::warning(this, "Eingabefehler", "Es wurde kein Kunde angegeben!", QMessageBox::Ok);
+        return;
+    }
+
+    if( ui->twRgArticles->rowCount() <= 0)
+    {
+        QMessageBox::warning(this, "Eingabefehler", "Es wurde kein Artikel erfasst!", QMessageBox::Ok);
+        return;
+    }
+
     // Add positions to DB
     for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
     {
@@ -1014,7 +1003,8 @@ void MainWindow::on_btnRgCreate_clicked()
     // Add invoice to DB
     int kdnr = ui->cbRgCustomer->currentText().split(" ").value(0).toInt();
     QString rgdate = ui->deRgDate->text();
-    double amount = ui->sbRgSumme->value();
+    QString amount_str = ui->leRgSumme->text().split(" ").value(0);
+    double amount = amount_str.replace(".", "").replace(",", ".").toDouble();
     int ust = ui->sbRgUst->value();
     int skonto = ui->sbRgSkonto->value();
     QString currency = ui->leRgCurrency->text();
@@ -1035,8 +1025,16 @@ void MainWindow::on_btnRgCreate_clicked()
 
     updateTotalPrice();
     ui->btnRgDeteleAllArticle->setEnabled(false);
-    ui->btnRgCreate->setEnabled(false);
+//    ui->btnRgCreate->setEnabled(false);
     m_posNr = 0;
+
+    // Fill invoice number
+    int lastRgNr = m_dbManager->readLastID(RECHNUNGEN);
+    ui->leRgNr->setText(QString::number(lastRgNr + 1));
+
+    // Clear customer
+    ui->cbRgCustomer->setCurrentIndex(-1);
+
     QMessageBox::information(this, "Info", "Rechnung wurde erstellt!", QMessageBox::Ok);
 }
 
@@ -1052,6 +1050,19 @@ void MainWindow::readSettingsEdit()
 
 void MainWindow::createInvoice()
 {
+    QString outPath = PATH_PDF;
+    QStringList dateList = ui->deRgDate->text().split(".");
+    QString date = dateList[dateList.size()-1] + dateList[dateList.size()-2] + dateList[dateList.size()-3];
+    QString outputName = outPath + "Rechnung_" + ui->leRgNr->text() + "_" + date + ".pdf";
+
+    QPainter* m_painter = new QPainter();
+
+    QPrinter* m_pdfPrinter = new QPrinter(QPrinter::HighResolution);
+    m_pdfPrinter->setOutputFormat(QPrinter::PdfFormat);
+    m_pdfPrinter->setOutputFileName(outputName);
+    m_pdfPrinter->setPaperSize(QPrinter::A4);
+    m_pdfPrinter->setPageMargins(QMarginsF(30, 30, 30, 30));
+
     QString receiver;
     QString KdNr = ui->cbRgCustomer->currentText().split(" ").value(0);
     Customers customer;
@@ -1093,6 +1104,7 @@ void MainWindow::createInvoice()
     if (!m_painter->begin(m_pdfPrinter))
     {
         qWarning("failed to open file, is it writeable?");
+        QMessageBox::warning(this, "PDF Fehler", "Fehler beim öffnen der PDF Datei!", QMessageBox::Ok);
         return;
     }
 
@@ -1197,14 +1209,18 @@ void MainWindow::createInvoice()
         m_painter->drawRect(rectRgLfNrLabel);
     #endif
     m_painter->drawText(rectRgLfNrLabel, Qt::AlignLeft | Qt::AlignTop, invoiceNrLabel);
-    m_painter->drawText(rectRgLfNrLabel, Qt::AlignLeft | Qt::AlignBottom, deliveryNrLabel);
+
+    if( !ui->leLiefNr->text().isEmpty())
+    {
+        m_painter->drawText(rectRgLfNrLabel, Qt::AlignLeft | Qt::AlignBottom, deliveryNrLabel);
+    }
 
     QRect rectRgLfNrData(x_posLeft + metricFont.width(deliveryNrLabel) + spaceData, y, 1400, metricFont.height() * 2);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectRgLfNrData);
     #endif
     m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignTop, ui->leRgNr->text());
-    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignBottom, "2345678");
+    m_painter->drawText(rectRgLfNrData, Qt::AlignLeft | Qt::AlignBottom, ui->leLiefNr->text());
 
     // Invoice & Delivery Dates & Customer Nr.
     QRect rectRgLfDateLabel(x_posSender, y, metricFont.width(invoiceDateLabel), metricFont.height() * 3);
@@ -1220,7 +1236,7 @@ void MainWindow::createInvoice()
         m_painter->drawRect(rectRgLfDateData);
     #endif
     m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignTop, m_settings.getDateStr());
-    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignVCenter, "01.01.2001");
+    m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignVCenter, ui->deLiefDate->text());
     m_painter->drawText(rectRgLfDateData, Qt::AlignLeft | Qt::AlignBottom, ui->cbRgCustomer->currentText().split(" ").value(0));
 
     y += 1100;
@@ -1254,7 +1270,6 @@ void MainWindow::createInvoice()
     QStringList slPosNr;
     QStringList slArtNr;
     QStringList slLabel;
-    //QStringList slDescription;
     QStringList slCount;
     QStringList slUnit;
     QStringList slPrice;
@@ -1274,29 +1289,33 @@ void MainWindow::createInvoice()
         slPosNr.append(ui->twRgArticles->item(i, PosNr)->text());
         slArtNr.append(ui->twRgArticles->item(i, ArtNrPos)->text());
         slLabel.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
-        //slDescription.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
         slCount.append(QString::number(ui->twRgArticles->item(i, AnzahlPos)->text().toDouble(), 'f', 2).replace(".", ","));
         slUnit.append(ui->twRgArticles->item(i, EinheitPos)->text());
-        slPrice.append(QLocale().toCurrencyString(ui->twRgArticles->item(i, EinzelPreisPos)->text().split(" ").value(0).toDouble()));
-        slSumme.append(QLocale().toCurrencyString(ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble()));
+        slPrice.append(ui->twRgArticles->item(i, EinzelPreisPos)->text());
+        slSumme.append(ui->twRgArticles->item(i, SummePos)->text());
     }
 
     QString posNrStr = slPosNr.join("\n\n");
     QString artNrStr = slArtNr.join("\n\n");
     QString labelStr = slLabel.join("\n\n");
-    //QString descriptionStr = slDescription.join("\n\n");
     QString countStr = slCount.join("\n\n");
     QString unitStr = slUnit.join("\n\n");
     QString priceStr = slPrice.join("\n\n");
     QString summeStr = slSumme.join("\n\n");
 
+    // Anzahl der zu benötigten Zeilen
+    int rows = qRound((double(metricFont.width(labelStr)) / double(maxLenDescription)) + 0.49);
+
+    // Position Label
     QRect rectPosLabel(x, y_posHeader, maxLenPosNr, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPosLabel);
     #endif
-    m_painter->drawText(rectPosLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(PosNr));
-    QRect rectPosNr(x, y, maxLenPosNr, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectPosLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(Position_PosNr));
+
+    // Position
+    QRect rectPosNr(x, y, maxLenPosNr, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPosNr);
@@ -1305,13 +1324,16 @@ void MainWindow::createInvoice()
 
     x += rectPosNr.width() + tabWidth;
 
+    // ArtNr Label
     QRect rectArtNrLabel(x, y_posHeader, maxLenArtNr, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectArtNrLabel);
     #endif
-    m_painter->drawText(rectArtNrLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(ArtNrPos));
-    QRect rectArtNr(x, y, maxLenArtNr, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectArtNrLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(Position_ArtNr));
+
+    // ArtNr
+    QRect rectArtNr(x, y, maxLenArtNr, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectArtNr);
@@ -1320,13 +1342,16 @@ void MainWindow::createInvoice()
 
     x += rectArtNr.width() + tabWidth;
 
+    // Beschreibung Label
     QRect rectDescriptionLabel(x, y_posHeader, maxLenDescription, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectDescriptionLabel);
     #endif
-    m_painter->drawText(rectDescriptionLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(BeschreibungPos));
-    QRect rectDescription(x, y, maxLenDescription, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectDescriptionLabel, Qt::AlignLeft, m_dbManager->getArticleFields().value(Article_Bezeichnung));
+
+    // Beschreibung
+    QRect rectDescription(x, y, maxLenDescription, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectDescription);
@@ -1335,13 +1360,16 @@ void MainWindow::createInvoice()
 
     x += rectDescription.width() + tabWidth;
 
+    // Anzahl Label
     QRect rectCountLabel(x, y_posHeader, maxLenCount, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectCountLabel);
     #endif
-    m_painter->drawText(rectCountLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(AnzahlPos));
-    QRect rectCount(x, y, maxLenCount, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectCountLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Menge));
+
+    // Anzahl
+    QRect rectCount(x, y, maxLenCount, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectCount);
@@ -1351,13 +1379,16 @@ void MainWindow::createInvoice()
     int x_totalLabel = x;
     x += rectCount.width() + tabWidth;
 
+    // Einheit Label
     QRect rectUnitLabel(x, y_posHeader, maxLenUnit, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectUnitLabel);
     #endif
-    m_painter->drawText(rectUnitLabel, Qt::AlignHCenter, m_dbManager->getPositionFields().value(EinheitPos));
-    QRect rectUnit(x, y, maxLenUnit, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectUnitLabel, Qt::AlignHCenter, m_dbManager->getArticleFields().value(Article_Einheit));
+
+    // Einheit
+    QRect rectUnit(x, y, maxLenUnit, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectUnit);
@@ -1366,13 +1397,16 @@ void MainWindow::createInvoice()
 
     x += rectUnit.width() + tabWidth;
 
+    // Preis Label
     QRect rectPriceLabel(x, y_posHeader, maxLenPrice, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPriceLabel);
     #endif
-    m_painter->drawText(rectPriceLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(EinzelPreisPos));
-    QRect rectPrice(x, y, maxLenPrice, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectPriceLabel, Qt::AlignRight, m_dbManager->getArticleFields().value(Article_Preis));
+
+    // Preis
+    QRect rectPrice(x, y, maxLenPrice, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPrice);
@@ -1381,13 +1415,16 @@ void MainWindow::createInvoice()
 
     x += rectPrice.width() + tabWidth;
 
+    // Summe Label
     QRect rectSummeLabel(x, y_posHeader, maxLenSumme, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSummeLabel);
     #endif
-    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(SummePos));
-    QRect rectSumme(x, y, maxLenSumme, metricFont.height() * (ui->twRgArticles->rowCount() * 2));
+    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Gesamt));
+
+    // Summe
+    QRect rectSumme(x, y, maxLenSumme, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
     m_painter->setFont(font);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSumme);
@@ -1396,15 +1433,15 @@ void MainWindow::createInvoice()
 
     y += rectSumme.height() + 200;
 
+    // Trennlinie
     m_painter->setPen(penLine);
     m_painter->drawLine(x_totalLabel, y, x_posRight, y);
     m_painter->setPen(penDefault);
 
     y += 100;
 
-    // Summe
-    QString totalStr = QLocale().toCurrencyString(ui->sbRgSumme->value());
-    //QString totalStr = "€ " + QString::number(ui->sbRgSumme->value(), 'f', 2).replace(".", ",");
+    // Gesamtsumme
+    QString totalStr = ui->leRgSumme->text();
     QRect rectTotal(x_totalLabel, y, x_posRight - x_totalLabel, metricPosHeaderFont.height());
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectTotal);
@@ -1445,6 +1482,9 @@ void MainWindow::createInvoice()
     m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, getSettings(Konto));
 
     m_painter->end();
+
+    delete m_pdfPrinter;
+    delete m_painter;
 }
 
 QString MainWindow::getSettings(SettingsColumns typ)
@@ -1548,9 +1588,11 @@ void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgDelete_clicked()
 {
+    QString rechnungsNr = ui->twRgList->item(ui->twRgList->currentRow(), 0)->text();
+
     QMessageBox msg;
     msg.setWindowIcon(QPixmap("logo.png"));
-    msg.setText("Möchten Sie die Rechnung wirklich löschen?");
+    msg.setText("Möchten Sie die Rechnung mit der Nr. " + rechnungsNr + " wirklich löschen?");
     msg.setWindowTitle("Warnung");
     msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msg.setButtonText(QMessageBox::Yes, "Ja");
@@ -1568,7 +1610,8 @@ void MainWindow::on_btnRgDelete_clicked()
 
         printAllInvoices();
 
-        QMessageBox::information(this, "Info", "Die Rechnung wurde gelöscht!", QMessageBox::Ok);
+        ui->btnRgDelete->setEnabled(false);
+        ui->btnRgDetails->setEnabled(false);
     }
 }
 
@@ -1582,15 +1625,51 @@ void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem *item)
     on_btnEditCustomer_clicked();
 }
 
-void MainWindow::on_actionProgramm_beenden_triggered()
-{
-    qApp->quit();
-}
-
 void MainWindow::on_twArticles_itemDoubleClicked(QTableWidgetItem *item)
 {
+    articleEdit(item);
+}
+
+void MainWindow::on_btnArtEdit_clicked()
+{
+    if (ui->twArticles->selectedItems().size() > 0 )
+    {
+        articleEdit(ui->twArticles->currentItem());
+    }
+    else
+    {
+        QMessageBox::warning(this, "Warnung", "Es wurde kein Artikel ausgewählt!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
+{
+    ui->btnArtEdit->setEnabled(true);
+    ui->btnArtDelete->setEnabled(true);
+}
+
+void MainWindow::articleAdd()
+{
+    int artNr = m_dbManager->readLastID(ARTIKEL) + 1;
+    Articles article;
+    article.setArtNr(artNr);
+
+    WindowArticle wa(this, &article, m_dbManager);
+    wa.setWindowTitle("Neuer Artikel");
+
+    if(wa.exec() == QDialog::Accepted)
+    {
+        m_dbManager->addArticle(wa.getArticle());
+        printAllArticles();
+    }
+}
+
+void MainWindow::articleEdit(QTableWidgetItem* item)
+{
+    int selectedRow = item->row();
+
     // read article from database
-    QString artNr = ui->twArticles->item(item->row(), ArtNr)->text();
+    QString artNr = ui->twArticles->item(item->row(), Article_ArtNr)->text();
     Articles article;
     if (!m_dbManager->readArticle(artNr, article))
     {
@@ -1602,5 +1681,144 @@ void MainWindow::on_twArticles_itemDoubleClicked(QTableWidgetItem *item)
     wa.setWindowTitle("Artikel bearbeiten");
 
     if(wa.exec() == QDialog::Accepted)
+    {
         printAllArticles();
+        ui->twArticles->selectRow(selectedRow);
+    }
+}
+
+void MainWindow::articleDelete()
+{
+    if(ui->twArticles->selectedItems().count() >  0)
+    {
+        QMessageBox msg;
+        msg.setWindowIcon(QPixmap("logo.png"));
+        msg.setText("Möchten Sie den Artikel wirklich löschen?");
+        msg.setWindowTitle("Warnung");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setButtonText(QMessageBox::Yes, "Ja");
+        msg.setButtonText(QMessageBox::No, "Nein");
+        msg.setDefaultButton(QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+
+        if(msg.exec() == QMessageBox::Yes)
+        {
+            QString id = ui->twArticles->item(ui->twArticles->currentRow(), 0)->text();
+            m_dbManager->removeDbEntry(ARTIKEL, id);
+            printAllArticles();
+            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        QMessageBox::warning(this, "Warnung", "Es wurde kein Artikel zum löschen ausgewählt!", QMessageBox::Ok);
+    }
+}
+
+void MainWindow::on_cbRgArtikel_activated(const QString &arg1)
+{
+    ui->sbRgCount->setFocus();
+    ui->sbRgCount->selectAll();
+    ui->btnRgClear->setEnabled(true);
+}
+
+void MainWindow::on_leRgSinglePrice_returnPressed()
+{
+    this->on_btnRgAddArticle_clicked();
+    ui->leRgArtNr->setFocus();
+}
+
+void MainWindow::on_cbLiefDate_stateChanged()
+{
+    if(ui->cbLiefDate->isChecked())
+    {
+        ui->deLiefDate->setEnabled( false );
+    }
+    else
+    {
+        ui->deLiefDate->setEnabled( true );
+    }
+}
+
+void MainWindow::on_actionExit_triggered()
+{
+    qApp->quit();
+}
+
+void MainWindow::on_actionDbSave_triggered()
+{
+    QString dbDir = QFileDialog::getExistingDirectory(this, tr("Verzeichnis auswählen"),
+                                                    "/home",
+                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    if(!dbDir.isEmpty())
+    {
+        QString dbPath = PATH_DATABASE;
+        QString newPath = dbDir + "/mainDatabase.db";
+
+        if (QFile::exists(newPath))
+        {
+            QFile::remove(newPath);
+        }
+
+        bool copyState = QFile::copy(PATH_DATABASE, newPath);
+
+        if(copyState)
+        {
+            QMessageBox::information(this, "Datenbank Sicherung", "Die Datenbank wurde erfolgreich gesichert!", QMessageBox::Ok);
+
+        }
+        else
+        {
+            QMessageBox::warning(this, "Datenbank Sicherung", "Fehler beim sichern der Datenbank!", QMessageBox::Ok);
+        }
+    }
+}
+
+void MainWindow::on_actionDbRestore_triggered()
+{
+    QStringList filters;
+    filters << "Datenbankdateien (*.db)"
+            << "Alle Dateien (*)";
+
+    QFileDialog dialog(this);
+    dialog.setNameFilters(filters);
+    dialog.setWindowTitle("Datenbankdatei auswählen");
+
+    if(dialog.exec())
+    {
+        QString newDbFile = dialog.selectedFiles().first();
+
+        if (QFile::exists(PATH_DATABASE))
+        {
+            m_dbManager->closeDatabase();
+            QFile::remove(PATH_DATABASE);
+        }
+
+        bool copyState = QFile::copy(newDbFile, PATH_DATABASE);
+
+        if(copyState)
+        {
+            m_dbManager->openDatabase(PATH_DATABASE);
+            on_tabWidgetMain_currentChanged(0);
+            QMessageBox::information(this, "Datenbank Wiederherstellung", "Die Datenbank wurde erfolgreich wiederhergestellt!", QMessageBox::Ok);
+        }
+        else
+        {
+            QMessageBox::warning(this, "Datenbank Wiederherstellung", "Fehler beim wiederherstellen der Datenbank!", QMessageBox::Ok);
+        }
+    }
+}
+
+void MainWindow::on_leRgSinglePrice_textChanged(const QString &arg1)
+{
+    QString valueStr = arg1.split(" ").first();
+    valueStr = valueStr.replace(",", ".");
+    ui->leRgTotalPrice->setText(QLocale().toCurrencyString(valueStr.toDouble() * ui->sbRgCount->value()));
+}
+
+void MainWindow::on_actionUeber_triggered()
+{
+    QMessageBox::information(this, "Über RechnungsApp", "Author: Marcel Geprägs \n"
+                                                        "Version: 1.0", QMessageBox::Ok);
 }

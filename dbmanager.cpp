@@ -1,37 +1,51 @@
 #include "dbmanager.h"
+#include "mainwindow.h"
+
 #include <vector>
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <qmessagebox.h>
 
-#include "mainwindow.h"
 
 DBManager::DBManager(const QString &path)
 {
-    QFileInfo fileInfo(path);
-
     // Datenbank öffnen
-    m_db = QSqlDatabase::addDatabase("QSQLITE");
-    m_db.setDatabaseName(path);
-    if (!m_db.open())
-    {
-       qDebug() << DEBUG_TAG << ": Error - Connection to Database fail!";
-    }
-    else
-    {
-       qDebug() << DEBUG_TAG << ": Database Connection to " + fileInfo.absoluteFilePath() + " successfull!";
-
-       // Read table fields from DB
-       m_customerFields = readFieldNames(KUNDEN);
-       m_articleFields = readFieldNames(ARTIKEL);
-       m_invoiceFields = readFieldNames(RECHNUNGEN);
-       m_positionFields = readFieldNames(POSITIONEN);
-       m_settingsFields = readFieldNames(SETTINGS);
-    }
+    openDatabase(path);
 }
 
 DBManager::~DBManager()
 {
+    closeDatabase();
+}
+
+void DBManager::openDatabase(QString path)
+{
+    m_db = QSqlDatabase::addDatabase("QSQLITE");
+    m_db.setDatabaseName(path);
+
+    if (!m_db.open())
+    {
+        QMessageBox errorMsg;
+        errorMsg.setText("Es konnte keine Verbindung zur Datenbank hergestellt werden!");
+        errorMsg.setStandardButtons(QMessageBox::Ok);
+        errorMsg.setWindowTitle("Fehler Datenkbank");
+        errorMsg.setIcon(QMessageBox::Warning);
+        errorMsg.exec();
+
+        qDebug() << DEBUG_TAG << ": Error - Connection to Database fail!";
+    }
+    else
+    {
+        qDebug() << DEBUG_TAG << ": Database Connection to " + m_db.databaseName() /*fileInfo.absoluteFilePath()*/ + " successfull!";
+
+        // Read table fields from DB
+        m_customerFields = readFieldNames(KUNDEN);
+        m_articleFields = readFieldNames(ARTIKEL);
+        m_invoiceFields = readFieldNames(RECHNUNGEN);
+        m_positionFields = readFieldNames(POSITIONEN);
+        m_settingsFields = readFieldNames(SETTINGS);
+    }
 }
 
 void DBManager::closeDatabase()
@@ -166,9 +180,9 @@ bool DBManager::addPosition(const Positions& position)
     bool success = false;
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Positionen (\"" + m_positionFields[Position_Pos] + "\", "
+    queryAdd.prepare("INSERT INTO Positionen (\"" + m_positionFields[Position_PosNr] + "\", "
                                              "\"" + m_positionFields[Position_RgNr] + "\", "
-                                             "\"" + m_positionFields[Position_ArNr] + "\", "
+                                             "\"" + m_positionFields[Position_ArtNr] + "\", "
                                              "\"" + m_positionFields[Position_Menge] + "\", "
                                              "\"" + m_positionFields[Position_Gesamt] + "\") "
                              "VALUES (:pos, "
@@ -202,10 +216,10 @@ bool DBManager::addArticle(const Articles& article)
     bool success = false;
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Artikel (\"" + m_articleFields[Einheit] + "\", "
-                                         "\"" + m_articleFields[Bezeichnung] + "\", "
-                                         "\"" + m_articleFields[Preis] + "\", "
-                                         "\"" + m_articleFields[Beschreibung] + "\") "
+    queryAdd.prepare("INSERT INTO Artikel (\"" + m_articleFields[Article_Einheit] + "\", "
+                                         "\"" + m_articleFields[Article_Bezeichnung] + "\", "
+                                         "\"" + m_articleFields[Article_Preis] + "\", "
+                                         "\"" + m_articleFields[Article_Beschreibung] + "\") "
                              "VALUES (:einheit, "
                                      ":bezeichnung, "
                                      ":preis, "
@@ -466,11 +480,11 @@ bool DBManager::editArticle(QString id, const Articles& article)
         QSqlQuery query;
 
         query.prepare("UPDATE Artikel SET "
-                              "'"+m_articleFields[Einheit]+"' = :einheit, "
-                              "'"+m_articleFields[Bezeichnung]+"' = :bezeichnung, "
-                              "'"+m_articleFields[Beschreibung]+"' = :beschreibung, "
-                              "'"+m_articleFields[Preis]+"' = :preis "
-                      "WHERE \"" + m_articleFields[ArtNr] + "\" = '"+id+"'");
+                              "'"+m_articleFields[Article_Einheit]+"' = :einheit, "
+                              "'"+m_articleFields[Article_Bezeichnung]+"' = :bezeichnung, "
+                              "'"+m_articleFields[Article_Beschreibung]+"' = :beschreibung, "
+                              "'"+m_articleFields[Article_Preis]+"' = :preis "
+                      "WHERE \"" + m_articleFields[Article_ArtNr] + "\" = '"+id+"'");
 
         query.bindValue(":einheit", article.getUnit());
         query.bindValue(":bezeichnung", article.getName());
@@ -691,7 +705,7 @@ bool DBManager::readArticle(QString articleID, Articles &article)
     if (m_db.isOpen())
     {
         QSqlQuery query;
-        query.prepare("SELECT * FROM Artikel WHERE \"" + m_articleFields[ArtNr] + "\" = " + articleID);
+        query.prepare("SELECT * FROM Artikel WHERE \"" + m_articleFields[Article_ArtNr] + "\" = " + articleID);
 
         if (!query.exec())
         {
@@ -700,11 +714,11 @@ bool DBManager::readArticle(QString articleID, Articles &article)
         }
         else
         {
-            int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
-            int idUnit = query.record().indexOf(m_articleFields[Einheit]);
-            int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
-            int idPrice = query.record().indexOf(m_articleFields[Preis]);
-            int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
+            int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
+            int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
+            int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
+            int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
+            int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
 
             if (query.next())
             {
@@ -797,7 +811,7 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
 bool DBManager::readArticles(std::vector<Articles> &articles) const
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM Artikel ORDER BY \"" + m_articleFields[ArtNr] + "\" ASC");
+    query.prepare("SELECT * FROM Artikel ORDER BY \"" + m_articleFields[Article_ArtNr] + "\" ASC");
 
     if(!query.exec())
     {
@@ -805,11 +819,11 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
         return false;
     }
 
-    int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
-    int idUnit = query.record().indexOf(m_articleFields[Einheit]);
-    int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
-    int idPrice = query.record().indexOf(m_articleFields[Preis]);
-    int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
+    int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
+    int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
+    int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
+    int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
+    int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
 
     while (query.next())
     {
@@ -893,14 +907,14 @@ bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) c
         return false;
     }
 
-    int idPos = query.record().indexOf(m_positionFields[Position_Pos]);
-    int idArtNr = query.record().indexOf(m_articleFields[ArtNr]);
-    int idName= query.record().indexOf(m_articleFields[Bezeichnung]);
+    int idPos = query.record().indexOf(m_positionFields[Position_PosNr]);
+    int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
+    int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
     int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
-    int idUnit = query.record().indexOf(m_articleFields[Einheit]);
-    int idPrice = query.record().indexOf(m_articleFields[Preis]);
+    int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
+    int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
     int idTotal = query.record().indexOf(m_positionFields[Position_Gesamt]);
-    int idDescription = query.record().indexOf(m_articleFields[Beschreibung]);
+    int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
 
     while (query.next())
     {
@@ -955,7 +969,7 @@ QString DBManager::getDbIdent(QString table)
     if (table == KUNDEN)
         ident = m_customerFields[KdNr];
     else if (table == ARTIKEL)
-        ident = m_articleFields[ArtNr];
+        ident = m_articleFields[Article_ArtNr];
     else if (table == RECHNUNGEN)
         ident = m_invoiceFields[Invoice_RgNr];
     else if (table == POSITIONEN)

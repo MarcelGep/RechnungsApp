@@ -20,5 +20,16 @@
         <file>icons/article_new.png</file>
         <file>icons/details.png</file>
         <file>icons/invoice_delete.png</file>
+        <file>icons/article_edit.png</file>
+        <file>../../Desktop/rechnungsapp_icon.ico</file>
+    </qresource>
+    <qresource prefix="/32x32">
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_add.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_delete.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_edit.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_gear.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_go.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/door_out.png</file>
     </qresource>
 </RCC>

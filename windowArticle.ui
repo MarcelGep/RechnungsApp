@@ -138,6 +138,9 @@
      </item>
      <item row="5" column="1">
       <widget class="QPushButton" name="btnArtSave">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="text">
         <string> Speichern</string>
        </property>
@@ -169,6 +172,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>leArtNr</tabstop>
+  <tabstop>leArtUnit</tabstop>
+  <tabstop>leArtName</tabstop>
+  <tabstop>leArtPrice</tabstop>
+  <tabstop>ptArtDescription</tabstop>
+  <tabstop>btnArtSave</tabstop>
+  <tabstop>btnArtCancel</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

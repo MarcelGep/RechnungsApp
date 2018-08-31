@@ -35,6 +35,7 @@ public:
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
     void closeDatabase();
+    void openDatabase(QString path);
     bool dbEntryExist(QString table, QString id);
     bool readCustomers(std::vector<Customers> &customers) const;
     int readLastID(QString table) const;

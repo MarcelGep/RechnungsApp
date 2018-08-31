@@ -26,7 +26,7 @@ WindowPositions::WindowPositions(QWidget *parent, std::vector<Positions> positio
     QFont fontInvoicePos("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twRgPositions->horizontalHeader()->setFont(fontInvoicePos);
     ui->twRgPositions->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twRgPositions->horizontalHeader()->setSectionResizeMode(Beschreibung, QHeaderView::Stretch);
+    ui->twRgPositions->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
 
     printPositions();
 }

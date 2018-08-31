@@ -5,9 +5,7 @@
 #include <QTableWidget>
 
 #include <articles.h>
-
 #include <dbmanager.h>
-
 
 namespace Ui {
 class WindowArticle;
@@ -18,8 +16,10 @@ class WindowArticle : public QDialog
     Q_OBJECT
 
 public:
-    explicit WindowArticle(QWidget *parent = 0, Articles *article = NULL, DBManager *dbmanager = NULL);
+    explicit WindowArticle(QWidget *parent = nullptr, Articles *article = NULL, DBManager *dbmanager = NULL);
     ~WindowArticle();
+
+    Articles getArticle();
 
 private slots:
     void on_btnArtCancel_clicked();

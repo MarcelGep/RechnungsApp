@@ -9,9 +9,11 @@ WindowArticle::WindowArticle(QWidget *parent, Articles *article, DBManager *dbma
 {
     ui->setupUi(this);
 
+    setWindowFlags(windowFlags() ^ Qt::WindowContextHelpButtonHint);
+
     ui->leArtNr->setText(QString::number(article->getArtNr()));
     ui->leArtUnit->setText(article->getUnit());
-    ui->leArtPrice->setText(QString::number(article->getPrice()));
+    ui->leArtPrice->setText(QString::number(article->getPrice(), 'f', 2));
     ui->leArtName->setText(article->getName());
     ui->ptArtDescription->setPlainText(article->getDescription());
 }
@@ -19,6 +21,18 @@ WindowArticle::WindowArticle(QWidget *parent, Articles *article, DBManager *dbma
 WindowArticle::~WindowArticle()
 {
     delete ui;
+}
+
+Articles WindowArticle::getArticle()
+{
+    Articles article;
+    article.setArtNr(ui->leArtNr->text().toInt());
+    article.setName(ui->leArtName->text());
+    article.setPrice(ui->leArtPrice->text().toDouble());
+    article.setUnit(ui->leArtUnit->text());
+    article.setDescription(ui->ptArtDescription->toPlainText());
+
+    return article;
 }
 
 void WindowArticle::on_btnArtCancel_clicked()

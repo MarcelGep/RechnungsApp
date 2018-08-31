@@ -33,7 +33,8 @@ SOURCES += \
     invoices.cpp \
     positions.cpp \
     windowPositions.cpp \
-    windowArticle.cpp
+    windowArticle.cpp \
+    startapp.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,12 +45,14 @@ HEADERS += \
     invoices.h \
     positions.h \
     windowPositions.h \
-    windowArticle.h
+    windowArticle.h \
+    startapp.h
 
 FORMS += \
         mainwindow.ui \
     windowPositions.ui \
-    windowArticle.ui
+    windowArticle.ui \
+    startapp.ui
 
 QT+= \
     network
@@ -61,3 +64,5 @@ QT += printsupport
 
 RESOURCES += \
     resources.qrc
+
+RC_ICONS = rechnungsapp_icon.ico
