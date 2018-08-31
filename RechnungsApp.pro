@@ -61,3 +61,5 @@ QT += printsupport
 
 RESOURCES += \
     resources.qrc
+
+RC_ICONS = rechnungsapp_icon.ico
