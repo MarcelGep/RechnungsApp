@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout_11" rowstretch="0,0,0,0,0,0" columnstretch="0,0,0">
+    <layout class="QGridLayout" name="gridLayout_11" rowstretch="0,0,0,0,0,0,0" columnstretch="0,0,0">
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
@@ -41,39 +41,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_37">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Einheit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" colspan="2">
-      <widget class="QLineEdit" name="leArtName">
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1" colspan="2">
-      <widget class="QLineEdit" name="leArtPrice">
-       <property name="inputMask">
-        <string/>
-       </property>
-       <property name="placeholderText">
-        <string/>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_33">
        <property name="sizePolicy">
@@ -87,20 +54,34 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_34">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="4" column="1" colspan="2">
+      <widget class="QLineEdit" name="leArtPrice">
+       <property name="inputMask">
+        <string/>
        </property>
-       <property name="text">
-        <string>Preis €</string>
+       <property name="placeholderText">
+        <string/>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="6" column="1">
+      <widget class="QPushButton" name="btnArtSave">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string> Speichern</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/Icons/icons/save.png</normaloff>:/Icons/icons/save.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="label_36">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -116,14 +97,38 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1" colspan="2">
-      <widget class="QLineEdit" name="leArtUnit">
-       <property name="clearButtonEnabled">
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_34">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Preis €</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1" colspan="2">
+      <widget class="QTextEdit" name="ptArtDescription">
+       <property name="tabChangesFocus">
         <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="6" column="2">
+      <widget class="QPushButton" name="btnArtCancel">
+       <property name="text">
+        <string> Abbrechen</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/Icons/icons/cancel.png</normaloff>:/Icons/icons/cancel.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
       <widget class="QLabel" name="label_35">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -136,35 +141,30 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QPushButton" name="btnArtSave">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string> Speichern</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/Icons/icons/save.png</normaloff>:/Icons/icons/save.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1" colspan="2">
-      <widget class="QTextEdit" name="ptArtDescription">
-       <property name="tabChangesFocus">
+     <item row="1" column="1" colspan="2">
+      <widget class="QLineEdit" name="leArtName">
+       <property name="clearButtonEnabled">
         <bool>true</bool>
        </property>
       </widget>
      </item>
-     <item row="5" column="2">
-      <widget class="QPushButton" name="btnArtCancel">
-       <property name="text">
-        <string> Abbrechen</string>
+     <item row="2" column="1" rowspan="2" colspan="2">
+      <widget class="QLineEdit" name="leArtUnit">
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/Icons/icons/cancel.png</normaloff>:/Icons/icons/cancel.png</iconset>
+      </widget>
+     </item>
+     <item row="2" column="0" rowspan="2">
+      <widget class="QLabel" name="label_37">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Einheit</string>
        </property>
       </widget>
      </item>
@@ -174,8 +174,8 @@
  </widget>
  <tabstops>
   <tabstop>leArtNr</tabstop>
-  <tabstop>leArtUnit</tabstop>
   <tabstop>leArtName</tabstop>
+  <tabstop>leArtUnit</tabstop>
   <tabstop>leArtPrice</tabstop>
   <tabstop>ptArtDescription</tabstop>
   <tabstop>btnArtSave</tabstop>

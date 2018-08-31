@@ -202,31 +202,18 @@ private slots:
     void on_btnRgDetails_clicked();
     void on_twRgList_itemClicked(QTableWidgetItem *item);
     void on_btnRgDelete_clicked();
-
     void on_twRgList_itemDoubleClicked(QTableWidgetItem *);
-
     void on_twCustomers_itemDoubleClicked(QTableWidgetItem *);
-
     void on_twArticles_itemDoubleClicked(QTableWidgetItem *item);
-
     void on_btnArtEdit_clicked();
-
     void on_twArticles_itemClicked(QTableWidgetItem *);
-
     void on_cbRgArtikel_activated(const QString &);
-
     void on_leRgSinglePrice_returnPressed();
-
     void on_cbLiefDate_stateChanged();
-
     void on_actionExit_triggered();
-
     void on_actionDbSave_triggered();
-
     void on_actionDbRestore_triggered();
-
     void on_leRgSinglePrice_textChanged(const QString &arg1);
-
     void on_actionUeber_triggered();
 
 private:
@@ -244,12 +231,10 @@ private:
     DBManager* m_dbManager;
     int m_posNr;
     Settings m_settings;
-
     std::vector<Customers> m_customers;
     std::vector<Articles> m_articles;
     std::vector<Invoices> m_invoices;
     std::vector<Positions> m_positions;
-
     void readSettingsEdit();
     QString getSettings(SettingsColumns typ);
     void clearInvoices();
@@ -257,8 +242,6 @@ private:
     void clearPositions();
     void printPositions(QString rgnr);
     void setPositionsColumnsWidth() const;
-
-
     void articleEdit(QTableWidgetItem *item);
     void articleDelete();
     void articleAdd();
