@@ -1602,7 +1602,7 @@ void MainWindow::on_btnRgDetails_clicked()
 
 void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
 {
-    if (item != NULL)
+    if (item != nullptr)
     {
         ui->btnRgDetails->setEnabled(true);
         ui->btnRgDelete->setEnabled(true);

@@ -17,11 +17,13 @@ class WindowPositions : public QDialog
     Q_OBJECT
 
 public:
-    explicit WindowPositions(QWidget *parent = 0, std::vector<Positions> positions = {});
+    explicit WindowPositions(QWidget *parent = nullptr, std::vector<Positions> positions = {});
     ~WindowPositions();
 
 private slots:
     void on_btnClose_clicked();
+
+    void on_twRgPositions_itemDoubleClicked(QTableWidgetItem *);
 
 private:
     Ui::WindowPositions *ui;

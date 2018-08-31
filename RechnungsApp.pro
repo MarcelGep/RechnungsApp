@@ -33,7 +33,8 @@ SOURCES += \
     invoices.cpp \
     positions.cpp \
     windowPositions.cpp \
-    windowArticle.cpp
+    windowArticle.cpp \
+    windowEditPosition.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -44,12 +45,14 @@ HEADERS += \
     invoices.h \
     positions.h \
     windowPositions.h \
-    windowArticle.h
+    windowArticle.h \
+    windowEditPosition.h
 
 FORMS += \
         mainwindow.ui \
     windowPositions.ui \
-    windowArticle.ui
+    windowArticle.ui \
+    windowEditPosition.ui
 
 QT+= \
     network
