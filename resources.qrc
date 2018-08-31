@@ -21,7 +21,6 @@
         <file>icons/details.png</file>
         <file>icons/invoice_delete.png</file>
         <file>icons/article_edit.png</file>
-        <file>../../Desktop/rechnungsapp_icon.ico</file>
     </qresource>
     <qresource prefix="/32x32">
         <file>icons/fatcow-hosting-icons-3000/32x32/database_add.png</file>

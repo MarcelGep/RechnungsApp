@@ -35,10 +35,14 @@ class Settings
         QString getDateStr() const;
         void setDateStr(const QString &dateStr);
 
-    private:
+        QString getSteuer() const;
+        void setSteuer(const QString &steuer);
+
+private:
         QString m_kontakt;
         QString m_anschrift;
         QString m_konto;
+        QString m_steuer;
         QString m_ust;
         QString m_thx;
         QString m_freeText;

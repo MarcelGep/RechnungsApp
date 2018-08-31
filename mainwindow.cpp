@@ -1,7 +1,6 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "startapp.h"
 
 #include <qmessagebox.h>
 #include <QStandardItemModel>
@@ -10,7 +9,7 @@
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
 
-#define BORDER_ACTIVE
+//#define BORDER_ACTIVE
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -236,6 +235,7 @@ void MainWindow::on_btnEditCustomer_clicked()
         ui->leKdNr->clear();
 
         QString kdnr = ui->twCustomers->item(ui->twCustomers->currentRow(), KdNr)->text();
+
         Customers customer;
         m_dbManager->readCustomer(kdnr, customer);
 
@@ -668,10 +668,6 @@ void MainWindow::on_btnArtDelAll_clicked()
     }
 }
 
-void MainWindow::on_twCustomers_itemClicked(QTableWidgetItem *item)
-{
-}
-
 void MainWindow::on_btnRgClear_clicked()
 {
     clearBillEdits();
@@ -858,7 +854,7 @@ void MainWindow::on_twRgArticles_itemSelectionChanged()
     }
 }
 
-void MainWindow::on_cbRgArtikel_activated(int index)
+void MainWindow::on_cbRgArtikel_activated(int /*index*/)
 {
     ui->btnRgClear->setEnabled(true);
     ui->btnRgAddArticle->setEnabled(true);
@@ -962,7 +958,7 @@ void MainWindow::on_leRgUnit_returnPressed()
     ui->leRgSinglePrice->selectAll();
 }
 
-void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
+void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem */*item*/)
 {
     if (ui->twRgArticles->rowCount() > 0)
     {
@@ -1035,7 +1031,7 @@ void MainWindow::on_btnRgCreate_clicked()
     // Clear customer
     ui->cbRgCustomer->setCurrentIndex(-1);
 
-    QMessageBox::information(this, "Info", "Rechnung wurde erstellt!", QMessageBox::Ok);
+    //QMessageBox::information(this, "Info", "Die Rechnung wurde erstellt! ", QMessageBox::Ok | QMessageBox::Close);
 }
 
 void MainWindow::fillSettingsEdit()
@@ -1248,9 +1244,7 @@ void MainWindow::createInvoice()
     #endif
     m_painter->drawText(rectFreeText, getSettings(FreeText));
 
-
     // Position List
-
     /* Header */
     x = x_posLeft;
     y += 700;
@@ -1259,22 +1253,17 @@ void MainWindow::createInvoice()
     m_painter->drawLine(x, y, x_posRight, y);
 
     int y_posHeader = y + 150;
-    y = y_posHeader + metricPosHeaderFont.height() + 150;
+    int y_posSecLine = y_posHeader + metricPosHeaderFont.height() + 150;
 
-    m_painter->drawLine(x, y, x_posRight, y);
+    m_painter->drawLine(x, y_posSecLine, x_posRight, y_posSecLine);
+
+    y = y_posSecLine;
+
     m_painter->setPen(penDefault);
 
     y += 200;
 
     /* Data */
-    QStringList slPosNr;
-    QStringList slArtNr;
-    QStringList slLabel;
-    QStringList slCount;
-    QStringList slUnit;
-    QStringList slPrice;
-    QStringList slSumme;
-
     int maxLenPosNr = metricFont.width("0000");
     int maxLenArtNr = metricFont.width("00000000");
     int maxLenCount = metricFont.width("000000000");
@@ -1284,154 +1273,156 @@ void MainWindow::createInvoice()
     int dataLenght = maxLenPosNr + maxLenArtNr + maxLenCount + maxLenUnit + maxLenPrice + maxLenSumme + (6 * tabWidth);
     int maxLenDescription = pageContent - dataLenght;
 
-    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
-    {
-        slPosNr.append(ui->twRgArticles->item(i, PosNr)->text());
-        slArtNr.append(ui->twRgArticles->item(i, ArtNrPos)->text());
-        slLabel.append(ui->twRgArticles->item(i, BeschreibungPos)->text());
-        slCount.append(QString::number(ui->twRgArticles->item(i, AnzahlPos)->text().toDouble(), 'f', 2).replace(".", ","));
-        slUnit.append(ui->twRgArticles->item(i, EinheitPos)->text());
-        slPrice.append(ui->twRgArticles->item(i, EinzelPreisPos)->text());
-        slSumme.append(ui->twRgArticles->item(i, SummePos)->text());
-    }
-
-    QString posNrStr = slPosNr.join("\n\n");
-    QString artNrStr = slArtNr.join("\n\n");
-    QString labelStr = slLabel.join("\n\n");
-    QString countStr = slCount.join("\n\n");
-    QString unitStr = slUnit.join("\n\n");
-    QString priceStr = slPrice.join("\n\n");
-    QString summeStr = slSumme.join("\n\n");
-
-    // Anzahl der zu benötigten Zeilen
-    int rows = qRound((double(metricFont.width(labelStr)) / double(maxLenDescription)) + 0.49);
-
     // Position Label
-    QRect rectPosLabel(x, y_posHeader, maxLenPosNr, metricPosHeaderFont.height());
+    int x_position = x;
+    QRect rectPosLabel(x_position, y_posHeader, maxLenPosNr, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPosLabel);
     #endif
     m_painter->drawText(rectPosLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(Position_PosNr));
 
-    // Position
-    QRect rectPosNr(x, y, maxLenPosNr, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectPosNr);
-    #endif
-    m_painter->drawText(rectPosNr, Qt::AlignLeft | Qt::TextWordWrap, posNrStr);
-
-    x += rectPosNr.width() + tabWidth;
+    x += rectPosLabel.width() + tabWidth;
 
     // ArtNr Label
-    QRect rectArtNrLabel(x, y_posHeader, maxLenArtNr, metricPosHeaderFont.height());
+    int x_artNr = x;
+    QRect rectArtNrLabel(x_artNr, y_posHeader, maxLenArtNr, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectArtNrLabel);
     #endif
     m_painter->drawText(rectArtNrLabel, Qt::AlignLeft, m_dbManager->getPositionFields().value(Position_ArtNr));
 
-    // ArtNr
-    QRect rectArtNr(x, y, maxLenArtNr, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectArtNr);
-    #endif
-    m_painter->drawText(rectArtNr, Qt::AlignLeft | Qt::TextWordWrap, artNrStr);
-
-    x += rectArtNr.width() + tabWidth;
+    x += rectArtNrLabel.width() + tabWidth;
 
     // Beschreibung Label
-    QRect rectDescriptionLabel(x, y_posHeader, maxLenDescription, metricPosHeaderFont.height());
+    int x_description = x;
+    QRect rectDescriptionLabel(x_description, y_posHeader, maxLenDescription, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectDescriptionLabel);
     #endif
     m_painter->drawText(rectDescriptionLabel, Qt::AlignLeft, m_dbManager->getArticleFields().value(Article_Bezeichnung));
 
-    // Beschreibung
-    QRect rectDescription(x, y, maxLenDescription, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectDescription);
-    #endif
-    m_painter->drawText(rectDescription, Qt::AlignLeft | Qt::TextWordWrap, labelStr);
-
-    x += rectDescription.width() + tabWidth;
+    x += rectDescriptionLabel.width() + tabWidth;
 
     // Anzahl Label
-    QRect rectCountLabel(x, y_posHeader, maxLenCount, metricPosHeaderFont.height());
+    int x_count = x;
+    QRect rectCountLabel(x_count, y_posHeader, maxLenCount, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectCountLabel);
     #endif
     m_painter->drawText(rectCountLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Menge));
 
-    // Anzahl
-    QRect rectCount(x, y, maxLenCount, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectCount);
-    #endif
-    m_painter->drawText(rectCount, Qt::AlignRight | Qt::TextWordWrap, countStr);
-
     int x_totalLabel = x;
-    x += rectCount.width() + tabWidth;
+    x += rectCountLabel.width() + tabWidth;
 
     // Einheit Label
-    QRect rectUnitLabel(x, y_posHeader, maxLenUnit, metricPosHeaderFont.height());
+    int x_unit = x;
+    QRect rectUnitLabel(x_unit, y_posHeader, maxLenUnit, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectUnitLabel);
     #endif
     m_painter->drawText(rectUnitLabel, Qt::AlignHCenter, m_dbManager->getArticleFields().value(Article_Einheit));
 
-    // Einheit
-    QRect rectUnit(x, y, maxLenUnit, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectUnit);
-    #endif
-    m_painter->drawText(rectUnit, Qt::AlignHCenter | Qt::TextWordWrap, unitStr);
-
-    x += rectUnit.width() + tabWidth;
+    x += rectUnitLabel.width() + tabWidth;
 
     // Preis Label
-    QRect rectPriceLabel(x, y_posHeader, maxLenPrice, metricPosHeaderFont.height());
+    int x_price = x;
+    QRect rectPriceLabel(x_price, y_posHeader, maxLenPrice, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectPriceLabel);
     #endif
     m_painter->drawText(rectPriceLabel, Qt::AlignRight, m_dbManager->getArticleFields().value(Article_Preis));
 
-    // Preis
-    QRect rectPrice(x, y, maxLenPrice, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectPrice);
-    #endif
-    m_painter->drawText(rectPrice, Qt::AlignRight | Qt::TextWordWrap, priceStr);
-
-    x += rectPrice.width() + tabWidth;
+    x += rectPriceLabel.width() + tabWidth;
 
     // Summe Label
-    QRect rectSummeLabel(x, y_posHeader, maxLenSumme, metricPosHeaderFont.height());
+    int x_summe = x;
+    QRect rectSummeLabel(x_summe, y_posHeader, maxLenSumme, metricPosHeaderFont.height());
     m_painter->setFont(posHeaderFont);
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSummeLabel);
     #endif
     m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Gesamt));
 
-    // Summe
-    QRect rectSumme(x, y, maxLenSumme, metricFont.height() * (ui->twRgArticles->rowCount() * rows));
-    m_painter->setFont(font);
-    #ifdef BORDER_ACTIVE
-        m_painter->drawRect(rectSumme);
-    #endif
-    m_painter->drawText(rectSumme, Qt::AlignRight | Qt::TextWordWrap, summeStr);
+    y = y_posSecLine + 200;
 
-    y += rectSumme.height() + 200;
+    for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
+    {
+        QString posNrStr = ui->twRgArticles->item(i, PosNr)->text();
+        QString artNrStr = ui->twRgArticles->item(i, ArtNrPos)->text();
+        QString labelStr = ui->twRgArticles->item(i, BeschreibungPos)->text();
+        QString countStr = QString::number(ui->twRgArticles->item(i, AnzahlPos)->text().toDouble(), 'f', 2).replace(".", ",");
+        QString unitStr = ui->twRgArticles->item(i, EinheitPos)->text();
+        QString priceStr = ui->twRgArticles->item(i, EinzelPreisPos)->text();
+        QString summeStr = ui->twRgArticles->item(i, SummePos)->text();
+
+        int rows = qRound((double(metricFont.width(labelStr)) / double(maxLenDescription)) + 0.49);
+
+        // Position
+        QRect rectPosNr(x_position, y, maxLenPosNr, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectPosNr);
+        #endif
+        m_painter->drawText(rectPosNr, Qt::AlignLeft | Qt::TextWordWrap, posNrStr);
+
+        // ArtNr
+        QRect rectArtNr(x_artNr, y, maxLenArtNr, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectArtNr);
+        #endif
+        m_painter->drawText(rectArtNr, Qt::AlignLeft | Qt::TextWordWrap, artNrStr);
+
+        // Beschreibung
+        QRect rectDescription(x_description, y, maxLenDescription, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectDescription);
+        #endif
+        m_painter->drawText(rectDescription, Qt::AlignLeft | Qt::TextWordWrap, labelStr);
+
+        // Anzahl
+        QRect rectCount(x_count, y, maxLenCount, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectCount);
+        #endif
+        m_painter->drawText(rectCount, Qt::AlignRight | Qt::TextWordWrap, countStr);
+
+        // Einheit
+        QRect rectUnit(x_unit, y, maxLenUnit, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectUnit);
+        #endif
+        m_painter->drawText(rectUnit, Qt::AlignHCenter | Qt::TextWordWrap, unitStr);
+
+        // Preis
+        QRect rectPrice(x_price, y, maxLenPrice, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectPrice);
+        #endif
+        m_painter->drawText(rectPrice, Qt::AlignRight | Qt::TextWordWrap, priceStr);
+
+        // Summe
+        QRect rectSumme(x_summe, y, maxLenSumme, metricFont.height() * rows);
+        m_painter->setFont(font);
+        #ifdef BORDER_ACTIVE
+            m_painter->drawRect(rectSumme);
+        #endif
+        m_painter->drawText(rectSumme, Qt::AlignRight | Qt::TextWordWrap, summeStr);
+
+        y += metricFont.height() * rows + 200;
+    }
+
+    y += 100;
 
     // Trennlinie
     m_painter->setPen(penLine);
@@ -1451,7 +1442,6 @@ void MainWindow::createInvoice()
     m_painter->drawText(rectTotal, Qt::AlignRight, totalStr);
     m_painter->setFont(font);
 
-
     // Conclusion part
     y = h - bMargin - (metricFont.height() * 3) - (metricAccountFont.height()) - 250;
 
@@ -1465,7 +1455,7 @@ void MainWindow::createInvoice()
     m_painter->setFont(font);
     m_painter->drawText(rectConclusion, Qt::AlignBottom | Qt::AlignLeft, getSettings(Thx));
 
-    y += (metricFont.height() * 3) + 400;
+    y += metricFont.height() + 600;
 
     m_painter->setPen(penLineThin);
     m_painter->drawLine(x_posLeft, y, x_posRight, y);
@@ -1473,7 +1463,17 @@ void MainWindow::createInvoice()
 
     y += 100;
 
-    /* Account informations */
+    /* Steuernummer */
+    QRect rectSteuerNr(x_posLeft, y, pageContent, metricAccountFont.height());
+    #ifdef BORDER_ACTIVE
+        m_painter->drawRect(rectSteuerNr);
+    #endif
+    m_painter->setFont(accountFont);
+    m_painter->drawText(rectSteuerNr, Qt::AlignBottom | Qt::AlignHCenter, getSettings(Steuernummer));
+
+    y += metricFont.height() + 10;
+
+    /* Kontoinformationen */
     QRect rectAccountInfo(x_posLeft, y, pageContent, metricAccountFont.height());
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectAccountInfo);
@@ -1482,6 +1482,34 @@ void MainWindow::createInvoice()
     m_painter->drawText(rectAccountInfo, Qt::AlignBottom | Qt::AlignHCenter, getSettings(Konto));
 
     m_painter->end();
+
+    QMessageBox msgBox;
+    QPushButton *showButton = msgBox.addButton(tr("PDF Drucken"), QMessageBox::ActionRole);
+    msgBox.setText("Die Rechnung wurde erstellt!");
+    msgBox.setWindowTitle("Erstellung PDF");
+    msgBox.setButtonText(QMessageBox::Close, "Schließen");
+    msgBox.setDefaultButton(QMessageBox::Close);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.addButton(QMessageBox::Close);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == showButton)
+    {
+//        QPdfDocument *document = new QPdfDocument;
+//        document->load("/invoice/Rechnung_1107_20180831.pdf");
+
+//        QPdfView *view = new QPdfView;
+//        view->setDocument(document);
+//        view->show();
+
+//        QPrinter printer;
+//        QPrintDialog printDialog(&printer, this);
+//        if (printDialog.exec() == QDialog::Accepted)
+//        {
+//            // print ...
+//        }
+    }
 
     delete m_pdfPrinter;
     delete m_painter;
@@ -1615,12 +1643,12 @@ void MainWindow::on_btnRgDelete_clicked()
     }
 }
 
-void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem *item)
+void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem */*item*/)
 {
     on_btnRgDetails_clicked();
 }
 
-void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem *item)
+void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem */*item*/)
 {
     on_btnEditCustomer_clicked();
 }
@@ -1642,7 +1670,7 @@ void MainWindow::on_btnArtEdit_clicked()
     }
 }
 
-void MainWindow::on_twArticles_itemClicked(QTableWidgetItem *item)
+void MainWindow::on_twArticles_itemClicked(QTableWidgetItem */*item*/)
 {
     ui->btnArtEdit->setEnabled(true);
     ui->btnArtDelete->setEnabled(true);
@@ -1715,7 +1743,7 @@ void MainWindow::articleDelete()
     }
 }
 
-void MainWindow::on_cbRgArtikel_activated(const QString &arg1)
+void MainWindow::on_cbRgArtikel_activated(const QString &/*arg1*/)
 {
     ui->sbRgCount->setFocus();
     ui->sbRgCount->selectAll();

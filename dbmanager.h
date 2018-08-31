@@ -50,7 +50,7 @@ public:
     QMap<int, QString> getInvoiceFields() const;
     QMap<int, QString> getPositionFields() const;
     QMap<int, QString> getSettingsFields() const;
-    bool readSettings(Settings &settings);
+    bool readSettings(Settings);
     bool removeDBList(QString table);
     bool editSettings(Settings &settings);
 

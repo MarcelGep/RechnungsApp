@@ -590,12 +590,14 @@ bool DBManager::editSettings(Settings &settings)
         query.prepare("UPDATE Settings SET \"" + m_settingsFields[Kontakt] + "\" = :kontakt, "
                                           "\"" + m_settingsFields[Anschrift] + "\" = :anschrift, "
                                           "\"" + m_settingsFields[Konto] + "\" = :konto, "
+                                          "\"" + m_settingsFields[Steuernummer] + "\" = :steuer, "
                                           "\"" + m_settingsFields[USt] + "\" = :ust, "
                                           "\"" + m_settingsFields[Thx] + "\" = :thx, "
                                           "\"" + m_settingsFields[FreeText] + "\" = :freetext");
 
         query.bindValue(":kontakt", settings.getKontakt());
         query.bindValue(":anschrift", settings.getAnschrift());
+        query.bindValue(":steuer", settings.getSteuer());
         query.bindValue(":konto", settings.getKonto());
         query.bindValue(":ust", settings.getUst());
         query.bindValue(":thx", settings.getThx());
@@ -695,7 +697,7 @@ bool DBManager::readSetting(QString typ, QString& data)
     return true;
 }
 
-bool DBManager::readSettings(Settings &settings)
+bool DBManager::readSettings(Settings /*&settings*/)
 {
     return false;
 }

@@ -40,7 +40,7 @@
 #define DEFAULT_FONT_SIZE       160
 #define SUBJECT_FONT_SIZE       220
 #define SENDER_SMALL_FONT_SIZE  115
-#define ACCOUNT_FONT_SIZE       100
+#define ACCOUNT_FONT_SIZE       150
 
 enum ArtPosColumns
 {
@@ -92,6 +92,7 @@ enum SettingsColumns
     Kontakt,
     Anschrift,
     Konto,
+    Steuernummer,
     USt,
     Thx,
     FreeText,
@@ -174,7 +175,6 @@ private slots:
     void on_btnArtNew_clicked();
     void on_btnArtDelete_clicked();
     void on_btnArtDelAll_clicked();
-    void on_twCustomers_itemClicked(QTableWidgetItem *item);
     void on_btnRgClear_clicked();
     void on_cbRgArtikel_currentTextChanged(const QString &name);
     void on_sbRgCount_valueChanged(int value);
@@ -182,7 +182,7 @@ private slots:
     void on_btnRgDeteleAllArticle_clicked();
     void on_btnRgDeleteArticle_clicked();
     void on_twRgArticles_itemSelectionChanged();
-    void on_cbRgArtikel_activated(int index);
+    void on_cbRgArtikel_activated(int);
     void on_leRgName_textChanged(const QString &text);
     void on_twRgArticles_itemClicked(QTableWidgetItem *item);
     void on_btnCustomerBill_clicked();
@@ -190,7 +190,7 @@ private slots:
     void on_leRgArtNr_returnPressed();
     void on_sbRgCount_editingFinished();
     void on_leRgUnit_returnPressed();
-    void on_twRgArticles_itemChanged(QTableWidgetItem *item);
+    void on_twRgArticles_itemChanged(QTableWidgetItem *);
     void on_btnRgCreate_clicked();
     void on_btnSetCancel_clicked();
     void on_btnSetSave_clicked();
@@ -203,17 +203,17 @@ private slots:
     void on_twRgList_itemClicked(QTableWidgetItem *item);
     void on_btnRgDelete_clicked();
 
-    void on_twRgList_itemDoubleClicked(QTableWidgetItem *item);
+    void on_twRgList_itemDoubleClicked(QTableWidgetItem *);
 
-    void on_twCustomers_itemDoubleClicked(QTableWidgetItem *item);
+    void on_twCustomers_itemDoubleClicked(QTableWidgetItem *);
 
     void on_twArticles_itemDoubleClicked(QTableWidgetItem *item);
 
     void on_btnArtEdit_clicked();
 
-    void on_twArticles_itemClicked(QTableWidgetItem *item);
+    void on_twArticles_itemClicked(QTableWidgetItem *);
 
-    void on_cbRgArtikel_activated(const QString &arg1);
+    void on_cbRgArtikel_activated(const QString &);
 
     void on_leRgSinglePrice_returnPressed();
 

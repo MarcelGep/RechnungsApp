@@ -103,3 +103,13 @@ void Settings::setDateStr(const QString &dateStr)
 {
     m_dateStr = dateStr;
 }
+
+QString Settings::getSteuer() const
+{
+    return m_steuer;
+}
+
+void Settings::setSteuer(const QString &steuer)
+{
+    m_steuer = steuer;
+}
