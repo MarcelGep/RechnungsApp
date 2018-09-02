@@ -17,7 +17,7 @@
    <item>
     <widget class="QTableWidget" name="twRgPositions">
      <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+      <enum>Qt::ClickFocus</enum>
      </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
@@ -31,11 +31,17 @@
      <property name="dragDropOverwriteMode">
       <bool>false</bool>
      </property>
+     <property name="alternatingRowColors">
+      <bool>false</bool>
+     </property>
      <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="cornerButtonEnabled">
+      <bool>false</bool>
      </property>
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>false</bool>

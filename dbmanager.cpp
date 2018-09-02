@@ -505,6 +505,46 @@ bool DBManager::editArticle(QString id, const Articles& article)
         return false;
 }
 
+bool DBManager::editPosition(QString id, const Positions& position)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        query.prepare("UPDATE Positionen SET "
+                                "'"+m_invoiceFields[Position_Menge]+"'= :kdnr, "
+                                "'"+m_invoiceFields[Pos]+"'= :firma, "
+                                "'"+m_invoiceFields[Invoice_Amount]+"'= :firma, "
+                                "'"+m_invoiceFields[Invoice_USt]+"'= :firma, "
+                                "'"+m_invoiceFields[Invoice_Skonto]+"'= :firma, "
+                                "'"+m_invoiceFields[Invoice_Currency]+"'= :firma "
+                         "WHERE \"" + m_invoiceFields[KdNr] + "\" = '"+id+"'");
+
+//        query.bindValue(":kdnr", position.);
+//        query.bindValue(":ort", customer.getOrt());
+//        query.bindValue(":land", customer.getLand());
+//        query.bindValue(":telefon", customer.getTelefon());
+//        query.bindValue(":telefax", customer.getTelefax());
+//        query.bindValue(":email", customer.getEmail());
+//        query.bindValue(":website", customer.getWebsite());
+//        query.bindValue(":rabatt", customer.getRabatt());
+//        query.bindValue(":kontostand",customer.getKontostand());
+//        query.bindValue(":info", customer.getInfo());
+
+        if(query.exec())
+        {
+            return true;
+        }
+        else
+        {
+            qDebug() << DEBUG_TAG << ": Edit ERROR - " << query.lastError();
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
 bool DBManager::editCustomer(QString id, const Customers& customer)
 {
     if(isOpen())

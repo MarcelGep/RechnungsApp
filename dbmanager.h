@@ -32,6 +32,7 @@ public:
     bool addCustomer(const Customers &customer);
     bool addBill(QString datum, double betrag);
     bool editCustomer(QString id, const Customers &customer);
+    bool editInvoice(QString id, const Positions& position);
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
     void closeDatabase();
