@@ -1047,6 +1047,12 @@ void MainWindow::readSettingsEdit()
 void MainWindow::createInvoice()
 {
     QString outPath = PATH_PDF;
+
+    if(!QDir(PATH_PDF).exists())
+    {
+        QDir().mkdir(PATH_PDF);
+    }
+
     QStringList dateList = ui->deRgDate->text().split(".");
     QString date = dateList[dateList.size()-1] + dateList[dateList.size()-2] + dateList[dateList.size()-3];
     QString outputName = outPath + "Rechnung_" + ui->leRgNr->text() + "_" + date + ".pdf";
