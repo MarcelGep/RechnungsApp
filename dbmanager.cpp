@@ -513,7 +513,7 @@ bool DBManager::editPosition(QString id, const Positions& position)
 
         query.prepare("UPDATE Positionen SET "
                                 "'"+m_invoiceFields[Position_Menge]+"'= :kdnr, "
-                                "'"+m_invoiceFields[Pos]+"'= :firma, "
+                                "'"+m_invoiceFields[Position_Menge]+"'= :firma, "
                                 "'"+m_invoiceFields[Invoice_Amount]+"'= :firma, "
                                 "'"+m_invoiceFields[Invoice_USt]+"'= :firma, "
                                 "'"+m_invoiceFields[Invoice_Skonto]+"'= :firma, "
