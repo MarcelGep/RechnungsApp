@@ -136,8 +136,11 @@ enum PositionColumns
     Position_PosNr,
     Position_ArtNr,
     Position_RgNr,
+    Position_Beschreibung,
     Position_Menge,
-    Position_Gesamt,
+    Position_Einheit,
+    Position_Preis,
+    Position_Gesamtpreis,
 
     PositionColumns_Count
 };
@@ -199,10 +202,10 @@ private slots:
     void on_deRgDate_dateChanged(const QDate &date);
     void on_tabWidgetMain_currentChanged(int index);
     void on_tabWidgetInvoice_currentChanged(int index);
-    void on_btnRgDetails_clicked();
+    void on_btnRgDetails_clicked(QTableWidgetItem *item);
     void on_twRgList_itemClicked(QTableWidgetItem *item);
     void on_btnRgDelete_clicked();
-    void on_twRgList_itemDoubleClicked(QTableWidgetItem *);
+    void on_twRgList_itemDoubleClicked(QTableWidgetItem *item);
     void on_twCustomers_itemDoubleClicked(QTableWidgetItem *);
     void on_twArticles_itemDoubleClicked(QTableWidgetItem *item);
     void on_btnArtEdit_clicked();

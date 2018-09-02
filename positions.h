@@ -8,7 +8,8 @@ class Positions
 {
 public:
     Positions();
-    Positions(int pos, int rgnr, int artnr, int menge, double total);
+//    Positions(int pos, int rgnr, int artnr, int menge, double total);
+    Positions(int pos, int rgnr, int artnr, QString beschreibung, QString einheit, int menge, double price, double total);
     Positions(int pos, int artnr, QString name, int menge, QString unit, double price, double total, QString description);
     ~Positions();
 
@@ -30,11 +31,23 @@ public:
     int getPos() const;
     void setPos(int value);
 
+    QString getBeschreibung() const;
+    void setBeschreibung(const QString &value);
+
+    QString getEinheit() const;
+    void setEinheit(const QString &value);
+
+    double getPrice() const;
+    void setPrice(double value);
+
 private:
     int pos;
     int rgnr;
     int artnr;
+    QString beschreibung;
+    QString einheit;
     int menge;
+    double price;
     double total;
     Articles article;
 };

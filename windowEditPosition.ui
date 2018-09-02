@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>403</width>
+    <height>417</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -19,15 +31,19 @@
      <property name="horizontalSpacing">
       <number>20</number>
      </property>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="leEditPosPosition">
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Summe €</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="leEditPosSumme">
        <property name="enabled">
         <bool>false</bool>
        </property>
       </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="leEditPosName"/>
      </item>
      <item row="6" column="1">
       <widget class="QLineEdit" name="leEditPosPreis"/>
@@ -36,27 +52,6 @@
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Position</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>ArtNr.</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Bezeichnung</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="leEditPosArtNr">
-       <property name="enabled">
-        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -70,7 +65,44 @@
      <item row="6" column="0">
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>Preis</string>
+        <string>Preis €</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="leEditPosAnzahl"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>ArtNr.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="leEditPosPosition">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lbDescription">
+       <property name="text">
+        <string>Beschreibung</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLineEdit" name="leEditPosEinheit"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="leEditPosArtNr">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -81,33 +113,16 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QLineEdit" name="leEditPosEinheit"/>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="leEditPosBezeichnung"/>
-     </item>
-     <item row="4" column="1">
-      <widget class="QLineEdit" name="leEditPosAnzahl"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Name</string>
+     <item row="2" column="1">
+      <widget class="QTextEdit" name="teEditPosBezeichnung">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Summe</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QLineEdit" name="leEditPosSumme">
-       <property name="enabled">
-        <bool>false</bool>
+       <property name="tabChangesFocus">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -164,6 +179,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>teEditPosBezeichnung</tabstop>
+  <tabstop>leEditPosAnzahl</tabstop>
+  <tabstop>leEditPosEinheit</tabstop>
+  <tabstop>leEditPosPreis</tabstop>
+  <tabstop>leEditPosSumme</tabstop>
+  <tabstop>btnEditPosSave</tabstop>
+  <tabstop>btnEditPosCancel</tabstop>
+  <tabstop>leEditPosArtNr</tabstop>
+  <tabstop>leEditPosPosition</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

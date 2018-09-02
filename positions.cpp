@@ -6,15 +6,19 @@ Positions::Positions()
     rgnr = -1;
     artnr = -1;
     menge = -1;
+    price = -1;
     total = -1;
 }
 
-Positions::Positions(int pos, int rgnr, int artnr, int menge, double total)
+Positions::Positions(int pos, int rgnr, int artnr, QString beschreibung, QString einheit, int menge, double price, double total)
 {
     this->pos = pos;
     this->rgnr = rgnr;
     this->artnr = artnr;
+    this->beschreibung = beschreibung;
+    this->einheit = einheit;
     this->menge = menge;
+    this->price = price;
     this->total = total;
 }
 
@@ -93,4 +97,34 @@ int Positions::getPos() const
 void Positions::setPos(int value)
 {
     pos = value;
+}
+
+QString Positions::getBeschreibung() const
+{
+    return beschreibung;
+}
+
+void Positions::setBeschreibung(const QString &value)
+{
+    beschreibung = value;
+}
+
+QString Positions::getEinheit() const
+{
+    return einheit;
+}
+
+void Positions::setEinheit(const QString &value)
+{
+    einheit = value;
+}
+
+double Positions::getPrice() const
+{
+    return price;
+}
+
+void Positions::setPrice(double value)
+{
+    price = value;
 }

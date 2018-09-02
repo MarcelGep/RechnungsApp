@@ -148,7 +148,7 @@ void MainWindow::on_btnSaveCustomer_clicked()
                        kontostand,
                        info);
 
-    if (m_dbManager->dbEntryExist(KUNDEN, QString::number(kdnr)))
+    if (m_dbManager->dbEntryExist(KUNDE, QString::number(kdnr)))
     {
         if (m_dbManager->editCustomer(QString::number(kdnr), customer))
         {
@@ -191,7 +191,7 @@ void MainWindow::on_btnDeleteCustomer_clicked()
         if(msg.exec() == QMessageBox::Yes)
         {
             QString id = ui->twCustomers->item(ui->twCustomers->currentRow(), 0)->text();
-            m_dbManager->removeDbEntry(KUNDEN, id);
+            m_dbManager->removeDbEntry(KUNDE, id);
             printAllCustomers();
 
             if (ui->tabWidKunden->currentIndex() == EditTab)
@@ -216,7 +216,7 @@ void MainWindow::on_btnNewCustomer_clicked()
 {
     clearCustomerEdits();
 
-    int lastID = m_dbManager->readLastID(KUNDEN);
+    int lastID = m_dbManager->readLastID(KUNDE);
     ui->leKdNr->setText(QString::number(lastID + 1));
 
     ui->tabWidKunden->setCurrentIndex(EditTab);
@@ -359,7 +359,7 @@ void MainWindow::printAllInvoices()
        ui->twRgList->setItem(row, Invoice_RgNr, new QTableWidgetItem(QString::number(it->rgnr())));
        ui->twRgList->setItem(row, Invoice_KdNr, new QTableWidgetItem(QString::number(it->kdnr())));
        ui->twRgList->setItem(row, Invoice_RgDate, new QTableWidgetItem(it->rgdate()));
-       ui->twRgList->setItem(row, Invoice_Amount, new QTableWidgetItem(QString::number(it->amount(), 'f', 2) + " €"));
+       ui->twRgList->setItem(row, Invoice_Amount, new QTableWidgetItem(QLocale().toCurrencyString(it->amount())));
        ui->twRgList->item(row, Invoice_Amount)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
        ui->twRgList->setItem(row, Invoice_USt, new QTableWidgetItem(QString::number(it->ust(), 'f', 1) + " %"));
        ui->twRgList->item(row, Invoice_USt)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
@@ -499,7 +499,7 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
         }
         else
         {
-            int lastID = m_dbManager->readLastID(KUNDEN);
+            int lastID = m_dbManager->readLastID(KUNDE);
             ui->leKdNr->setText(QString::number(lastID + 1));
 
             QPixmap pixmap = QPixmap(":/Icons/icons/customer_add.png");
@@ -552,7 +552,7 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
             ui->cbRgCustomer->addItems(entries);
 
             // Fill invoice number
-            int lastRgNr = m_dbManager->readLastID(RECHNUNGEN);
+            int lastRgNr = m_dbManager->readLastID(RECHNUNG);
             ui->leRgNr->setText(QString::number(lastRgNr + 1));
 
             // Fill subject line
@@ -989,9 +989,12 @@ void MainWindow::on_btnRgCreate_clicked()
         int rgnr = ui->leRgNr->text().toInt();
         int artnr = ui->twRgArticles->item(i, ArtNrPos)->text().toInt();
         int menge = ui->twRgArticles->item(i, AnzahlPos)->text().toInt();
-        double total = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).toDouble();
+        QString beschreibung = ui->twRgArticles->item(i, BeschreibungPos)->text();
+        QString einheit = ui->twRgArticles->item(i, EinheitPos)->text();
+        double preis = ui->twRgArticles->item(i, EinzelPreisPos)->text().split(" ").value(0).replace(".", "").replace(",", ".").toDouble();
+        double total = ui->twRgArticles->item(i, SummePos)->text().split(" ").value(0).replace(".", "").replace(",", ".").toDouble();
 
-        Positions position(pos, rgnr, artnr, menge, total);
+        Positions position(pos, rgnr, artnr, beschreibung, einheit, menge, preis, total);
 
         m_dbManager->addPosition(position);
     }
@@ -1025,7 +1028,7 @@ void MainWindow::on_btnRgCreate_clicked()
     m_posNr = 0;
 
     // Fill invoice number
-    int lastRgNr = m_dbManager->readLastID(RECHNUNGEN);
+    int lastRgNr = m_dbManager->readLastID(RECHNUNG);
     ui->leRgNr->setText(QString::number(lastRgNr + 1));
 
     // Clear customer
@@ -1353,7 +1356,7 @@ void MainWindow::createInvoice()
     #ifdef BORDER_ACTIVE
         m_painter->drawRect(rectSummeLabel);
     #endif
-    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Gesamt));
+    m_painter->drawText(rectSummeLabel, Qt::AlignRight, m_dbManager->getPositionFields().value(Position_Gesamtpreis));
 
     y = y_posSecLine + 200;
 
@@ -1586,9 +1589,8 @@ void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
     }
 }
 
-void MainWindow::on_btnRgDetails_clicked()
+void MainWindow::on_btnRgDetails_clicked(QTableWidgetItem *item)
 {
-    QTableWidgetItem* item = ui->twRgList->selectedItems().value(0);
     QString rgnr = ui->twRgList->item(item->row(), 0)->text();
 
     m_positions.clear();
@@ -1639,8 +1641,8 @@ void MainWindow::on_btnRgDelete_clicked()
         QTableWidgetItem* item = ui->twRgList->selectedItems().value(0);
         QString rgnr = ui->twRgList->item(item->row(), 0)->text();
 
-        m_dbManager->removeDbEntry(RECHNUNGEN, rgnr);
-        m_dbManager->removeDbEntries(POSITIONEN, m_dbManager->getInvoiceFields()[Invoice_RgNr], rgnr);
+        m_dbManager->removeDbEntry(RECHNUNG, rgnr);
+        m_dbManager->removeDbEntries(POSITION, m_dbManager->getInvoiceFields()[Invoice_RgNr], rgnr);
 
         printAllInvoices();
 
@@ -1649,9 +1651,9 @@ void MainWindow::on_btnRgDelete_clicked()
     }
 }
 
-void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem */*item*/)
+void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem *item)
 {
-    on_btnRgDetails_clicked();
+    on_btnRgDetails_clicked(item);
 }
 
 void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem */*item*/)

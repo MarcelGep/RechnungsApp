@@ -15,11 +15,11 @@
 
 #define DEBUG_TAG "DBManager"
 
-#define ARTIKEL     "Artikel"
-#define KUNDEN      "Kunden"
-#define RECHNUNGEN  "Rechnungen"
-#define POSITIONEN  "Positionen"
-#define SETTINGS    "Settings"
+#define ARTIKEL   "Artikel"
+#define KUNDE     "Kunde"
+#define RECHNUNG  "Rechnung"
+#define POSITION  "Position"
+#define SETTINGS  "Settings"
 
 class DBManager
 {

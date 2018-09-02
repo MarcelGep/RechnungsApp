@@ -7,28 +7,27 @@ WindowPositions::WindowPositions(QWidget *parent, std::vector<Positions> positio
     QDialog(parent),
     ui(new Ui::WindowPositions),
     m_positions(positions),
-    m_windowSize(0, 0)
+    m_windowSize(0, 0),
+    m_selectedRow( -1 )
 {
     ui->setupUi(this);
 
     setWindowFlags(windowFlags() ^ Qt::WindowContextHelpButtonHint);
 
     // Setup invoice positions
-    ui->twRgPositions->setColumnCount(8);
+    ui->twRgPositions->setColumnCount(ArtPosColumnsCount);
 
-    ui->twRgPositions->setHorizontalHeaderItem(0, new QTableWidgetItem("Pos."));
-    ui->twRgPositions->setHorizontalHeaderItem(1, new QTableWidgetItem("Art-Nr."));
-    ui->twRgPositions->setHorizontalHeaderItem(2, new QTableWidgetItem("Bezeichnung"));
-    ui->twRgPositions->setHorizontalHeaderItem(3, new QTableWidgetItem("Beschreibung"));
-    ui->twRgPositions->setHorizontalHeaderItem(4, new QTableWidgetItem("Anzahl"));
-    ui->twRgPositions->setHorizontalHeaderItem(5, new QTableWidgetItem("Einheit"));
-    ui->twRgPositions->setHorizontalHeaderItem(6, new QTableWidgetItem("E-Preis"));
-    ui->twRgPositions->setHorizontalHeaderItem(7, new QTableWidgetItem("Gesamt"));
+    ui->twRgPositions->setHorizontalHeaderItem(PosNr, new QTableWidgetItem("Pos."));
+    ui->twRgPositions->setHorizontalHeaderItem(ArtNrPos, new QTableWidgetItem("Art-Nr."));
+    ui->twRgPositions->setHorizontalHeaderItem(BeschreibungPos, new QTableWidgetItem("Beschreibung"));
+    ui->twRgPositions->setHorizontalHeaderItem(AnzahlPos, new QTableWidgetItem("Anzahl"));
+    ui->twRgPositions->setHorizontalHeaderItem(EinheitPos, new QTableWidgetItem("Einheit"));
+    ui->twRgPositions->setHorizontalHeaderItem(EinzelPreisPos, new QTableWidgetItem("E-Preis"));
+    ui->twRgPositions->setHorizontalHeaderItem(SummePos, new QTableWidgetItem("Gesamt"));
 
     QFont fontInvoicePos("MS Shell Dlg 2", 8, QFont::Bold);
     ui->twRgPositions->horizontalHeader()->setFont(fontInvoicePos);
-    ui->twRgPositions->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twRgPositions->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
+    ui->twRgPositions->horizontalHeader()->setSectionResizeMode(BeschreibungPos, QHeaderView::Stretch);
 
     printPositions();
 }
@@ -51,16 +50,15 @@ void WindowPositions::printPositions()
        int row = ui->twRgPositions->rowCount();
        ui->twRgPositions->insertRow(row);
        ui->twRgPositions->setRowHeight(row, INVOICE_ROW_HEIGHT);
-       ui->twRgPositions->setItem(row, 0, new QTableWidgetItem(QString::number(it->getPos())));
-       ui->twRgPositions->setItem(row, 1, new QTableWidgetItem(QString::number(it->getArtnr())));
-       ui->twRgPositions->setItem(row, 2, new QTableWidgetItem(it->getArticle().getName()));
-       ui->twRgPositions->setItem(row, 3, new QTableWidgetItem(it->getArticle().getDescription()));
-       ui->twRgPositions->setItem(row, 4, new QTableWidgetItem(QString::number(it->getMenge())));
-       ui->twRgPositions->setItem(row, 5, new QTableWidgetItem(it->getArticle().getUnit()));
-       ui->twRgPositions->setItem(row, 6, new QTableWidgetItem(QString::number(it->getArticle().getPrice(), 'f', 2) + " €"));
-       ui->twRgPositions->item(row, 6)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-       ui->twRgPositions->setItem(row, 7, new QTableWidgetItem(QString::number(it->getTotal(),'f', 2) + " €"));
-       ui->twRgPositions->item(row, 7)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twRgPositions->setItem(row, PosNr, new QTableWidgetItem(QString::number(it->getPos())));
+       ui->twRgPositions->setItem(row, ArtNrPos, new QTableWidgetItem(QString::number(it->getArtnr())));
+       ui->twRgPositions->setItem(row, BeschreibungPos, new QTableWidgetItem(it->getBeschreibung()));
+       ui->twRgPositions->setItem(row, AnzahlPos, new QTableWidgetItem(QString::number(it->getMenge())));
+       ui->twRgPositions->setItem(row, EinheitPos, new QTableWidgetItem(it->getEinheit()));
+       ui->twRgPositions->setItem(row, EinzelPreisPos, new QTableWidgetItem(QLocale().toCurrencyString(it->getPrice())));
+       ui->twRgPositions->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+       ui->twRgPositions->setItem(row, SummePos, new QTableWidgetItem(QLocale().toCurrencyString(it->getTotal())));
+       ui->twRgPositions->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     }
 
     // Set customer table column width offset
@@ -101,39 +99,47 @@ void WindowPositions::on_btnClose_clicked()
 
 void WindowPositions::on_twRgPositions_itemDoubleClicked(QTableWidgetItem */*item*/)
 {
-    int selectedRow = ui->twRgPositions->currentRow();
+    m_selectedRow = ui->twRgPositions->currentRow();
 
-    int pos = ui->twRgPositions->item(selectedRow, 0)->text().toInt();
-    int artNr = ui->twRgPositions->item(selectedRow, 1)->text().toInt();
-    QString name = ui->twRgPositions->item(selectedRow, 2)->text();
-    QString description = ui->twRgPositions->item(selectedRow, 3)->text();
-    int menge = ui->twRgPositions->item(selectedRow, 4)->text().toInt();
-    QString unit = ui->twRgPositions->item(selectedRow, 5)->text();
-    double price = ui->twRgPositions->item(selectedRow, 6)->text().replace(",", ".").toDouble();
-    double total = ui->twRgPositions->item(selectedRow, 7)->text().replace(",", ".").toDouble();
+    int pos = m_positions[m_selectedRow].getPos();
+    int artNr = m_positions[m_selectedRow].getArtnr();
+    int rgnr = m_positions[m_selectedRow].getRgnr();
+    QString description = m_positions[m_selectedRow].getBeschreibung();
+    QString unit = m_positions[m_selectedRow].getEinheit();
+    int menge = m_positions[m_selectedRow].getMenge();
+    double price = m_positions[m_selectedRow].getPrice();
+    double total = m_positions[m_selectedRow].getTotal();
 
-    Positions position(pos, artNr, name, menge, unit, price, total, description);
+    Positions position(pos, rgnr, artNr, description,unit, menge, price, total);
 
     WindowEditPosition epos(this, position);
     epos.setWindowTitle("Position bearbeiten");
+
+    connect(&epos, SIGNAL(editPosition(Positions)), this, SLOT(positionChanged(Positions)));
+
     if(epos.exec() == QDialog::Rejected)
+    {
         return;
+    }
+}
 
+void WindowPositions::positionChanged(Positions position)
+{
+    m_positions[m_selectedRow] = position;
+    printPositions();
+}
 
-//    for (std::vector<Positions>::iterator it = m_positions.begin(); it != m_positions.end(); ++it)
-//    {
-//       int row = ui->twRgPositions->rowCount();
-//       ui->twRgPositions->insertRow(row);
-//       ui->twRgPositions->setRowHeight(row, INVOICE_ROW_HEIGHT);
-//       ui->twRgPositions->setItem(row, 0, new QTableWidgetItem(QString::number(it->getPos())));
-//       ui->twRgPositions->setItem(row, 1, new QTableWidgetItem(QString::number(it->getArtnr())));
-//       ui->twRgPositions->setItem(row, 2, new QTableWidgetItem(it->getArticle().getName()));
-//       ui->twRgPositions->setItem(row, 3, new QTableWidgetItem(it->getArticle().getDescription()));
-//       ui->twRgPositions->setItem(row, 4, new QTableWidgetItem(QString::number(it->getMenge())));
-//       ui->twRgPositions->setItem(row, 5, new QTableWidgetItem(it->getArticle().getUnit()));
-//       ui->twRgPositions->setItem(row, 6, new QTableWidgetItem(QString::number(it->getArticle().getPrice(), 'f', 2) + " €"));
-//       ui->twRgPositions->item(row, 6)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-//       ui->twRgPositions->setItem(row, 7, new QTableWidgetItem(QString::number(it->getTotal(),'f', 2) + " €"));
-//       ui->twRgPositions->item(row, 7)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-//    }
+std::vector<Positions> WindowPositions::positions() const
+{
+    return m_positions;
+}
+
+void WindowPositions::setPositions(const std::vector<Positions> &positions)
+{
+    m_positions = positions;
+}
+
+void WindowPositions::on_btnPositionSave_clicked()
+{
+    //TODO save rechnung to DB
 }

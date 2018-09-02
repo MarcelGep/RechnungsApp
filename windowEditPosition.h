@@ -20,9 +20,16 @@ private slots:
     void on_btnEditPosSave_clicked();
     void on_btnEditPosCancel_clicked();
 
+    void on_leEditPosAnzahl_textChanged(const QString &menge);
+
+    void on_leEditPosPreis_textChanged(const QString &preis);
+
 private:
     Ui::WindowEditPosition *ui;
     Positions m_position;
+
+signals:
+    void editPosition(Positions);
 };
 
 #endif // WINDOWEDITPOSITION_H

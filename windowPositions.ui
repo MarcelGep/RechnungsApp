@@ -52,11 +52,25 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="btnClose">
-     <property name="text">
-      <string>Schließen</string>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>30</number>
      </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="btnPositionSave">
+       <property name="text">
+        <string>Speichern</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="text">
+        <string>Schließen</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

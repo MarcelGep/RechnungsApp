@@ -40,10 +40,10 @@ void DBManager::openDatabase(QString path)
         qDebug() << DEBUG_TAG << ": Database Connection to " + m_db.databaseName() /*fileInfo.absoluteFilePath()*/ + " successfull!";
 
         // Read table fields from DB
-        m_customerFields = readFieldNames(KUNDEN);
+        m_customerFields = readFieldNames(KUNDE);
         m_articleFields = readFieldNames(ARTIKEL);
-        m_invoiceFields = readFieldNames(RECHNUNGEN);
-        m_positionFields = readFieldNames(POSITIONEN);
+        m_invoiceFields = readFieldNames(RECHNUNG);
+        m_positionFields = readFieldNames(POSITION);
         m_settingsFields = readFieldNames(SETTINGS);
     }
 }
@@ -119,34 +119,17 @@ bool DBManager::isOpen() const
     return m_db.isOpen();
 }
 
-//bool DBManager::removeAllArticles()
-//{
-//    QSqlQuery removeQuery;
-//    removeQuery.prepare("DELETE FROM articles");
-
-//    if (removeQuery.exec())
-//    {
-//        qDebug() << DEBUG_TAG << ": All articles deleted!";
-//        return true;
-//    }
-//    else
-//    {
-//        qDebug() << DEBUG_TAG << ": remove all articles failed: " << removeQuery.lastError();
-//        return false;
-//    }
-//}
-
 bool DBManager::addInvoice(const Invoices& invoice)
 {
     bool success = false;
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Rechnungen (\"" + m_invoiceFields[Invoice_KdNr] + "\", "
-                                             "\"" + m_invoiceFields[Invoice_RgDate] + "\", "
-                                             "\"" + m_invoiceFields[Invoice_Amount] + "\", "
-                                             "\"" + m_invoiceFields[Invoice_USt] + "\", "
-                                             "\"" + m_invoiceFields[Invoice_Skonto] + "\", "
-                                             "\"" + m_invoiceFields[Invoice_Currency] + "\") "
+    queryAdd.prepare("INSERT INTO Rechnung (\"" + m_invoiceFields[Invoice_KdNr] + "\", "
+                                           "\"" + m_invoiceFields[Invoice_RgDate] + "\", "
+                                           "\"" + m_invoiceFields[Invoice_Amount] + "\", "
+                                           "\"" + m_invoiceFields[Invoice_USt] + "\", "
+                                           "\"" + m_invoiceFields[Invoice_Skonto] + "\", "
+                                           "\"" + m_invoiceFields[Invoice_Currency] + "\") "
                              "VALUES (:kdnr, "
                                      ":rgdate, "
                                      ":amount, "
@@ -180,21 +163,30 @@ bool DBManager::addPosition(const Positions& position)
     bool success = false;
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Positionen (\"" + m_positionFields[Position_PosNr] + "\", "
-                                             "\"" + m_positionFields[Position_RgNr] + "\", "
-                                             "\"" + m_positionFields[Position_ArtNr] + "\", "
-                                             "\"" + m_positionFields[Position_Menge] + "\", "
-                                             "\"" + m_positionFields[Position_Gesamt] + "\") "
+    queryAdd.prepare("INSERT INTO Position (\"" + m_positionFields[Position_PosNr] + "\", "
+                                            "\"" + m_positionFields[Position_RgNr] + "\", "
+                                            "\"" + m_positionFields[Position_ArtNr] + "\", "
+                                            "\"" + m_positionFields[Position_Beschreibung] + "\", "
+                                            "\"" + m_positionFields[Position_Einheit] + "\", "
+                                            "\"" + m_positionFields[Position_Menge] + "\", "
+                                            "\"" + m_positionFields[Position_Preis] + "\", "
+                                            "\"" + m_positionFields[Position_Gesamtpreis] + "\") "
                              "VALUES (:pos, "
                                      ":rgnr, "
                                      ":artnr, "
+                                     ":beschreibung, "
+                                     ":einheit, "
                                      ":menge, "
+                                     ":preis, "
                                      ":gesamt)");
 
     queryAdd.bindValue(":pos", position.getPos());
     queryAdd.bindValue(":rgnr", position.getRgnr());
     queryAdd.bindValue(":artnr", position.getArtnr());
+    queryAdd.bindValue(":beschreibung", position.getBeschreibung());
+    queryAdd.bindValue(":einheit", position.getEinheit());
     queryAdd.bindValue(":menge", position.getMenge());
+    queryAdd.bindValue(":preis", position.getPrice());
     queryAdd.bindValue(":gesamt", position.getTotal());
 
     if(queryAdd.exec())
@@ -217,9 +209,9 @@ bool DBManager::addArticle(const Articles& article)
 
     QSqlQuery queryAdd;
     queryAdd.prepare("INSERT INTO Artikel (\"" + m_articleFields[Article_Einheit] + "\", "
-                                         "\"" + m_articleFields[Article_Bezeichnung] + "\", "
-                                         "\"" + m_articleFields[Article_Preis] + "\", "
-                                         "\"" + m_articleFields[Article_Beschreibung] + "\") "
+                                          "\"" + m_articleFields[Article_Bezeichnung] + "\", "
+                                          "\"" + m_articleFields[Article_Preis] + "\", "
+                                          "\"" + m_articleFields[Article_Beschreibung] + "\") "
                              "VALUES (:einheit, "
                                      ":bezeichnung, "
                                      ":preis, "
@@ -249,7 +241,7 @@ bool DBManager::addCustomer(const Customers& customer)
     bool success = false;
 
     QSqlQuery queryAdd;
-    queryAdd.prepare("INSERT INTO Kunden (\"" + m_customerFields[Firma] + "\", "
+    queryAdd.prepare("INSERT INTO Kunde (\"" + m_customerFields[Firma] + "\", "
                                          "\"" + m_customerFields[Name1] + "\", "
                                          "\"" + m_customerFields[Name2] + "\", "
                                          "\"" + m_customerFields[Strasse] + "\", "
@@ -311,7 +303,7 @@ bool DBManager::readInvoices(std::vector<Invoices> &invoices)
     if (m_db.isOpen())
     {
         QSqlQuery query;
-        query.prepare("SELECT * FROM Rechnungen ORDER BY \"" + m_invoiceFields[Invoice_RgNr] + "\" ASC");
+        query.prepare("SELECT * FROM Rechnung ORDER BY \"" + m_invoiceFields[Invoice_RgNr] + "\" ASC");
 
         if(!query.exec())
         {
@@ -463,7 +455,7 @@ void DBManager::removeBill(int billID)
     }
 
     QSqlQuery queryDelete;
-    queryDelete.prepare("DELETE FROM Rechnungen WHERE \"" + m_invoiceFields[0] + "\" = '"+id+"'");
+    queryDelete.prepare("DELETE FROM Rechnung WHERE \"" + m_invoiceFields[0] + "\" = '"+id+"'");
 
     if(!queryDelete.exec())
     {
@@ -511,7 +503,7 @@ bool DBManager::editPosition(QString id, const Positions& position)
     {
         QSqlQuery query;
 
-        query.prepare("UPDATE Positionen SET "
+        query.prepare("UPDATE Position SET "
                                 "'"+m_invoiceFields[Position_Menge]+"'= :kdnr, "
                                 "'"+m_invoiceFields[Position_Menge]+"'= :firma, "
                                 "'"+m_invoiceFields[Invoice_Amount]+"'= :firma, "
@@ -551,7 +543,7 @@ bool DBManager::editCustomer(QString id, const Customers& customer)
     {
         QSqlQuery query;
 
-        query.prepare("UPDATE Kunden SET "
+        query.prepare("UPDATE Kunde SET "
                               "'"+m_customerFields[Firma]+"'= :firma, "
                               "'"+m_customerFields[Name1]+"' = :name1, "
                               "'"+m_customerFields[Name2]+"' = :name2, "
@@ -791,7 +783,7 @@ bool DBManager::readCustomer(QString customerID, Customers &customer)
     if (m_db.isOpen())
     {
         QSqlQuery query;
-        query.prepare("SELECT * FROM Kunden WHERE \"" + m_customerFields[KdNr] + "\" = " + customerID);
+        query.prepare("SELECT * FROM Kunde WHERE \"" + m_customerFields[KdNr] + "\" = " + customerID);
 
         if(!query.exec())
         {
@@ -886,7 +878,7 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
 bool DBManager::readCustomers(std::vector<Customers> &customers) const
 {
     QSqlQuery query;
-    query.prepare("SELECT * FROM Kunden ORDER BY \"" + m_customerFields[KdNr] + "\" ASC");
+    query.prepare("SELECT * FROM Kunde ORDER BY \"" + m_customerFields[KdNr] + "\" ASC");
 
     if(!query.exec())
     {
@@ -939,9 +931,10 @@ bool DBManager::readCustomers(std::vector<Customers> &customers) const
 bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) const
 {
     QSqlQuery query;
-    QString test = "SELECT * FROM Positionen, Artikel WHERE RgNr = '"+rgnr+"' AND Positionen.'Art-Nr.' = Artikel.'Art-Nr.'";
-    query.prepare("SELECT * FROM Positionen, Artikel "
-                  "WHERE RgNr = '"+rgnr+"' AND Positionen.'Art-Nr.' = Artikel.'Art-Nr.'");
+    query.prepare("SELECT * FROM Position WHERE RgNr = '"+rgnr+"'");
+
+//    query.prepare("SELECT * FROM Position, Artikel "
+//                  "WHERE RgNr = '"+rgnr+"' AND Position.'Art-Nr.' = Artikel.'Art-Nr.'");
 
     if(!query.exec())
     {
@@ -950,35 +943,25 @@ bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) c
     }
 
     int idPos = query.record().indexOf(m_positionFields[Position_PosNr]);
-    int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
-    int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
+    int idArtNr = query.record().indexOf(m_positionFields[Position_ArtNr]);
+    int idRgNr = query.record().indexOf(m_positionFields[Position_RgNr]);
+    int idDescription = query.record().indexOf(m_positionFields[Position_Beschreibung]);
     int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
-    int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
-    int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
-    int idTotal = query.record().indexOf(m_positionFields[Position_Gesamt]);
-    int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
+    int idUnit = query.record().indexOf(m_positionFields[Position_Einheit]);
+    int idPrice = query.record().indexOf(m_positionFields[Position_Preis]);
+    int idTotal = query.record().indexOf(m_positionFields[Position_Gesamtpreis]);
 
     while (query.next())
     {
         Positions position;
-        Articles article;
-
         position.setPos(query.value(idPos).toInt());
         position.setArtnr(query.value(idArtNr).toInt());
+        position.setRgnr(query.value(idRgNr).toInt());
         position.setMenge(query.value(idCount).toInt());
+        position.setBeschreibung(query.value(idDescription).toString());
+        position.setEinheit(query.value(idUnit).toString());
+        position.setPrice(query.value(idPrice).toDouble());
         position.setTotal(query.value(idTotal).toDouble());
-
-        article.setName(query.value(idName).toString());
-        article.setUnit(query.value(idUnit).toString());
-        article.setPrice(query.value(idPrice).toDouble());
-        article.setDescription(query.value(idDescription).toString());
-
-        //position.getArticle().setName(query.value(idName).toString());
-        //position.getArticle().setUnit(query.value(idUnit).toString());
-        //position.getArticle().setPrice(query.value(idPrice).toDouble());
-        //position.getArticle().setDescription(query.value(idDescription).toString());
-
-        position.setArticle(article);
 
         positions.push_back(position);
     }
@@ -1008,13 +991,13 @@ QSqlQueryModel *DBManager::readDbData(QString table)
 QString DBManager::getDbIdent(QString table)
 {
     QString ident = "";
-    if (table == KUNDEN)
+    if (table == KUNDE)
         ident = m_customerFields[KdNr];
     else if (table == ARTIKEL)
         ident = m_articleFields[Article_ArtNr];
-    else if (table == RECHNUNGEN)
+    else if (table == RECHNUNG)
         ident = m_invoiceFields[Invoice_RgNr];
-    else if (table == POSITIONEN)
+    else if (table == POSITION)
         ident = m_positionFields[PosNr];
 
     return ident;
