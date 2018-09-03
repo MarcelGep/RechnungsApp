@@ -2,7 +2,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <qmessagebox.h>
+#include <QMessageBox>
 #include <QStandardItemModel>
 #include <QStandardItem>
 
@@ -647,7 +647,7 @@ void MainWindow::on_btnArtDelAll_clicked()
     {
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
-        msg.setText("Möchten Sie ALLE Artikel wirklich löschen?");
+        msg.setText("Möchten Sie wirklich ALLE Artikel löschen?");
         msg.setWindowTitle("Warnung");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setButtonText(QMessageBox::Yes, "Ja");
@@ -744,6 +744,7 @@ void MainWindow::on_btnRgAddArticle_clicked()
     }
 
     int row = ui->twRgArticles->rowCount();
+    m_posNr = row;
 
     ui->twRgArticles->insertRow(row);
     ui->twRgArticles->setRowHeight(row, ARTICLEPOS_ROW_HEIGHT);
@@ -809,7 +810,7 @@ void MainWindow::on_btnRgDeteleAllArticle_clicked()
         ui->btnRgDeteleAllArticle->setEnabled(false);
         ui->btnRgCreate->setEnabled(false);
         m_posNr = 0;
-        QMessageBox::information(this, "Info", "Alle Positionen wurden erfolgreich gelöscht!", QMessageBox::Ok);
+//        QMessageBox::information(this, "Info", "Alle Positionen wurden erfolgreich gelöscht!", QMessageBox::Ok);
     }
 }
 
@@ -829,10 +830,22 @@ void MainWindow::on_btnRgDeleteArticle_clicked()
 
         if(msg.exec() == QMessageBox::Yes)
         {
-            ui->twRgArticles->removeRow(ui->twRgArticles->currentRow());
+            int currRow = ui->twRgArticles->currentRow();
+            ui->twRgArticles->removeRow(currRow);
             ui->twRgArticles->clearSelection();
             updateTotalPrice();
-            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+
+            for( int i = currRow; i < ui->twRgArticles->rowCount(); i++)
+            {
+                ui->twRgArticles->setItem(i, PosNr, new QTableWidgetItem(QString::number(++currRow)));
+
+            }
+//            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+
+            if(ui->twRgArticles->rowCount() == 0)
+            {
+                ui->btnRgDeteleAllArticle->setEnabled(false);
+            }
         }
     }
     else
@@ -879,13 +892,14 @@ void MainWindow::on_leRgName_textChanged(const QString &text)
 
 void MainWindow::on_twRgArticles_itemClicked(QTableWidgetItem *item)
 {
-    int curRow = item->row();
-    ui->leRgArtNr->setText(ui->twRgArticles->item(curRow, ArtNrPos)->text());
-    ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
-    ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, AnzahlPos)->text().toDouble());
-    ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
-    ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
-    ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
+    // TODO!!
+//    int curRow = item->row();
+//    ui->leRgArtNr->setText(ui->twRgArticles->item(curRow, ArtNrPos)->text());
+//    ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
+//    ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, AnzahlPos)->text().toDouble());
+//    ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
+//    ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
+//    ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
 }
 
 void MainWindow::on_btnCustomerBill_clicked()
@@ -1035,6 +1049,7 @@ void MainWindow::on_btnRgCreate_clicked()
     ui->cbRgCustomer->setCurrentIndex(-1);
 
     //QMessageBox::information(this, "Info", "Die Rechnung wurde erstellt! ", QMessageBox::Ok | QMessageBox::Close);
+    ui->tabWidgetInvoice->setCurrentIndex(InvoicesTab);
 }
 
 void MainWindow::fillSettingsEdit()
@@ -1493,7 +1508,7 @@ void MainWindow::createInvoice()
     m_painter->end();
 
     QMessageBox msgBox;
-    QPushButton *showButton = msgBox.addButton(tr("PDF Drucken"), QMessageBox::ActionRole);
+    //QPushButton *showButton = msgBox.addButton(tr("PDF "), QMessageBox::ActionRole);
     msgBox.setText("Die Rechnung wurde erstellt!");
     msgBox.setWindowTitle("Erstellung PDF");
     msgBox.setButtonText(QMessageBox::Close, "Schließen");
@@ -1503,8 +1518,8 @@ void MainWindow::createInvoice()
 
     msgBox.exec();
 
-    if (msgBox.clickedButton() == showButton)
-    {
+//    if (msgBox.clickedButton() == showButton)
+//    {
 //        QPdfDocument *document = new QPdfDocument;
 //        document->load("/invoice/Rechnung_1107_20180831.pdf");
 
@@ -1518,7 +1533,7 @@ void MainWindow::createInvoice()
 //        {
 //            // print ...
 //        }
-    }
+//    }
 
     delete m_pdfPrinter;
     delete m_painter;
@@ -1585,27 +1600,14 @@ void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
 
             ui->btnRgDetails->setEnabled(false);
             ui->btnRgDelete->setEnabled(false);
+
+            if( ui->twRgList->rowCount() > 0 )
+                ui->btnRgDeleteAll->setEnabled(true);
+            else
+                ui->btnRgDeleteAll->setEnabled(false);
+
             break;
     }
-}
-
-void MainWindow::on_btnRgDetails_clicked(QTableWidgetItem *item)
-{
-    QString rgnr = ui->twRgList->item(item->row(), 0)->text();
-
-    m_positions.clear();
-
-    // read invoice positions from database
-    if (!m_dbManager->readPositions(m_positions, rgnr))
-    {
-       qDebug() << DEBUG_TAG_MAIN << ": Error read invoice positions!";
-       return;
-    }
-
-    WindowPositions wp(this, m_positions);
-    wp.setWindowTitle("Detailansicht der Rechnung " + rgnr);
-    if(wp.exec() == QDialog::Rejected)
-        return;
 }
 
 void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
@@ -1651,9 +1653,9 @@ void MainWindow::on_btnRgDelete_clicked()
     }
 }
 
-void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem *item)
+void MainWindow::on_twRgList_itemDoubleClicked(QTableWidgetItem */*item*/)
 {
-    on_btnRgDetails_clicked(item);
+    on_btnRgDetails_clicked();
 }
 
 void MainWindow::on_twCustomers_itemDoubleClicked(QTableWidgetItem */*item*/)
@@ -1721,6 +1723,8 @@ void MainWindow::articleEdit(QTableWidgetItem* item)
         printAllArticles();
         ui->twArticles->selectRow(selectedRow);
     }
+
+    ui->twArticles->setFocus();
 }
 
 void MainWindow::articleDelete()
@@ -1742,7 +1746,7 @@ void MainWindow::articleDelete()
             QString id = ui->twArticles->item(ui->twArticles->currentRow(), 0)->text();
             m_dbManager->removeDbEntry(ARTIKEL, id);
             printAllArticles();
-            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
+//            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
         }
     }
     else
@@ -1857,4 +1861,48 @@ void MainWindow::on_actionUeber_triggered()
 {
     QMessageBox::information(this, "Über RechnungsApp", "Author: Marcel Geprägs \n"
                                                         "Version: 1.0", QMessageBox::Ok);
+}
+
+void MainWindow::on_btnRgDetails_clicked()
+{
+    int selectedRow = ui->twRgList->currentRow();
+    QString rgnr = ui->twRgList->item(selectedRow, 0)->text();
+
+    WindowPositions wp(this, rgnr, m_dbManager);
+    wp.setWindowTitle("Detailansicht der Rechnung " + rgnr);
+    wp.exec();
+
+    printAllInvoices();
+
+    ui->twRgList->selectRow(selectedRow);
+    ui->twRgList->setFocus();
+}
+
+void MainWindow::on_btnRgDeleteAll_clicked()
+{
+    if (ui->twRgList->rowCount() > 0)
+    {
+        QMessageBox msg;
+        msg.setText("Möchten Sie wirklich ALLE Rechnungen löschen?");
+        msg.setWindowTitle("Warnung");
+        msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msg.setButtonText(QMessageBox::Yes, "Ja");
+        msg.setButtonText(QMessageBox::No, "Nein");
+        msg.setDefaultButton(QMessageBox::No);
+        msg.setIcon(QMessageBox::Question);
+
+        if(msg.exec() == QMessageBox::Yes)
+        {
+            m_dbManager->removeDBList(RECHNUNG);
+            m_dbManager->removeDBList(POSITION);
+            printAllInvoices();
+
+            ui->btnRgDeleteAll->setEnabled(false);
+//            QMessageBox::information(this, "Info", "Alle Artikel wurden erfolgreich gelöscht!", QMessageBox::Ok);
+        }
+    }
+    else
+    {
+        QMessageBox::warning(this, "Warnung", "Keine Artikel zum löschen verfügbar!", QMessageBox::Ok);
+    }
 }

@@ -392,6 +392,28 @@ QMap<int, QString> DBManager::getCustomerFields() const
     return m_customerFields;
 }
 
+bool DBManager::deletePosition(QString rgnr, QString pos)
+{
+    if(!isOpen())
+    {
+        qDebug() << DEBUG_TAG << ": Database not open!";
+        return false;
+    }
+
+    QSqlQuery queryDelete;
+    queryDelete.prepare("DELETE FROM Position WHERE Pos = '" + pos + "' AND RgNr = " + rgnr);
+
+    if(!queryDelete.exec())
+    {
+        qDebug() << DEBUG_TAG << ": Remove position failed: " << queryDelete.lastError();
+        return false;
+    }
+    else
+        qDebug() << DEBUG_TAG << ": Remove position successfull!";
+
+    return true;
+}
+
 bool DBManager::removeDbEntry(QString table, QString id)
 {
     if(!isOpen())
@@ -497,31 +519,28 @@ bool DBManager::editArticle(QString id, const Articles& article)
         return false;
 }
 
-bool DBManager::editPosition(QString id, const Positions& position)
+bool DBManager::editPosition(const Positions& position)
 {
     if(isOpen())
     {
         QSqlQuery query;
 
-        query.prepare("UPDATE Position SET "
-                                "'"+m_invoiceFields[Position_Menge]+"'= :kdnr, "
-                                "'"+m_invoiceFields[Position_Menge]+"'= :firma, "
-                                "'"+m_invoiceFields[Invoice_Amount]+"'= :firma, "
-                                "'"+m_invoiceFields[Invoice_USt]+"'= :firma, "
-                                "'"+m_invoiceFields[Invoice_Skonto]+"'= :firma, "
-                                "'"+m_invoiceFields[Invoice_Currency]+"'= :firma "
-                         "WHERE \"" + m_invoiceFields[KdNr] + "\" = '"+id+"'");
+        QString pos = QString::number(position.getPos());
+        QString rgnr = QString::number(position.getRgnr());
 
-//        query.bindValue(":kdnr", position.);
-//        query.bindValue(":ort", customer.getOrt());
-//        query.bindValue(":land", customer.getLand());
-//        query.bindValue(":telefon", customer.getTelefon());
-//        query.bindValue(":telefax", customer.getTelefax());
-//        query.bindValue(":email", customer.getEmail());
-//        query.bindValue(":website", customer.getWebsite());
-//        query.bindValue(":rabatt", customer.getRabatt());
-//        query.bindValue(":kontostand",customer.getKontostand());
-//        query.bindValue(":info", customer.getInfo());
+        query.prepare("UPDATE Position SET "
+                                "'"+m_positionFields[Position_Beschreibung]+"'= :beschreibung, "
+                                "'"+m_positionFields[Position_Menge]+"'= :menge, "
+                                "'"+m_positionFields[Position_Einheit]+"'= :einheit, "
+                                "'"+m_positionFields[Position_Preis]+"'= :preis, "
+                                "'"+m_positionFields[Position_Gesamtpreis]+"'= :summe "
+                      "WHERE Pos = '"+pos+"' AND RgNr = " + rgnr);
+
+        query.bindValue(":beschreibung", position.getBeschreibung());
+        query.bindValue(":menge", position.getMenge());
+        query.bindValue(":einheit", position.getEinheit());
+        query.bindValue(":preis", position.getPrice());
+        query.bindValue(":summe", position.getTotal());
 
         if(query.exec())
         {
@@ -529,12 +548,38 @@ bool DBManager::editPosition(QString id, const Positions& position)
         }
         else
         {
-            qDebug() << DEBUG_TAG << ": Edit ERROR - " << query.lastError();
+            qDebug() << DEBUG_TAG << ": Edit position ERROR - " << query.lastError();
             return false;
         }
     }
     else
         return false;
+}
+
+bool DBManager::editInvoiceSumme(QString rgnr, double summe)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        query.prepare("UPDATE Rechnung SET "
+                            "'"+m_invoiceFields[Invoice_Amount]+"'= :summe "
+                      "WHERE \"" + m_invoiceFields[Invoice_RgNr] + "\" = '"+rgnr+"'");
+
+        query.bindValue(":summe", summe);
+
+        if(query.exec())
+        {
+          return true;
+        }
+        else
+        {
+          qDebug() << DEBUG_TAG << ": Edit ERROR - " << query.lastError();
+          return false;
+        }
+    }
+    else
+      return false;
 }
 
 bool DBManager::editCustomer(QString id, const Customers& customer)
@@ -671,29 +716,6 @@ QMap<int, QString> DBManager::readFieldNames(QString table)
 
     return fields;
 }
-
-//int DBManager::readLastID(QString table) const
-//{
-//    QString ident = "";
-//    if (table == KUNDEN)
-//        ident = "Kd-Nr.";
-//    else if (table == ARTIKEL)
-//        ident = "Art-Nr.";
-//    else if (table == RECHNUNG)
-//        ident = "RgnNr";
-//    else if (table == POSITIONEN)
-//        ident = "Pos.";
-//    else
-//        return -1;
-
-//    QSqlQuery query;
-//    query.prepare("SELECT last_insert_rowid()");
-
-//    if(!query.exec())
-//        qDebug() << DEBUG_TAG << ": " << query.lastError();
-
-//    return query.lastInsertId().toInt();
-//}
 
 bool DBManager::readSetting(QString typ, QString& data)
 {
@@ -928,46 +950,95 @@ bool DBManager::readCustomers(std::vector<Customers> &customers) const
     return true;
 }
 
-bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) const
+bool DBManager::readPosition(Positions &position, QString pos, QString rgnr) const
 {
-    QSqlQuery query;
-    query.prepare("SELECT * FROM Position WHERE RgNr = '"+rgnr+"'");
-
-//    query.prepare("SELECT * FROM Position, Artikel "
-//                  "WHERE RgNr = '"+rgnr+"' AND Position.'Art-Nr.' = Artikel.'Art-Nr.'");
-
-    if(!query.exec())
+    if (m_db.isOpen())
     {
-        qDebug() << DEBUG_TAG << ": " << query.lastError();
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Position WHERE Pos = '"+pos+"' AND RgNr = " + rgnr);
+
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+            return false;
+        }
+
+        int idPos = query.record().indexOf(m_positionFields[Position_PosNr]);
+        int idArtNr = query.record().indexOf(m_positionFields[Position_ArtNr]);
+        int idRgNr = query.record().indexOf(m_positionFields[Position_RgNr]);
+        int idDescription = query.record().indexOf(m_positionFields[Position_Beschreibung]);
+        int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
+        int idUnit = query.record().indexOf(m_positionFields[Position_Einheit]);
+        int idPrice = query.record().indexOf(m_positionFields[Position_Preis]);
+        int idTotal = query.record().indexOf(m_positionFields[Position_Gesamtpreis]);
+
+        while (query.next())
+        {
+            position.setPos(query.value(idPos).toInt());
+            position.setArtnr(query.value(idArtNr).toInt());
+            position.setRgnr(query.value(idRgNr).toInt());
+            position.setMenge(query.value(idCount).toInt());
+            position.setBeschreibung(query.value(idDescription).toString());
+            position.setEinheit(query.value(idUnit).toString());
+            position.setPrice(query.value(idPrice).toDouble());
+            position.setTotal(query.value(idTotal).toDouble());
+        }
+        qDebug() << DEBUG_TAG << ": Read position successfull!";
+
+        return true;
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
         return false;
     }
+}
 
-    int idPos = query.record().indexOf(m_positionFields[Position_PosNr]);
-    int idArtNr = query.record().indexOf(m_positionFields[Position_ArtNr]);
-    int idRgNr = query.record().indexOf(m_positionFields[Position_RgNr]);
-    int idDescription = query.record().indexOf(m_positionFields[Position_Beschreibung]);
-    int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
-    int idUnit = query.record().indexOf(m_positionFields[Position_Einheit]);
-    int idPrice = query.record().indexOf(m_positionFields[Position_Preis]);
-    int idTotal = query.record().indexOf(m_positionFields[Position_Gesamtpreis]);
-
-    while (query.next())
+bool DBManager::readPositions(std::vector<Positions> &positions, QString rgnr) const
+{
+    if (m_db.isOpen())
     {
-        Positions position;
-        position.setPos(query.value(idPos).toInt());
-        position.setArtnr(query.value(idArtNr).toInt());
-        position.setRgnr(query.value(idRgNr).toInt());
-        position.setMenge(query.value(idCount).toInt());
-        position.setBeschreibung(query.value(idDescription).toString());
-        position.setEinheit(query.value(idUnit).toString());
-        position.setPrice(query.value(idPrice).toDouble());
-        position.setTotal(query.value(idTotal).toDouble());
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Position WHERE RgNr = '"+rgnr+"'");
 
-        positions.push_back(position);
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": " << query.lastError();
+            return false;
+        }
+
+        int idPos = query.record().indexOf(m_positionFields[Position_PosNr]);
+        int idArtNr = query.record().indexOf(m_positionFields[Position_ArtNr]);
+        int idRgNr = query.record().indexOf(m_positionFields[Position_RgNr]);
+        int idDescription = query.record().indexOf(m_positionFields[Position_Beschreibung]);
+        int idCount = query.record().indexOf(m_positionFields[Position_Menge]);
+        int idUnit = query.record().indexOf(m_positionFields[Position_Einheit]);
+        int idPrice = query.record().indexOf(m_positionFields[Position_Preis]);
+        int idTotal = query.record().indexOf(m_positionFields[Position_Gesamtpreis]);
+
+        while (query.next())
+        {
+            Positions position;
+            position.setPos(query.value(idPos).toInt());
+            position.setArtnr(query.value(idArtNr).toInt());
+            position.setRgnr(query.value(idRgNr).toInt());
+            position.setMenge(query.value(idCount).toInt());
+            position.setBeschreibung(query.value(idDescription).toString());
+            position.setEinheit(query.value(idUnit).toString());
+            position.setPrice(query.value(idPrice).toDouble());
+            position.setTotal(query.value(idTotal).toDouble());
+
+            positions.push_back(position);
+        }
+        qDebug() << DEBUG_TAG << ": Read all positions successfull!";
+
+        return true;
     }
-    qDebug() << DEBUG_TAG << ": Read all positions successfull!";
-
-    return true;
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
 }
 
 QSqlQueryModel *DBManager::readDbData(QString table)

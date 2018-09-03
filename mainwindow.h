@@ -202,7 +202,6 @@ private slots:
     void on_deRgDate_dateChanged(const QDate &date);
     void on_tabWidgetMain_currentChanged(int index);
     void on_tabWidgetInvoice_currentChanged(int index);
-    void on_btnRgDetails_clicked(QTableWidgetItem *item);
     void on_twRgList_itemClicked(QTableWidgetItem *item);
     void on_btnRgDelete_clicked();
     void on_twRgList_itemDoubleClicked(QTableWidgetItem *item);
@@ -218,6 +217,9 @@ private slots:
     void on_actionDbRestore_triggered();
     void on_leRgSinglePrice_textChanged(const QString &arg1);
     void on_actionUeber_triggered();
+    void on_btnRgDetails_clicked();
+
+    void on_btnRgDeleteAll_clicked();
 
 private:
     void setCustomerColumnsWidth() const;

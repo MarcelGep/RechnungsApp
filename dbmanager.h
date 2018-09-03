@@ -32,7 +32,8 @@ public:
     bool addCustomer(const Customers &customer);
     bool addBill(QString datum, double betrag);
     bool editCustomer(QString id, const Customers &customer);
-    bool editPosition(QString id, const Positions& position);
+    bool editInvoiceSumme(QString rgnr, double summe);
+    bool editPosition(const Positions& position);
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
     void closeDatabase();
@@ -61,7 +62,11 @@ public:
     bool addPosition(const Positions &position);
     bool addInvoice(const Invoices &invoice);
     bool readPositions(std::vector<Positions> &positions, QString rgnr) const;
+    bool readPosition(Positions &position, QString pos, QString rgnr) const;
     bool removeDbEntries(QString table, QString ident, QString id);
+
+public slots:
+    bool deletePosition(QString rgnr, QString pos);
 
 private:
     QSqlDatabase m_db;

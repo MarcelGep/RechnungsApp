@@ -1269,7 +1269,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidgetInvoice">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabCreateInvoice">
            <attribute name="title">
@@ -2127,7 +2127,7 @@
                   <enum>Qt::ClickFocus</enum>
                  </property>
                  <property name="editTriggers">
-                  <set>QAbstractItemView::NoEditTriggers</set>
+                  <set>QAbstractItemView::DoubleClicked</set>
                  </property>
                  <property name="alternatingRowColors">
                   <bool>false</bool>
@@ -2136,7 +2136,7 @@
                   <enum>QAbstractItemView::SingleSelection</enum>
                  </property>
                  <property name="selectionBehavior">
-                  <enum>QAbstractItemView::SelectRows</enum>
+                  <enum>QAbstractItemView::SelectItems</enum>
                  </property>
                  <property name="cornerButtonEnabled">
                   <bool>false</bool>
@@ -2268,7 +2268,7 @@
            <attribute name="title">
             <string>Erstellte Rechnungen</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_13">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QGroupBox" name="Aktion_2">
               <property name="sizePolicy">
@@ -2324,6 +2324,20 @@
                   </widget>
                  </item>
                 </layout>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnRgDeleteAll">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string> Alle Rechnungen löschen</string>
+                 </property>
+                 <property name="icon">
+                  <iconset resource="resources.qrc">
+                   <normaloff>:/Icons/icons/articles_deleteall.png</normaloff>:/Icons/icons/articles_deleteall.png</iconset>
+                 </property>
+                </widget>
                </item>
                <item>
                 <spacer name="horizontalSpacer_17">
