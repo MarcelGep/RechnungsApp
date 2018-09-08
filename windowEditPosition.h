@@ -15,8 +15,10 @@ class WindowEditPosition : public QDialog
     Q_OBJECT
 
 public:
-    explicit WindowEditPosition(QWidget *parent = nullptr, QString pos = "", QString rgnr = "", DBManager *dbmanager = NULL);
+    explicit WindowEditPosition(QWidget *parent = nullptr, Positions *position = NULL);
     ~WindowEditPosition();
+
+    Positions *position() const;
 
 private slots:
     void on_btnEditPosSave_clicked();
@@ -26,9 +28,7 @@ private slots:
 
 private:
     Ui::WindowEditPosition *ui;
-    DBManager *m_dbManager;
-    QString m_pos;
-    QString m_rgNr;
+    Positions *m_position;
 
     void printPosition();
 

@@ -136,9 +136,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnClose">
+      <widget class="QPushButton" name="btnPositionsSave">
        <property name="text">
-        <string>Übernehmen</string>
+        <string>Rechnung speichern</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnPositionsClose">
+       <property name="text">
+        <string>Abbrechen</string>
        </property>
       </widget>
      </item>

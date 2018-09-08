@@ -1,12 +1,10 @@
 #include "windowEditPosition.h"
 #include "ui_windowEditPosition.h"
 
-WindowEditPosition::WindowEditPosition(QWidget *parent, QString pos, QString rgnr, DBManager *dbmanager) :
+WindowEditPosition::WindowEditPosition(QWidget *parent, Positions *position) :
     QDialog(parent),
     ui(new Ui::WindowEditPosition),
-    m_dbManager(dbmanager),
-    m_pos(pos),
-    m_rgNr(rgnr)
+    m_position(position)
 {
     ui->setupUi(this);
 
@@ -20,37 +18,30 @@ WindowEditPosition::~WindowEditPosition()
 
 void WindowEditPosition::printPosition()
 {
-    Positions position;
-    m_dbManager->readPosition(position, m_pos, m_rgNr);
+    ui->leEditPosPosition->setText(QString::number(m_position->getPos()));
+    ui->leEditPosArtNr->setText(QString::number(m_position->getArtnr()));
 
-    ui->leEditPosPosition->setText(QString::number(position.getPos()));
-    ui->leEditPosArtNr->setText(QString::number(position.getArtnr()));
-
-    ui->teEditPosBezeichnung->setText(position.getBeschreibung());
+    ui->teEditPosBezeichnung->setText(m_position->getBeschreibung());
     ui->teEditPosBezeichnung->selectAll();
 
-    ui->leEditPosEinheit->setText(position.getEinheit());
-    ui->leEditPosAnzahl->setText(QString::number(position.getMenge()));
-    ui->leEditPosPreis->setText(QLocale().toCurrencyString(position.getPrice()).split(" ").value(0));
-    ui->leEditPosSumme->setText(QLocale().toCurrencyString(position.getTotal()).split(" ").value(0));
+    ui->leEditPosEinheit->setText(m_position->getEinheit());
+    ui->leEditPosAnzahl->setText(QString::number(m_position->getMenge()));
+    ui->leEditPosPreis->setText(QLocale().toCurrencyString(m_position->getPrice()).split(" ").value(0));
+    ui->leEditPosSumme->setText(QLocale().toCurrencyString(m_position->getTotal()).split(" ").value(0));
 }
 
 //resizeLineEditToContents
 
 void WindowEditPosition::on_btnEditPosSave_clicked()
 {
-    int artnr = ui->leEditPosArtNr->text().toInt();
-    QString beschreibung = ui->teEditPosBezeichnung->toPlainText();
-    QString einheit = ui->leEditPosEinheit->text();
-    int menge = ui->leEditPosAnzahl->text().toInt();
-    double preis = ui->leEditPosPreis->text().replace(".", "").replace(",", ".").toDouble();
-    double summe = ui->leEditPosSumme->text().replace(".", "").replace(",", ".").toDouble();
+    m_position->setArtnr(ui->leEditPosArtNr->text().toInt());
+    m_position->setBeschreibung(ui->teEditPosBezeichnung->toPlainText());
+    m_position->setEinheit(ui->leEditPosEinheit->text());
+    m_position->setMenge(ui->leEditPosAnzahl->text().toInt());
+    m_position->setPrice(ui->leEditPosPreis->text().replace(".", "").replace(",", ".").toDouble());
+    m_position->setTotal(ui->leEditPosSumme->text().replace(".", "").replace(",", ".").toDouble());
 
-    Positions position(m_pos.toInt(), m_rgNr.toInt(), artnr, beschreibung, einheit, menge, preis, summe);
-
-    m_dbManager->editPosition(position);
-
-    reject();
+    accept();
 }
 
 void WindowEditPosition::on_btnEditPosCancel_clicked()
@@ -69,4 +60,9 @@ void WindowEditPosition::on_leEditPosPreis_textChanged(const QString &preis)
     QString preisNeu = preis;
     double summe = preisNeu.replace(".", "").replace(",", ".").toDouble() * ui->leEditPosAnzahl->text().toInt();
     ui->leEditPosSumme->setText(QLocale().toCurrencyString(summe).split(" ").value(0));
+}
+
+Positions *WindowEditPosition::position() const
+{
+    return m_position;
 }

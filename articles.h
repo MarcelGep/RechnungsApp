@@ -10,7 +10,6 @@ public:
     Articles();
 
     Articles(const int &artnr,
-             const QString &name,
              const QString &description,
              const QString &unit,
              const double &price);
@@ -19,9 +18,6 @@ public:
 
     int getArtNr() const;
     void setArtNr(const int &artnr);
-
-    QString getName() const;
-    void setName(const QString &name);
 
     QString getDescription() const;
     void setDescription(const QString &description);
@@ -34,7 +30,6 @@ public:
 
 private:
     int m_artnr;
-    QString m_name;
     QString m_description;
     QString m_unit;
     double m_price;

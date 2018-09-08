@@ -59,6 +59,7 @@ public:
     bool readSetting(QString typ, QString &data);
     bool editSetting(QString typ, QString data);
     bool readInvoices(std::vector<Invoices> &invoices);
+    bool readInvoice(Invoices &invoice, QString rgNr);
     bool addPosition(const Positions &position);
     bool addInvoice(const Invoices &invoice);
     bool readPositions(std::vector<Positions> &positions, QString rgnr) const;

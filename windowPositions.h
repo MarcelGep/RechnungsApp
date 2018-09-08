@@ -23,17 +23,18 @@ public:
     ~WindowPositions();
 
     void setPositions(const std::vector<Positions> &positions);
+    std::vector<Positions> positions() const;
+    double summe() const;
 
 private slots:
-    void on_btnClose_clicked();
     void on_twRgPositions_itemDoubleClicked(QTableWidgetItem *);
     void on_btnPositionEdit_clicked();
     void on_btnPositionDelete_clicked();
     void on_twRgPositions_itemClicked(QTableWidgetItem *item);
-
     void on_twRgPositions_itemChanged(QTableWidgetItem *item);
-
     void on_twRgPositions_cellChanged(int row, int column);
+    void on_btnPositionsClose_clicked();
+    void on_btnPositionsSave_clicked();
 
 private:
     Ui::WindowPositions *ui;
@@ -41,6 +42,8 @@ private:
     QSize m_windowSize;
     int m_selectedRow;
     QString m_rgNr;
+    std::vector<Positions> m_positions;
+    double m_summe;
 
     void printPositions();
     void clearPositions();

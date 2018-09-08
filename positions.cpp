@@ -28,7 +28,6 @@ Positions::Positions(int pos, int artnr, QString name, int menge, QString unit, 
     this->artnr = artnr;
     this->menge = menge;
     this->total = total;
-    article.setName(name);
     article.setUnit(unit);
     article.setPrice(price);
     article.setDescription(description);

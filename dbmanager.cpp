@@ -209,16 +209,13 @@ bool DBManager::addArticle(const Articles& article)
 
     QSqlQuery queryAdd;
     queryAdd.prepare("INSERT INTO Artikel (\"" + m_articleFields[Article_Einheit] + "\", "
-                                          "\"" + m_articleFields[Article_Bezeichnung] + "\", "
                                           "\"" + m_articleFields[Article_Preis] + "\", "
                                           "\"" + m_articleFields[Article_Beschreibung] + "\") "
                              "VALUES (:einheit, "
-                                     ":bezeichnung, "
                                      ":preis, "
                                      ":beschreibung)");
 
     queryAdd.bindValue(":einheit", article.getUnit());
-    queryAdd.bindValue(":bezeichnung", article.getName());
     queryAdd.bindValue(":preis", article.getPrice());
     queryAdd.bindValue(":beschreibung", article.getDescription());
 
@@ -296,6 +293,53 @@ bool DBManager::addCustomer(const Customers& customer)
     }
 
     return success;
+}
+
+bool DBManager::readInvoice(Invoices &invoice, QString rgNr)
+{
+    if (m_db.isOpen())
+    {
+        QSqlQuery query;
+        query.prepare("SELECT * FROM Rechnung WHERE RgNr = '"+rgNr+"'");
+
+        if(!query.exec())
+        {
+            qDebug() << DEBUG_TAG << ": No table in database!" << " " << query.lastError();
+            return false;
+        }
+        else
+        {
+            int idRgNr = query.record().indexOf(m_invoiceFields[Invoice_RgNr]);
+            int idKdNr = query.record().indexOf(m_invoiceFields[Invoice_KdNr]);
+            int idDate = query.record().indexOf(m_invoiceFields[Invoice_RgDate]);
+            int idAmount = query.record().indexOf(m_invoiceFields[Invoice_Amount]);
+            int idUst = query.record().indexOf(m_invoiceFields[Invoice_USt]);
+            int idSkonto = query.record().indexOf(m_invoiceFields[Invoice_Skonto]);
+            int idCurrency = query.record().indexOf(m_invoiceFields[Invoice_Currency]);
+
+            while (query.next())
+            {
+                invoice.setRgnr(query.value(idRgNr).toInt());
+                invoice.setKdnr(query.value(idKdNr).toInt());
+                invoice.setRgdate(query.value(idDate).toString());
+                invoice.setAmount(query.value(idAmount).toDouble());
+                invoice.setUst(query.value(idUst).toInt());
+                invoice.setSkonto(query.value(idSkonto).toInt());
+                invoice.setCurrency(query.value(idCurrency).toString());
+            }
+            qDebug() << DEBUG_TAG << ": Read invoice successfull!";
+
+            return true;
+        }
+
+    }
+    else
+    {
+        qDebug() << "Database is not open!";
+        return false;
+    }
+
+    return true;
 }
 
 bool DBManager::readInvoices(std::vector<Invoices> &invoices)
@@ -495,13 +539,11 @@ bool DBManager::editArticle(QString id, const Articles& article)
 
         query.prepare("UPDATE Artikel SET "
                               "'"+m_articleFields[Article_Einheit]+"' = :einheit, "
-                              "'"+m_articleFields[Article_Bezeichnung]+"' = :bezeichnung, "
                               "'"+m_articleFields[Article_Beschreibung]+"' = :beschreibung, "
                               "'"+m_articleFields[Article_Preis]+"' = :preis "
                       "WHERE \"" + m_articleFields[Article_ArtNr] + "\" = '"+id+"'");
 
         query.bindValue(":einheit", article.getUnit());
-        query.bindValue(":bezeichnung", article.getName());
         query.bindValue(":beschreibung", article.getDescription());
         query.bindValue(":preis", article.getPrice());
 
@@ -772,7 +814,6 @@ bool DBManager::readArticle(QString articleID, Articles &article)
         {
             int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
             int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
-            int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
             int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
             int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
 
@@ -780,7 +821,6 @@ bool DBManager::readArticle(QString articleID, Articles &article)
             {
                 article.setArtNr(query.value(idArtNr).toInt());
                 article.setUnit(query.value(idUnit).toString());
-                article.setName(query.value(idName).toString());
                 article.setPrice(query.value(idPrice).toDouble());
                 article.setDescription(query.value(idDescription).toString());
             }
@@ -877,7 +917,6 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
 
     int idArtNr = query.record().indexOf(m_articleFields[Article_ArtNr]);
     int idUnit = query.record().indexOf(m_articleFields[Article_Einheit]);
-    int idName= query.record().indexOf(m_articleFields[Article_Bezeichnung]);
     int idPrice = query.record().indexOf(m_articleFields[Article_Preis]);
     int idDescription = query.record().indexOf(m_articleFields[Article_Beschreibung]);
 
@@ -886,7 +925,6 @@ bool DBManager::readArticles(std::vector<Articles> &articles) const
         Articles article;
         article.setArtNr(query.value(idArtNr).toInt());
         article.setUnit(query.value(idUnit).toString());
-        article.setName(query.value(idName).toString());
         article.setPrice(query.value(idPrice).toDouble());
         article.setDescription(query.value(idDescription).toString());
 

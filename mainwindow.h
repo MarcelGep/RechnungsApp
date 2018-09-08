@@ -80,7 +80,6 @@ enum ArticleColumns
 {
     Article_ArtNr,
     Article_Einheit,
-    Article_Bezeichnung,
     Article_Beschreibung,
     Article_Preis,
 
@@ -145,6 +144,14 @@ enum PositionColumns
     PositionColumns_Count
 };
 
+enum InvoiceTyp
+{
+    CreateInvoice,
+    EditInvoice,
+
+    InvoiceTyp_Count
+};
+
 namespace Ui {
 class MainWindow;
 }
@@ -161,6 +168,7 @@ public:
     void printCustomer(Customers customer);
     void clearCustomerEdits() const;
     void printAllArticles();
+    void createInvoice(QString rgNr, QString KdNr, QString date, QString subjectLine, std::vector<Positions> positions, QString summe, InvoiceTyp typ);
     void createInvoice();
 
     void printAllInvoices();

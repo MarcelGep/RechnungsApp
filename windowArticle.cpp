@@ -14,7 +14,6 @@ WindowArticle::WindowArticle(QWidget *parent, Articles *article, DBManager *dbma
     ui->leArtNr->setText(QString::number(article->getArtNr()));
     ui->leArtUnit->setText(article->getUnit());
     ui->leArtPrice->setText(QString::number(article->getPrice(), 'f', 2));
-    ui->leArtName->setText(article->getName());
     ui->ptArtDescription->setPlainText(article->getDescription());
 }
 
@@ -27,7 +26,6 @@ Articles WindowArticle::getArticle()
 {
     Articles article;
     article.setArtNr(ui->leArtNr->text().toInt());
-    article.setName(ui->leArtName->text());
     article.setPrice(ui->leArtPrice->text().toDouble());
     article.setUnit(ui->leArtUnit->text());
     article.setDescription(ui->ptArtDescription->toPlainText());
@@ -44,11 +42,10 @@ void WindowArticle::on_btnArtSave_clicked()
 {
     int artnr = ui->leArtNr->text().toInt();
     QString unit = ui->leArtUnit->text();
-    QString name = ui->leArtName->text();
     double price = ui->leArtPrice->text().toDouble();
     QString description = ui->ptArtDescription->toPlainText();
 
-    Articles article(artnr, name, description, unit, price);
+    Articles article(artnr, description, unit, price);
 
     if (m_dbManager->editArticle(QString::number(artnr), article))
     {
@@ -64,7 +61,6 @@ void WindowArticle::on_btnArtSave_clicked()
 void WindowArticle::clearArticleEdits()
 {
     ui->leArtNr->clear();
-    ui->leArtName->clear();
     ui->leArtPrice->clear();
     ui->leArtUnit->clear();
     ui->ptArtDescription->clear();

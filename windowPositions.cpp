@@ -10,7 +10,8 @@ WindowPositions::WindowPositions(QWidget *parent, QString rgnr, DBManager* dbman
     m_dbManager(dbmanager),
     m_windowSize(0, 0),
     m_selectedRow( -1 ),
-    m_rgNr(rgnr)
+    m_rgNr(rgnr),
+    m_summe( 0 )
 {
     ui->setupUi(this);
 
@@ -49,15 +50,14 @@ void WindowPositions::printPositions()
         clearPositions();
 
     // read invoice positions from database
-    std::vector<Positions> positions;
-    if (!m_dbManager->readPositions(positions, m_rgNr))
+    if (!m_dbManager->readPositions(m_positions, m_rgNr))
     {
        qDebug() << DEBUG_TAG_MAIN << ": Error read invoice positions!";
        return;
     }
 
     // print all exist positions on the invoice no
-    for (std::vector<Positions>::iterator it = positions.begin(); it != positions.end(); ++it)
+    for (std::vector<Positions>::iterator it = m_positions.begin(); it != m_positions.end(); ++it)
     {
        int row = ui->twRgPositions->rowCount();
        ui->twRgPositions->insertRow(row);
@@ -85,7 +85,7 @@ void WindowPositions::printPositions()
 
     ui->lePositionsSumme->setText(QLocale().toCurrencyString(summe));
 
-    m_dbManager->editInvoiceSumme(m_rgNr, summe);
+    m_summe = summe;
 }
 
 void WindowPositions::clearPositions()
@@ -110,11 +110,6 @@ void WindowPositions::setPositionsColumnsWidth()
     m_windowSize.setWidth(windowSize);
 }
 
-void WindowPositions::on_btnClose_clicked()
-{
-    reject();
-}
-
 void WindowPositions::on_twRgPositions_itemDoubleClicked(QTableWidgetItem */*item*/)
 {
     on_btnPositionEdit_clicked();
@@ -125,13 +120,33 @@ void WindowPositions::on_btnPositionEdit_clicked()
     if(ui->twRgPositions->selectedItems().size() > 0)
     {
         m_selectedRow = ui->twRgPositions->currentRow();
-        QString pos = ui->twRgPositions->item(m_selectedRow, 0)->text();
 
-        WindowEditPosition epos(this, pos, m_rgNr, m_dbManager);
+        WindowEditPosition epos(this, &m_positions[m_selectedRow]);
         epos.setWindowTitle("Position bearbeiten");
-        epos.exec();
+        if(epos.exec() == QDialog::Accepted)
+        {
+            Positions *position = epos.position();
+            ui->twRgPositions->setItem(m_selectedRow, PosNr, new QTableWidgetItem(QString::number(position->getPos())));
+            ui->twRgPositions->setItem(m_selectedRow, ArtNrPos, new QTableWidgetItem(QString::number(position->getArtnr())));
+            ui->twRgPositions->setItem(m_selectedRow, BeschreibungPos, new QTableWidgetItem(position->getBeschreibung()));
+            ui->twRgPositions->setItem(m_selectedRow, AnzahlPos, new QTableWidgetItem(QString::number(position->getMenge())));
+            ui->twRgPositions->setItem(m_selectedRow, EinheitPos, new QTableWidgetItem(position->getEinheit()));
+            ui->twRgPositions->setItem(m_selectedRow, EinzelPreisPos, new QTableWidgetItem(QLocale().toCurrencyString(position->getPrice())));
+            ui->twRgPositions->item(m_selectedRow, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+            ui->twRgPositions->setItem(m_selectedRow, SummePos, new QTableWidgetItem(QLocale().toCurrencyString(position->getTotal())));
+            ui->twRgPositions->item(m_selectedRow, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-        printPositions();
+            double summe = 0;
+            for(int i = 0; i < ui->twRgPositions->rowCount(); i++)
+            {
+                summe += ui->twRgPositions->item(i, SummePos)->text().split(" ").value(0).replace(".", "").replace(",", ".").toDouble();
+            }
+
+            ui->lePositionsSumme->setText(QLocale().toCurrencyString(summe));
+
+            m_summe = summe;
+            m_positions[m_selectedRow] = *position;
+        }
     }
     else
     {
@@ -196,4 +211,24 @@ void WindowPositions::on_twRgPositions_itemChanged(QTableWidgetItem *item)
 void WindowPositions::on_twRgPositions_cellChanged(int row, int column)
 {
     //int i = 0;
+}
+
+void WindowPositions::on_btnPositionsClose_clicked()
+{
+    reject();
+}
+
+void WindowPositions::on_btnPositionsSave_clicked()
+{
+    accept();
+}
+
+double WindowPositions::summe() const
+{
+    return m_summe;
+}
+
+std::vector<Positions> WindowPositions::positions() const
+{
+    return m_positions;
 }

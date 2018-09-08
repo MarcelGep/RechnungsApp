@@ -3,19 +3,17 @@
 Articles::Articles()
 {
     m_artnr = 0;
-    m_name = "";
     m_unit = "";
     m_description = "";
     m_price = 0;
 }
 
 Articles::Articles(const int &artnr,
-                   const QString &name,
                    const QString &description,
-                   const QString &unit, const double &price)
+                   const QString &unit,
+                   const double &price)
 {
     m_artnr = artnr;
-    m_name = name;
     m_description = description;
     m_unit = unit;
     m_price = price;
@@ -34,16 +32,6 @@ int Articles::getArtNr() const
 void Articles::setArtNr(const int &artnr)
 {
     m_artnr = artnr;
-}
-
-QString Articles::getName() const
-{
-    return m_name;
-}
-
-void Articles::setName(const QString &name)
-{
-    m_name = name;
 }
 
 QString Articles::getDescription() const
