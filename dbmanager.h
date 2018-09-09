@@ -66,6 +66,8 @@ public:
     bool readPosition(Positions &position, QString pos, QString rgnr) const;
     bool removeDbEntries(QString table, QString ident, QString id);
 
+    bool editPosNr(const Positions &position);
+
 public slots:
     bool deletePosition(QString rgnr, QString pos);
 

@@ -1269,7 +1269,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidgetInvoice">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabCreateInvoice">
            <attribute name="title">
@@ -1360,6 +1360,9 @@
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnRgAngebot">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
                     <string>Angebot</string>
                    </property>
@@ -1370,6 +1373,9 @@
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnRgGutschrift">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="text">
                     <string>Gutschrift</string>
                    </property>
@@ -1628,7 +1634,7 @@
                     <number>100</number>
                    </property>
                    <property name="value">
-                    <number>19</number>
+                    <number>0</number>
                    </property>
                    <property name="displayIntegerBase">
                     <number>10</number>
@@ -1674,7 +1680,7 @@
                     <string>Skontotext auf Rechnung</string>
                    </property>
                    <property name="checked">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>
@@ -1693,7 +1699,7 @@
                     <number>100</number>
                    </property>
                    <property name="value">
-                    <number>3</number>
+                    <number>0</number>
                    </property>
                   </widget>
                  </item>

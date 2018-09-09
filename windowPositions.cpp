@@ -9,9 +9,11 @@ WindowPositions::WindowPositions(QWidget *parent, QString rgnr, DBManager* dbman
     ui(new Ui::WindowPositions),
     m_dbManager(dbmanager),
     m_windowSize(0, 0),
-    m_selectedRow( -1 ),
+    m_selectedRow(-1),
     m_rgNr(rgnr),
-    m_summe( 0 )
+    m_summe(0),
+    m_positionDeleted(false),
+    m_deleteInvoice(false)
 {
     ui->setupUi(this);
 
@@ -136,15 +138,8 @@ void WindowPositions::on_btnPositionEdit_clicked()
             ui->twRgPositions->setItem(m_selectedRow, SummePos, new QTableWidgetItem(QLocale().toCurrencyString(position->getTotal())));
             ui->twRgPositions->item(m_selectedRow, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
-            double summe = 0;
-            for(int i = 0; i < ui->twRgPositions->rowCount(); i++)
-            {
-                summe += ui->twRgPositions->item(i, SummePos)->text().split(" ").value(0).replace(".", "").replace(",", ".").toDouble();
-            }
+            updateSumme();
 
-            ui->lePositionsSumme->setText(QLocale().toCurrencyString(summe));
-
-            m_summe = summe;
             m_positions[m_selectedRow] = *position;
         }
     }
@@ -158,7 +153,6 @@ void WindowPositions::on_btnPositionDelete_clicked()
 {
     if(ui->twRgPositions->selectedItems().size() > 0)
     {
-        bool lastPosition = false;
         QMessageBox msg;
         msg.setWindowTitle("Position löschen");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -166,30 +160,25 @@ void WindowPositions::on_btnPositionDelete_clicked()
         msg.setButtonText(QMessageBox::No, "Nein");
         msg.setDefaultButton(QMessageBox::No);
         msg.setIcon(QMessageBox::Question);
-
-        if(ui->twRgPositions->rowCount() > 1)
-        {
-            msg.setText("Möchten Sie die Position löschen?");
-        }
-        else
-        {
-            msg.setText("Durch löschen der letzten Position wird automatisch die ausgwählte Rechnung gelöscht.\n\n"
-                        "Möchten Sie fortfahren?");
-            lastPosition = true;
-        }
+        msg.setText("Möchten Sie die Position löschen?");
 
         if(msg.exec() == QMessageBox::Yes)
         {
-            m_dbManager->deletePosition(m_rgNr, ui->twRgPositions->item(m_selectedRow, 0)->text());
+            m_positions.erase(m_positions.begin() + m_selectedRow);
 
-            if(lastPosition)
+            m_positionDeleted = true;
+
+            m_deletedPos = ui->twRgPositions->item(m_selectedRow, PosNr)->text();
+
+            ui->twRgPositions->removeRow(m_selectedRow);
+
+            updateSumme();
+
+            int currRow = m_selectedRow;
+            for( int i = currRow; i < ui->twRgPositions->rowCount(); i++)
             {
-                m_dbManager->removeDbEntry(RECHNUNG, m_rgNr);
-                reject();
-            }
-            else
-            {
-                printPositions();
+                m_positions[i].setPos(++currRow);
+                ui->twRgPositions->setItem(i, PosNr, new QTableWidgetItem(QString::number(currRow)));
             }
         }
     }
@@ -197,6 +186,19 @@ void WindowPositions::on_btnPositionDelete_clicked()
     {
         QMessageBox::warning(this, "Position löschen", "Es wurde keine Position ausgewählt!", QMessageBox::Ok);
     }
+}
+
+void WindowPositions::updateSumme()
+{
+    double summe = 0;
+    for(int i = 0; i < ui->twRgPositions->rowCount(); i++)
+    {
+        summe += ui->twRgPositions->item(i, SummePos)->text().split(" ").value(0).replace(".", "").replace(",", ".").toDouble();
+    }
+
+    ui->lePositionsSumme->setText(QLocale().toCurrencyString(summe));
+
+    m_summe = summe;
 }
 
 void WindowPositions::on_twRgPositions_itemClicked(QTableWidgetItem *item)
@@ -220,7 +222,65 @@ void WindowPositions::on_btnPositionsClose_clicked()
 
 void WindowPositions::on_btnPositionsSave_clicked()
 {
+    if(ui->twRgPositions->rowCount() <= 0)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Rechnung bearbeiten");
+        msgBox.setText("Diese Rechnung enthält keine Positionen mehr, soll diese gelöscht werden?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        msgBox.setButtonText(QMessageBox::Yes, "Ja");
+        msgBox.setButtonText(QMessageBox::No, "Nein");
+        msgBox.setButtonText(QMessageBox::Cancel, "Abbrechen");
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        msgBox.setIcon(QMessageBox::Warning);
+
+        int msgStatus = msgBox.exec();
+
+        if(msgStatus == QMessageBox::Cancel)
+        {
+            return;
+        }
+        else if(msgStatus == QMessageBox::Yes)
+        {
+            m_deleteInvoice = true;
+        }
+        else if(msgStatus == QMessageBox::No)
+        {
+            m_deleteInvoice = false;
+        }
+    }
+
     accept();
+}
+
+bool WindowPositions::deleteInvoice() const
+{
+    return m_deleteInvoice;
+}
+
+void WindowPositions::setDeleteInvoice(bool deleteInvoice)
+{
+    m_deleteInvoice = deleteInvoice;
+}
+
+QString WindowPositions::deletedPos() const
+{
+    return m_deletedPos;
+}
+
+void WindowPositions::clearDeletedPos()
+{
+    m_deletedPos.clear();
+}
+
+void WindowPositions::setPositionDeleted(bool positionDeleted)
+{
+    m_positionDeleted = positionDeleted;
+}
+
+bool WindowPositions::positionDeleted() const
+{
+    return m_positionDeleted;
 }
 
 double WindowPositions::summe() const

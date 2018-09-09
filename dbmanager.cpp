@@ -561,6 +561,36 @@ bool DBManager::editArticle(QString id, const Articles& article)
         return false;
 }
 
+bool DBManager::editPosNr(const Positions& position)
+{
+    if(isOpen())
+    {
+        QSqlQuery query;
+
+        int pos = position.getPos();
+        QString rgnr = QString::number(position.getRgnr());
+        QString artnr = QString::number(position.getArtnr());
+
+        query.prepare("UPDATE Position SET "
+                                "'"+m_positionFields[Position_PosNr]+"'= :posNr "
+                      "WHERE \"Art-Nr.\" = '"+artnr+"' AND RgNr = " + rgnr);
+
+        query.bindValue(":posNr", pos);
+
+        if(query.exec())
+        {
+            return true;
+        }
+        else
+        {
+            qDebug() << DEBUG_TAG << ": Edit position nr ERROR - " << query.lastError();
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
 bool DBManager::editPosition(const Positions& position)
 {
     if(isOpen())

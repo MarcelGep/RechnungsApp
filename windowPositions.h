@@ -26,6 +26,15 @@ public:
     std::vector<Positions> positions() const;
     double summe() const;
 
+    bool positionDeleted() const;
+    void setPositionDeleted(bool positionDeleted);
+
+    QString deletedPos() const;
+    void clearDeletedPos();
+
+    bool deleteInvoice() const;
+    void setDeleteInvoice(bool deleteInvoice);
+
 private slots:
     void on_twRgPositions_itemDoubleClicked(QTableWidgetItem *);
     void on_btnPositionEdit_clicked();
@@ -44,10 +53,14 @@ private:
     QString m_rgNr;
     std::vector<Positions> m_positions;
     double m_summe;
+    bool m_positionDeleted;
+    QString m_deletedPos;
+    bool m_deleteInvoice;
 
     void printPositions();
     void clearPositions();
     void setPositionsColumnsWidth();
+    void updateSumme();
 };
 
 #endif // WINDOWPOSITIONS_H

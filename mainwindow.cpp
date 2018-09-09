@@ -837,7 +837,6 @@ void MainWindow::on_btnRgDeleteArticle_clicked()
             for( int i = currRow; i < ui->twRgArticles->rowCount(); i++)
             {
                 ui->twRgArticles->setItem(i, PosNr, new QTableWidgetItem(QString::number(++currRow)));
-
             }
 //            QMessageBox::information(this, "Info", "Der ausgewählte Artikel wurde erfolgreich gelöscht!", QMessageBox::Ok);
 
@@ -2159,7 +2158,12 @@ void MainWindow::on_twRgList_itemClicked(QTableWidgetItem *item)
 
 void MainWindow::on_btnRgDelete_clicked()
 {
-    QString rechnungsNr = ui->twRgList->item(ui->twRgList->currentRow(), 0)->text();
+    QString rechnungsNr = ui->twRgList->item(ui->twRgList->currentRow(), Invoice_RgNr)->text();
+    QString dateUnformated = ui->twRgList->item(ui->twRgList->currentRow(), Invoice_RgDate)->text();
+    QStringList dateList = dateUnformated.split(".");
+    QString date = dateList[dateList.size()-1] + dateList[dateList.size()-2] + dateList[dateList.size()-3];
+    QString outPath = PATH_PDF;
+    QString invoiceName = outPath + "Rechnung_" + rechnungsNr + "_" + date + ".pdf";
 
     QMessageBox msg;
     msg.setWindowIcon(QPixmap("logo.png"));
@@ -2178,6 +2182,10 @@ void MainWindow::on_btnRgDelete_clicked()
 
         m_dbManager->removeDbEntry(RECHNUNG, rgnr);
         m_dbManager->removeDbEntries(POSITION, m_dbManager->getInvoiceFields()[Invoice_RgNr], rgnr);
+
+        // delete invoice pdf
+        QFile invoice(invoiceName);
+        invoice.remove();
 
         printAllInvoices();
 
@@ -2401,11 +2409,43 @@ void MainWindow::on_btnRgDetails_clicked()
     int selectedRow = ui->twRgList->currentRow();
     QString rgNr = ui->twRgList->item(selectedRow, 0)->text();
 
+    QString dateUnformated = ui->twRgList->item(ui->twRgList->currentRow(), Invoice_RgDate)->text();
+    QStringList dateList = dateUnformated.split(".");
+    QString date = dateList[dateList.size()-1] + dateList[dateList.size()-2] + dateList[dateList.size()-3];
+    QString outPath = PATH_PDF;
+    QString invoiceName = outPath + "Rechnung_" + rgNr + "_" + date + ".pdf";
+
     WindowPositions wp(this, rgNr, m_dbManager);
     wp.setWindowTitle("Detailansicht der Rechnung " + rgNr);
 
     if(wp.exec() == QDialog::Accepted)
     {
+        if(wp.deleteInvoice())
+        {
+            m_dbManager->removeDbEntry(RECHNUNG, rgNr);
+            printAllInvoices();
+
+            // delete invoice pdf
+            QFile invoice(invoiceName);
+            invoice.remove();
+
+            wp.setDeleteInvoice(false);
+            return;
+        }
+
+        // delete positions in database
+        if(wp.positionDeleted() & !wp.deletedPos().isEmpty())
+        {
+            m_dbManager->deletePosition(rgNr, wp.deletedPos());
+            wp.setPositionDeleted(false);
+            wp.clearDeletedPos();
+
+            for(uint i = 0; i < wp.positions().size(); i++)
+            {
+                m_dbManager->editPosNr(wp.positions()[i]);
+            }
+        }
+
         // edit positions in database
         for(uint i = 0; i < wp.positions().size(); i++)
         {
