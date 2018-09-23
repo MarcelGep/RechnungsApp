@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QTableWidgetItem>
@@ -9,6 +8,7 @@
 #include <QPdfWriter>
 #include <QListWidgetItem>
 #include <QFileDialog>
+#include <QLabel>
 
 #include <windowPositions.h>
 #include <windowArticle.h>
@@ -41,6 +41,9 @@
 #define SUBJECT_FONT_SIZE       220
 #define SENDER_SMALL_FONT_SIZE  115
 #define ACCOUNT_FONT_SIZE       150
+
+#define DB_CONNECTED_MESSAGE "Datenbank verbunden"
+#define DB_NOTCONNECTED_MESSAGE "Datenbank nicht verbunden"
 
 enum ArtPosColumns
 {
@@ -195,13 +198,12 @@ private slots:
     void on_twRgArticles_itemSelectionChanged();
     void on_cbRgArtikel_activated(int);
     void on_leRgName_textChanged(const QString &text);
-    void on_twRgArticles_itemClicked(QTableWidgetItem *item);
     void on_btnCustomerBill_clicked();
     void on_twCustomers_itemSelectionChanged();
     void on_leRgArtNr_returnPressed();
     void on_sbRgCount_editingFinished();
     void on_leRgUnit_returnPressed();
-    void on_twRgArticles_itemChanged(QTableWidgetItem *);
+    void on_twRgArticles_itemChanged(QTableWidgetItem *item);
     void on_btnRgCreate_clicked();
     void on_btnSetCancel_clicked();
     void on_btnSetSave_clicked();
@@ -229,6 +231,8 @@ private slots:
 
     void on_btnRgDeleteAll_clicked();
 
+    void on_twRgArticles_itemDoubleClicked(QTableWidgetItem *item);
+
 private:
     void setCustomerColumnsWidth() const;
     void clearCustomers();
@@ -248,6 +252,7 @@ private:
     std::vector<Articles> m_articles;
     std::vector<Invoices> m_invoices;
     std::vector<Positions> m_positions;
+    QLabel* m_statusLabel;
     void readSettingsEdit();
     QString getSettings(SettingsColumns typ);
     void clearInvoices();
@@ -258,6 +263,9 @@ private:
     void articleEdit(QTableWidgetItem *item);
     void articleDelete();
     void articleAdd();
+    void setupInvoiceList();
+    void setupArticleList();
+    void setupArticlePositionList();
+    void setupCustomerList();
+    void selectMainTabIndex(int index);
 };
-
-#endif // MAINWINDOW_H

@@ -40,8 +40,8 @@ private slots:
     void on_btnPositionEdit_clicked();
     void on_btnPositionDelete_clicked();
     void on_twRgPositions_itemClicked(QTableWidgetItem *item);
-    void on_twRgPositions_itemChanged(QTableWidgetItem *item);
-    void on_twRgPositions_cellChanged(int row, int column);
+    void on_twRgPositions_itemChanged(QTableWidgetItem *);
+    void on_twRgPositions_cellChanged(int, int);
     void on_btnPositionsClose_clicked();
     void on_btnPositionsSave_clicked();
 

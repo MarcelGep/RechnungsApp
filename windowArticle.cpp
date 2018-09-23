@@ -13,8 +13,13 @@ WindowArticle::WindowArticle(QWidget *parent, Articles *article, DBManager *dbma
 
     ui->leArtNr->setText(QString::number(article->getArtNr()));
     ui->leArtUnit->setText(article->getUnit());
-    ui->leArtPrice->setText(QString::number(article->getPrice(), 'f', 2));
+    ui->leArtPrice->setText(QLocale().toCurrencyString(article->getPrice()).split(" ").value(0));
     ui->ptArtDescription->setPlainText(article->getDescription());
+
+    QDoubleValidator* spValidator= new QDoubleValidator(0.0, 9999999999.0, 2, ui->leArtPrice);
+    spValidator->setLocale(QLocale("de_DE"));
+    spValidator->setNotation(QDoubleValidator::StandardNotation);
+    ui->leArtPrice->setValidator(spValidator);
 }
 
 WindowArticle::~WindowArticle()
@@ -42,7 +47,7 @@ void WindowArticle::on_btnArtSave_clicked()
 {
     int artnr = ui->leArtNr->text().toInt();
     QString unit = ui->leArtUnit->text();
-    double price = ui->leArtPrice->text().toDouble();
+    double price = ui->leArtPrice->text().replace(".", "").replace(",", ".").toDouble();
     QString description = ui->ptArtDescription->toPlainText();
 
     Articles article(artnr, description, unit, price);

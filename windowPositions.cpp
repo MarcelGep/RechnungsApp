@@ -123,7 +123,7 @@ void WindowPositions::on_btnPositionEdit_clicked()
     {
         m_selectedRow = ui->twRgPositions->currentRow();
 
-        WindowEditPosition epos(this, &m_positions[m_selectedRow]);
+        WindowEditPosition epos(this, &m_positions[static_cast<uint>(m_selectedRow)]);
         epos.setWindowTitle("Position bearbeiten");
         if(epos.exec() == QDialog::Accepted)
         {
@@ -140,7 +140,7 @@ void WindowPositions::on_btnPositionEdit_clicked()
 
             updateSumme();
 
-            m_positions[m_selectedRow] = *position;
+            m_positions[static_cast<uint>(m_selectedRow)] = *position;
         }
     }
     else
@@ -177,7 +177,7 @@ void WindowPositions::on_btnPositionDelete_clicked()
             int currRow = m_selectedRow;
             for( int i = currRow; i < ui->twRgPositions->rowCount(); i++)
             {
-                m_positions[i].setPos(++currRow);
+                m_positions[static_cast<uint>(i)].setPos(++currRow);
                 ui->twRgPositions->setItem(i, PosNr, new QTableWidgetItem(QString::number(currRow)));
             }
         }
@@ -206,11 +206,11 @@ void WindowPositions::on_twRgPositions_itemClicked(QTableWidgetItem *item)
     m_selectedRow = item->row();
 }
 
-void WindowPositions::on_twRgPositions_itemChanged(QTableWidgetItem *item)
+void WindowPositions::on_twRgPositions_itemChanged(QTableWidgetItem */*item*/)
 {
     //int i = 0;
 }
-void WindowPositions::on_twRgPositions_cellChanged(int row, int column)
+void WindowPositions::on_twRgPositions_cellChanged(int /*row*/, int /*column*/)
 {
     //int i = 0;
 }

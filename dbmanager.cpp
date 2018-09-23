@@ -5,13 +5,9 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
-#include <qmessagebox.h>
 
-
-DBManager::DBManager(const QString &path)
+DBManager::DBManager()
 {
-    // Datenbank öffnen
-    openDatabase(path);
 }
 
 DBManager::~DBManager()
@@ -19,32 +15,29 @@ DBManager::~DBManager()
     closeDatabase();
 }
 
-void DBManager::openDatabase(QString path)
+bool DBManager::openDatabase(QString path)
 {
     m_db = QSqlDatabase::addDatabase("QSQLITE");
     m_db.setDatabaseName(path);
 
     if (!m_db.open())
     {
-        QMessageBox errorMsg;
-        errorMsg.setText("Es konnte keine Verbindung zur Datenbank hergestellt werden!");
-        errorMsg.setStandardButtons(QMessageBox::Ok);
-        errorMsg.setWindowTitle("Fehler Datenkbank");
-        errorMsg.setIcon(QMessageBox::Warning);
-        errorMsg.exec();
-
         qDebug() << DEBUG_TAG << ": Error - Connection to Database fail!";
+
+        return false;
     }
     else
     {
-        qDebug() << DEBUG_TAG << ": Database Connection to " + m_db.databaseName() /*fileInfo.absoluteFilePath()*/ + " successfull!";
-
         // Read table fields from DB
         m_customerFields = readFieldNames(KUNDE);
         m_articleFields = readFieldNames(ARTIKEL);
         m_invoiceFields = readFieldNames(RECHNUNG);
         m_positionFields = readFieldNames(POSITION);
         m_settingsFields = readFieldNames(SETTINGS);
+
+        qDebug() << DEBUG_TAG << ": Database Connection to " + m_db.databaseName() + " successfull!";
+
+        return true;
     }
 }
 

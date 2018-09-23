@@ -14,7 +14,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_posNr(0)
+    m_posNr(0),
+    m_statusLabel(new QLabel())
 {
     ui->setupUi(this);
 
@@ -28,72 +29,37 @@ MainWindow::MainWindow(QWidget *parent) :
 //        QMessageBox::information(this, "Info", "Die Datenbank wurde erfolgreich geladen!", QMessageBox::Ok);
 //    }
 
-    m_dbManager = new DBManager(PATH_DATABASE);
-
-    // Setup customer list
-    ui->twCustomers->setColumnCount(m_dbManager->getCustomerFields().size() - 1);
-    for ( int i = 0; i < m_dbManager->getCustomerFields().size(); i++)
+    // Init and open database
+    m_dbManager = new DBManager();
+    if(m_dbManager->openDatabase(PATH_DATABASE))
     {
-        ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getCustomerFields()[i]));
+        // Set default tabs
+        ui->tabWidgetMain->setCurrentIndex(CustomersTab);
+        ui->tabWidKunden->setCurrentIndex(OverviewTab);
+
+        m_statusLabel->setText(DB_CONNECTED_MESSAGE);
+        m_statusLabel->setStyleSheet("QLabel { color : green; }");
     }
-    QFont fontCustomer("MS Shell Dlg 2", 8, QFont::Bold);
-    ui->twCustomers->horizontalHeader()->setFont(fontCustomer);
-    ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    // Setup article list
-    ui->twArticles->setColumnCount(m_dbManager->getArticleFields().size());
-    for ( int i = 0; i < m_dbManager->getArticleFields().size(); i++)
+    else
     {
-        ui->twArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getArticleFields()[i]));
-    }
-    QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
-    ui->twArticles->horizontalHeader()->setFont(fontArticles);
-    ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twArticles->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
+        QMessageBox errorMsg;
+        errorMsg.setText("Es konnte keine Verbindung zur Datenbank hergestellt werden!");
+        errorMsg.setStandardButtons(QMessageBox::Ok);
+        errorMsg.setWindowTitle("Fehler Datenkbank");
+        errorMsg.setIcon(QMessageBox::Warning);
+        errorMsg.exec();
 
-    // Setup invoice list
-    ui->twRgList->setColumnCount(m_dbManager->getInvoiceFields().size());
-    for ( int i = 0; i < m_dbManager->getInvoiceFields().size(); i++)
-    {
-        ui->twRgList->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getInvoiceFields()[i]));
-    }
-    QFont fontInvoices("MS Shell Dlg 2", 8, QFont::Bold);
-    ui->twRgList->horizontalHeader()->setFont(fontInvoices);
-    ui->twRgList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twRgList->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
-
-    // Setup article positions
-    ui->twRgArticles->setColumnCount(ArtPosColumnsCount);
-
-    ui->twRgArticles->setHorizontalHeaderItem(0, new QTableWidgetItem("Pos."));
-    ui->twRgArticles->setHorizontalHeaderItem(1, new QTableWidgetItem("Art-Nr."));
-    ui->twRgArticles->setHorizontalHeaderItem(2, new QTableWidgetItem("Beschreibung"));
-    ui->twRgArticles->setHorizontalHeaderItem(3, new QTableWidgetItem("Menge"));
-    ui->twRgArticles->setHorizontalHeaderItem(4, new QTableWidgetItem("Einheit"));
-    ui->twRgArticles->setHorizontalHeaderItem(5, new QTableWidgetItem("E-Preis"));
-    ui->twRgArticles->setHorizontalHeaderItem(6, new QTableWidgetItem("Gesamt"));
-
-    QFont fontArticlesPos("MS Shell Dlg 2", 8, QFont::Bold);
-    ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
-    ui->twRgArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    ui->twRgArticles->horizontalHeader()->setSectionResizeMode(BeschreibungPos, QHeaderView::Stretch);
-
-    // Fill pdf settings list
-    m_dbManager->getSettingsFields();
-    for (int i = 0; i < m_dbManager->getSettingsFields().size(); i++)
-    {
-        QListWidgetItem *item = new QListWidgetItem();
-        item->setSizeHint(QSize(0, 30));
-        item->setText(m_dbManager->getSettingsFields().value(i));
-        ui->lwSetPdfPhrases->addItem(item);
-
+        m_statusLabel->setText(DB_NOTCONNECTED_MESSAGE);
+        m_statusLabel->setStyleSheet("QLabel { color : red; }");
     }
 
-    // Set CustomersTab as default tab
-    ui->tabWidgetMain->setCurrentIndex(CustomersTab);
-    printAllCustomers();
+    m_statusLabel->setAlignment(Qt::AlignRight);
+    ui->statusBar->addPermanentWidget(m_statusLabel, 1);
 
-    ui->tabWidKunden->setCurrentIndex(OverviewTab);
+//    QDoubleValidator* spValidator= new QDoubleValidator(0.0, 9999999999.0, 2, ui->leRgSinglePrice);
+//    spValidator->setLocale(QLocale("de_DE"));
+//    spValidator->setNotation(QDoubleValidator::StandardNotation);
+//    ui->leRgSinglePrice->setValidator(spValidator);
 }
 
 MainWindow::~MainWindow()
@@ -299,7 +265,7 @@ void MainWindow::printAllArticles()
        ui->twArticles->setItem(row, Article_ArtNr, new QTableWidgetItem(QString::number(it->getArtNr())));
        ui->twArticles->setItem(row, Article_Einheit, new QTableWidgetItem(it->getUnit()));
        ui->twArticles->setItem(row, Article_Beschreibung, new QTableWidgetItem(it->getDescription()));
-       ui->twArticles->setItem(row, Article_Preis, new QTableWidgetItem(QString::number(it->getPrice(), 'f', 2) + " €"));
+       ui->twArticles->setItem(row, Article_Preis, new QTableWidgetItem(QLocale().toCurrencyString(it->getPrice())));
        ui->twArticles->item(row, Article_Preis)->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
     }
 
@@ -511,27 +477,35 @@ void MainWindow::on_tabWidKunden_tabBarClicked(int index)
     }
 }
 
-void MainWindow::on_tabWidgetMain_currentChanged(int index)
+void MainWindow::selectMainTabIndex(int index)
 {
     switch(index)
     {
         case CustomersTab:
         {
             // Setup customer list
+            setupCustomerList();
+
+            // Setup customer list
             printAllCustomers();
-            ui->btnCustomerBill->setEnabled(false);            
+            ui->btnCustomerBill->setEnabled(false);
         }
         break;
 
         case ArticlesTab:
         {
             // Setup article list
+            setupArticleList();
+
             printAllArticles();
         }
         break;
 
         case CalculationsTab:
         {
+            // Setup article position list
+            setupArticlePositionList();
+
             // Fill customers combobox
             QList<QString> entries;
             std::vector<Customers> customerList;
@@ -587,10 +561,6 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
             clearBillEdits();
 
             ui->tabWidgetInvoice->setCurrentIndex(0);
-//            if (ui->tabWidgetInvoice->currentIndex() == 1)
-//            {
-//                printAllInvoices();
-//            }
 
             // clear customer
             ui->cbRgCustomer->setCurrentIndex(-1);
@@ -598,12 +568,36 @@ void MainWindow::on_tabWidgetMain_currentChanged(int index)
         break;
 
         case SettingsTab:
-            fillSettingsEdit();
-            break;
+        {
+            // Fill pdf settings list
+            ui->lwSetPdfPhrases->clear();
+
+            m_dbManager->getSettingsFields();
+            for (int i = 0; i < m_dbManager->getSettingsFields().size(); i++)
+            {
+                QListWidgetItem *item = new QListWidgetItem();
+                item->setSizeHint(QSize(0, 30));
+                item->setText(m_dbManager->getSettingsFields().value(i));
+                ui->lwSetPdfPhrases->addItem(item);
+            }
+
+            ui->lwSetPdfPhrases->setCurrentRow(0);
+            ui->lwSetPdfPhrases->setFocus();
+
+            QString data;
+            m_dbManager->readSetting(ui->lwSetPdfPhrases->item(0)->text(), data);
+            ui->teSetContent->setText(data);
+        }
+        break;
 
         default:
             break;
     }
+}
+
+void MainWindow::on_tabWidgetMain_currentChanged(int index)
+{
+    selectMainTabIndex(index);
 }
 
 void MainWindow::on_btnRgRechnung_clicked()
@@ -698,8 +692,8 @@ void MainWindow::on_cbRgArtikel_currentTextChanged(const QString &name)
         ui->leRgName->setText(article.getDescription());
         ui->leRgUnit->setText(article.getUnit());
         ui->sbRgCount->setValue(1);
-        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()));
-        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * ui->sbRgCount->value()));
+        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()).split(" ").value(0));
+        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * ui->sbRgCount->value()).split(" ").value(0));
     }
 }
 
@@ -707,7 +701,7 @@ void MainWindow::on_sbRgCount_valueChanged(int value)
 {
     QString singlePrice = ui->leRgSinglePrice->text().split(" ").value(0);
     double totalPriceTemp = singlePrice.replace(".", "").replace(",",".").toDouble() * value;
-    ui->leRgTotalPrice->setText(QLocale().toCurrencyString(totalPriceTemp));
+    ui->leRgTotalPrice->setText(QLocale().toCurrencyString(totalPriceTemp).split(" ").value(0));
 }
 
 void MainWindow::on_btnRgAddArticle_clicked()
@@ -716,8 +710,8 @@ void MainWindow::on_btnRgAddArticle_clicked()
     QString name = ui->leRgName->text();
     QString count = QString::number(ui->sbRgCount->value());
     QString unit = ui->leRgUnit->text();
-    QString sPrice = ui->leRgSinglePrice->text();
-    QString tPrice = ui->leRgTotalPrice->text();
+    QString sPrice = ui->leRgSinglePrice->text() + " €";
+    QString tPrice = ui->leRgTotalPrice->text() + " €";
 
     // search for exist entries
     for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
@@ -753,9 +747,9 @@ void MainWindow::on_btnRgAddArticle_clicked()
     ui->twRgArticles->setItem(row, AnzahlPos, new QTableWidgetItem(count));
     ui->twRgArticles->setItem(row, EinheitPos, new QTableWidgetItem(unit));
     ui->twRgArticles->setItem(row, EinzelPreisPos, new QTableWidgetItem(sPrice));
-    //ui->twRgArticles->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    ui->twRgArticles->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
     ui->twRgArticles->setItem(row, SummePos, new QTableWidgetItem(tPrice));
-    //ui->twRgArticles->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+    ui->twRgArticles->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
     // Set customer table column width offset
     setArticlePosColumnsWidth();
@@ -817,9 +811,11 @@ void MainWindow::on_btnRgDeleteArticle_clicked()
 {
     if(ui->twRgArticles->selectedItems().count() >  0)
     {
+        QString currRow = QString::number(ui->twRgArticles->currentRow() + 1);
+
         QMessageBox msg;
         msg.setWindowIcon(QPixmap("logo.png"));
-        msg.setText("Möchten Sie die Position wirklich löschen?");
+        msg.setText("Position " + currRow + " wirklich löschen?");
         msg.setWindowTitle("Warnung");
         msg.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
         msg.setButtonText(QMessageBox::Yes, "Ja");
@@ -888,18 +884,6 @@ void MainWindow::on_leRgName_textChanged(const QString &text)
     }
 }
 
-void MainWindow::on_twRgArticles_itemClicked(QTableWidgetItem *item)
-{
-    // TODO!!
-//    int curRow = item->row();
-//    ui->leRgArtNr->setText(ui->twRgArticles->item(curRow, ArtNrPos)->text());
-//    ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
-//    ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, AnzahlPos)->text().toDouble());
-//    ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
-//    ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
-//    ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
-}
-
 void MainWindow::on_btnCustomerBill_clicked()
 {
     int curRow = ui->twCustomers->currentRow();
@@ -944,8 +928,8 @@ void MainWindow::on_leRgArtNr_returnPressed()
         ui->leRgName->setText(article.getDescription());
         ui->leRgUnit->setText(article.getUnit());
         ui->sbRgCount->setValue(1);
-        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()));
-        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * 1));
+        ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()).split(" ").value(0));
+        ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * 1).split(" ").value(0));
 
         ui->sbRgCount->setFocus();
         ui->sbRgCount->selectAll();
@@ -970,12 +954,47 @@ void MainWindow::on_leRgUnit_returnPressed()
     ui->leRgSinglePrice->selectAll();
 }
 
-void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem */*item*/)
+void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
 {
     if (ui->twRgArticles->rowCount() > 0)
     {
         ui->btnRgDeteleAllArticle->setEnabled(true);
         ui->btnRgCreate->setEnabled(true);
+
+        QString value = item->text();
+
+        if(item->column() == EinzelPreisPos)
+        {
+            double price = 0;
+
+            if(value.contains("€"))
+            {
+                value = value.split(" ").value(0);
+            }
+
+            if(value.contains("."))
+            {
+                price = value.toDouble();
+            }
+            else if(value.contains(","))
+            {
+                price = value.replace(",", ".").toDouble();
+            }
+            else
+            {
+                price = value.toDouble();
+            }
+
+            double summe = price * ui->twRgArticles->item(item->row(), AnzahlPos)->text().toDouble();
+            ui->twRgArticles->setItem(item->row(), SummePos, new QTableWidgetItem(QLocale().toCurrencyString(summe).split(" ").value(0)));
+//            ui->twRgArticles->setItem(item->row(), EinzelPreisPos, new QTableWidgetItem(QLocale().toCurrencyString(price)));
+        }
+        else if(item->column() == AnzahlPos)
+        {
+            int anzahl = value.toInt();
+//            double price = ui->twRgArticles->item(item->row(), EinzelPreisPos)->text().split(" ").value(0).replace(",", ".").toDouble();
+//            ui->twRgArticles->setItem(item->row(), SummePos, new QTableWidgetItem(QLocale().toCurrencyString(price * anzahl)));
+        }
     }
 }
 
@@ -1172,15 +1191,15 @@ void MainWindow::createInvoice(QString rgNr, QString kdNr, QString date, QString
 
     // Create company Logo
     QImage logo(":/Images/logo/tpt_logo.png");
-    QImage scaledLogo = logo.scaled(logo.width() * 1.5, logo.height() * 1.5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QImage scaledLogo = logo.scaled(static_cast<int>(logo.width() * 1.5), static_cast<int>(logo.height() * 1.5), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     // Define coordinates
     int w = m_pdfPrinter->pageRect().width();
     int h = m_pdfPrinter->pageRect().height();
     int x = 0;
     int y = 0;
-    int lMargin = w * 0.05;
-    int rMargin = w * 0.04;
+    int lMargin = static_cast<int>(w * 0.05);
+    int rMargin = static_cast<int>(w * 0.04);
     int tMargin = 0;
     int bMargin = 0;
     int spaceData = 100;
@@ -1323,8 +1342,8 @@ void MainWindow::createInvoice(QString rgNr, QString kdNr, QString date, QString
     int maxLenArtNr = metricFont.width("00000000");
     int maxLenCount = metricFont.width("000000000");
     int maxLenUnit = metricFont.width("00000000");
-    int maxLenPrice = metricFont.width("0000000000");
-    int maxLenSumme = metricFont.width("00000000000");
+    int maxLenPrice = metricFont.width("0000000000000");
+    int maxLenSumme = metricFont.width("0000000000000");
     int dataLenght = maxLenPosNr + maxLenArtNr + maxLenCount + maxLenUnit + maxLenPrice + maxLenSumme + (6 * tabWidth);
     int maxLenDescription = pageContent - dataLenght;
 
@@ -1673,15 +1692,15 @@ void MainWindow::createInvoice()
 
     // Create company Logo
     QImage logo(":/Images/logo/tpt_logo.png");
-    QImage scaledLogo = logo.scaled(logo.width() * 1.5, logo.height() * 1.5, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QImage scaledLogo = logo.scaled(static_cast<int>(logo.width() * 1.5), static_cast<int>(logo.height() * 1.5), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
     // Define coordinates
     int w = m_pdfPrinter->pageRect().width();
     int h = m_pdfPrinter->pageRect().height();
     int x = 0;
     int y = 0;
-    int lMargin = w * 0.05;
-    int rMargin = w * 0.04;
+    int lMargin = static_cast<int>(w * 0.05);
+    int rMargin = static_cast<int>(w * 0.04);
     int tMargin = 0;
     int bMargin = 0;
     int spaceData = 100;
@@ -2127,6 +2146,9 @@ void MainWindow::on_tabWidgetInvoice_currentChanged(int index)
             break;
 
         case InvoicesTab:
+            // Setup invoice list
+            setupInvoiceList();
+
             // Read invoices
             printAllInvoices();
 
@@ -2380,9 +2402,17 @@ void MainWindow::on_actionDbRestore_triggered()
 
         if(copyState)
         {
-            m_dbManager->openDatabase(PATH_DATABASE);
-            on_tabWidgetMain_currentChanged(0);
-            QMessageBox::information(this, "Datenbank Wiederherstellung", "Die Datenbank wurde erfolgreich wiederhergestellt!", QMessageBox::Ok);
+            if(m_dbManager->openDatabase(PATH_DATABASE))
+            {
+                selectMainTabIndex(CustomersTab);
+                QMessageBox::information(this, "Datenbank Wiederherstellung", "Die Datenbank wurde erfolgreich wiederhergestellt!", QMessageBox::Ok);
+
+                ui->statusBar->showMessage(DB_CONNECTED_MESSAGE);
+            }
+            else
+            {
+                ui->statusBar->showMessage(DB_NOTCONNECTED_MESSAGE);
+            }
         }
         else
         {
@@ -2502,4 +2532,84 @@ void MainWindow::on_btnRgDeleteAll_clicked()
     {
         QMessageBox::warning(this, "Warnung", "Keine Artikel zum löschen verfügbar!", QMessageBox::Ok);
     }
+}
+
+void MainWindow::setupInvoiceList()
+{
+    if( ui->twRgList->columnCount() <= 0 )
+    {
+        ui->twRgList->setColumnCount(InvoiceColumsCount);
+        for ( int i = 0; i < m_dbManager->getInvoiceFields().size(); i++)
+        {
+            ui->twRgList->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getInvoiceFields()[i]));
+        }
+        QFont fontInvoices("MS Shell Dlg 2", 8, QFont::Bold);
+        ui->twRgList->horizontalHeader()->setFont(fontInvoices);
+        ui->twRgList->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        ui->twRgList->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
+    }
+}
+
+void MainWindow::setupArticleList()
+{
+    if(ui->twArticles->columnCount() <= 0)
+    {
+        ui->twArticles->setColumnCount(ArticleColumnsCount);
+
+        for ( int i = 0; i < m_dbManager->getArticleFields().size(); i++)
+        {
+            ui->twArticles->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getArticleFields()[i]));
+        }
+        QFont fontArticles("MS Shell Dlg 2", 8, QFont::Bold);
+        ui->twArticles->horizontalHeader()->setFont(fontArticles);
+        ui->twArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        ui->twArticles->horizontalHeader()->setSectionResizeMode(Article_Beschreibung, QHeaderView::Stretch);
+    }
+}
+
+void MainWindow::setupArticlePositionList()
+{
+    if(ui->twRgArticles->columnCount() <= 0)
+    {
+        ui->twRgArticles->setColumnCount(ArtPosColumnsCount);
+
+        ui->twRgArticles->setHorizontalHeaderItem(PosNr, new QTableWidgetItem("Pos."));
+        ui->twRgArticles->setHorizontalHeaderItem(ArtNrPos, new QTableWidgetItem("Art-Nr."));
+        ui->twRgArticles->setHorizontalHeaderItem(BeschreibungPos, new QTableWidgetItem("Beschreibung"));
+        ui->twRgArticles->setHorizontalHeaderItem(AnzahlPos, new QTableWidgetItem("Menge"));
+        ui->twRgArticles->setHorizontalHeaderItem(EinheitPos, new QTableWidgetItem("Einheit"));
+        ui->twRgArticles->setHorizontalHeaderItem(EinzelPreisPos, new QTableWidgetItem("E-Preis"));
+        ui->twRgArticles->setHorizontalHeaderItem(SummePos, new QTableWidgetItem("Gesamt"));
+
+        QFont fontArticlesPos("MS Shell Dlg 2", 8, QFont::Bold);
+        ui->twRgArticles->horizontalHeader()->setFont(fontArticlesPos);
+        ui->twRgArticles->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+        ui->twRgArticles->horizontalHeader()->setSectionResizeMode(BeschreibungPos, QHeaderView::Stretch);
+    }
+}
+
+void MainWindow::setupCustomerList()
+{
+    if(ui->twCustomers->columnCount() <= 0)
+    {
+        ui->twCustomers->setColumnCount(m_dbManager->getCustomerFields().size() - 1);
+        for ( int i = 0; i < m_dbManager->getCustomerFields().size(); i++)
+        {
+            ui->twCustomers->setHorizontalHeaderItem(i, new QTableWidgetItem(m_dbManager->getCustomerFields()[i]));
+        }
+        QFont fontCustomer("MS Shell Dlg 2", 8, QFont::Bold);
+        ui->twCustomers->horizontalHeader()->setFont(fontCustomer);
+        ui->twCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    }
+}
+
+void MainWindow::on_twRgArticles_itemDoubleClicked(QTableWidgetItem *item)
+{
+    int curRow = item->row();
+    ui->leRgArtNr->setText(ui->twRgArticles->item(curRow, ArtNrPos)->text());
+    ui->leRgName->setText(ui->twRgArticles->item(curRow, BeschreibungPos)->text());
+    ui->sbRgCount->setValue(ui->twRgArticles->item(curRow, AnzahlPos)->text().toInt());
+    ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
+    ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
+    ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
 }

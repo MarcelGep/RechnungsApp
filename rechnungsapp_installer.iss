@@ -2,47 +2,50 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "RechungsApp"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.0.0.0"
 #define MyAppExeName "RechnungsApp.exe"
+#define MyAppID "{BEEC3EE5-086F-4CAC-8000-11A20162DB3F}"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{BEEC3EE5-086F-4CAC-8000-11A20162DB3F}
+AppId={{#MyAppID}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
-DefaultDirName=C:\{#MyAppName}
-DisableProgramGroupPage=yes
+AppVerName={#MyAppName} {#MyAppVersion}
+DefaultDirName={sd}\{#MyAppName}
+DefaultGroupName=RechnungsApp
+AllowNoIcons=yes
 OutputDir=C:\Users\Marcel\Desktop
 OutputBaseFilename=RechnungsApp-Setup_v1.0
-SetupIconFile=C:\Users\Marcel\Desktop\rechnungsapp_icon.ico
+SetupIconFile=F:\Develop\build-RechnungsApp-Desktop-Release\release\rechnungsapp_icon.ico
 Compression=lzma
 SolidCompression=yes
 
-[Setup] 
-PrivilegesRequired=admin 
+;[Setup] 
+;PrivilegesRequired=admin 
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\RechnungsApp.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\database\*"; DestDir: "{app}\database"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\sqldrivers\*"; DestDir: "{app}\sqldrivers"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Marcel\Programmieren\build-RechnungsApp-Desktop_Qt_5_9_2_MinGW_32bit-Release\release\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\RechnungsApp.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\database\*"; DestDir: "{app}\database"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\platforms\*"; DestDir: "{app}\platforms"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\sqldrivers\*"; DestDir: "{app}\sqldrivers"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libstdc++-6.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libwinpthread-1.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Core.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Gui.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Sql.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Widgets.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Dirs]
@@ -55,3 +58,32 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
+[Messages]
+BeveledLabel=RechnungsApp Installer version 1.0 © 2018 Marcel Geprägs
+
+[CustomMessages]
+german.NewerVersionExists=Es ist bereits schon eine neuere Version von {#MyAppName} installiert.%n%nInstaller Version: {#MyAppVersion}%nVorhandene Version: 
+
+[Code]
+// find current version before installation
+function InitializeSetup: Boolean;
+var Version: String;
+begin
+  if RegValueExists(HKEY_LOCAL_MACHINE,'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppID}_is1', 'DisplayVersion') then
+    begin
+      RegQueryStringValue(HKEY_LOCAL_MACHINE,'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppID}_is1', 'DisplayVersion', Version);
+      if Version > '{#MyAppVersion}' then
+        begin
+          MsgBox(ExpandConstant('{cm:NewerVersionExists} '+Version), mbInformation, MB_OK);
+          Result := False;
+        end
+      else
+        begin
+          Result := True;
+        end
+    end
+  else
+    begin
+      Result := True;
+    end
+end;
