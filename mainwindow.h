@@ -233,6 +233,8 @@ private slots:
 
     void on_twRgArticles_itemDoubleClicked(QTableWidgetItem *item);
 
+    void on_leRgArtNr_textChanged(const QString &arg1);
+
 private:
     void setCustomerColumnsWidth() const;
     void clearCustomers();

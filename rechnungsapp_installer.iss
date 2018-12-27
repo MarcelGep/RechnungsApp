@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "RechungsApp"
-#define MyAppVersion "1.0.0.0"
+#define MyAppVersion "1.0.0.1"
 #define MyAppExeName "RechnungsApp.exe"
 #define MyAppID "{BEEC3EE5-086F-4CAC-8000-11A20162DB3F}"
 
@@ -18,7 +18,7 @@ DefaultDirName={sd}\{#MyAppName}
 DefaultGroupName=RechnungsApp
 AllowNoIcons=yes
 OutputDir=C:\Users\Marcel\Desktop
-OutputBaseFilename=RechnungsApp-Setup_v1.0
+OutputBaseFilename=RechnungsApp-Setup_v{#MyAppVersion}
 SetupIconFile=F:\Develop\build-RechnungsApp-Desktop-Release\release\rechnungsapp_icon.ico
 Compression=lzma
 SolidCompression=yes

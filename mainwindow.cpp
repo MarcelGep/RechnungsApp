@@ -8,6 +8,7 @@
 
 #include <QPrintDialog>
 #include <QPrintPreviewDialog>
+#include <QLocale>
 
 //#define BORDER_ACTIVE
 
@@ -674,7 +675,7 @@ void MainWindow::clearBillEdits()
     ui->cbRgArtikel->setCurrentIndex(-1);
     ui->leRgArtNr->clear();
     ui->leRgName->clear();
-    ui->sbRgCount->setValue(0);
+    ui->sbRgCount->setValue(1);
     ui->leRgSinglePrice->clear();
     ui->leRgTotalPrice->clear();
     ui->leRgUnit->setText("Stück");
@@ -691,7 +692,6 @@ void MainWindow::on_cbRgArtikel_currentTextChanged(const QString &name)
         ui->leRgArtNr->setText(artNr);
         ui->leRgName->setText(article.getDescription());
         ui->leRgUnit->setText(article.getUnit());
-        ui->sbRgCount->setValue(1);
         ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()).split(" ").value(0));
         ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * ui->sbRgCount->value()).split(" ").value(0));
     }
@@ -710,8 +710,8 @@ void MainWindow::on_btnRgAddArticle_clicked()
     QString name = ui->leRgName->text();
     QString count = QString::number(ui->sbRgCount->value());
     QString unit = ui->leRgUnit->text();
-    QString sPrice = ui->leRgSinglePrice->text() + " €";
-    QString tPrice = ui->leRgTotalPrice->text() + " €";
+    QString sPrice = ui->leRgSinglePrice->text().replace(".", "").replace(",",".");
+    QString tPrice = ui->leRgTotalPrice->text().replace(".", "").replace(",",".");
 
     // search for exist entries
     for (int i = 0; i < ui->twRgArticles->rowCount(); i++)
@@ -746,9 +746,9 @@ void MainWindow::on_btnRgAddArticle_clicked()
     ui->twRgArticles->setItem(row, BeschreibungPos, new QTableWidgetItem(name));
     ui->twRgArticles->setItem(row, AnzahlPos, new QTableWidgetItem(count));
     ui->twRgArticles->setItem(row, EinheitPos, new QTableWidgetItem(unit));
-    ui->twRgArticles->setItem(row, EinzelPreisPos, new QTableWidgetItem(sPrice));
+    ui->twRgArticles->setItem(row, EinzelPreisPos, new QTableWidgetItem(QLocale().toCurrencyString(sPrice.toDouble())));
     ui->twRgArticles->item(row, EinzelPreisPos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    ui->twRgArticles->setItem(row, SummePos, new QTableWidgetItem(tPrice));
+    ui->twRgArticles->setItem(row, SummePos, new QTableWidgetItem(QLocale().toCurrencyString(tPrice.toDouble())));
     ui->twRgArticles->item(row, SummePos)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
 
     // Set customer table column width offset
@@ -870,17 +870,15 @@ void MainWindow::on_cbRgArtikel_activated(int /*index*/)
 
 void MainWindow::on_leRgName_textChanged(const QString &text)
 {
-    if (!text.isEmpty())
+    if (!text.isEmpty() && !ui->leRgArtNr->text().isEmpty())
     {
         ui->btnRgAddArticle->setEnabled(true);
         ui->btnRgClear->setEnabled(true);
-        ui->sbRgCount->setValue(1);
     }
     else
     {
         ui->btnRgAddArticle->setEnabled(false);
         ui->btnRgClear->setEnabled(false);
-        ui->sbRgCount->setValue(0);
     }
 }
 
@@ -927,7 +925,6 @@ void MainWindow::on_leRgArtNr_returnPressed()
     {
         ui->leRgName->setText(article.getDescription());
         ui->leRgUnit->setText(article.getUnit());
-        ui->sbRgCount->setValue(1);
         ui->leRgSinglePrice->setText(QLocale().toCurrencyString(article.getPrice()).split(" ").value(0));
         ui->leRgTotalPrice->setText(QLocale().toCurrencyString(article.getPrice() * 1).split(" ").value(0));
 
@@ -2423,15 +2420,16 @@ void MainWindow::on_actionDbRestore_triggered()
 
 void MainWindow::on_leRgSinglePrice_textChanged(const QString &arg1)
 {
-    QString valueStr = arg1.split(" ").first();
-    valueStr = valueStr.replace(",", ".");
-    ui->leRgTotalPrice->setText(QLocale().toCurrencyString(valueStr.toDouble() * ui->sbRgCount->value()));
+    QString valueStr = arg1;
+    valueStr = valueStr.replace(".","").replace(",", ".");
+    QString currencyString = QLocale().toCurrencyString(valueStr.toDouble() * ui->sbRgCount->value());
+    ui->leRgTotalPrice->setText( currencyString.split(" ").first());
 }
 
 void MainWindow::on_actionUeber_triggered()
 {
     QMessageBox::information(this, "Über RechnungsApp", "Author: Marcel Geprägs \n"
-                                                        "Version: 1.0", QMessageBox::Ok);
+                                                        "Version: 1.0.0.1", QMessageBox::Ok);
 }
 
 void MainWindow::on_btnRgDetails_clicked()
@@ -2612,4 +2610,18 @@ void MainWindow::on_twRgArticles_itemDoubleClicked(QTableWidgetItem *item)
     ui->leRgUnit->setText(ui->twRgArticles->item(curRow, EinheitPos)->text());
     ui->leRgSinglePrice->setText(ui->twRgArticles->item(curRow, EinzelPreisPos)->text().split(" ").value(0));
     ui->leRgTotalPrice->setText(ui->twRgArticles->item(curRow, SummePos)->text().split(" ").value(0));
+}
+
+void MainWindow::on_leRgArtNr_textChanged(const QString &arg1)
+{
+    if (!arg1.isEmpty() && !ui->leRgName->text().isEmpty())
+    {
+        ui->btnRgAddArticle->setEnabled(true);
+        ui->btnRgClear->setEnabled(true);
+    }
+    else
+    {
+        ui->btnRgAddArticle->setEnabled(false);
+        ui->btnRgClear->setEnabled(false);
+    }
 }
