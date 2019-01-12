@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         // Set default tabs
         ui->tabWidgetMain->setCurrentIndex(CustomersTab);
+        selectMainTabIndex( CustomersTab );
+
         ui->tabWidKunden->setCurrentIndex(OverviewTab);
 
         m_statusLabel->setText(DB_CONNECTED_MESSAGE);
@@ -405,6 +407,10 @@ void MainWindow::setCustomerColumnsWidth() const
         int tempWidth = ui->twCustomers->columnWidth(i);
         ui->twCustomers->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
     }
+
+    int width = ui->twCustomers->horizontalHeader()->length()+ui->twCustomers->verticalHeader()->width();
+
+    ui->twCustomers->setMinimumWidth(width);
 }
 
 void MainWindow::setArticleColumnsWidth() const
