@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "RechungsApp"
-#define MyAppVersion "1.0.0.1"
+#define MyAppVersion "1.0.0.2"
 #define MyAppExeName "RechnungsApp.exe"
 #define MyAppID "{BEEC3EE5-086F-4CAC-8000-11A20162DB3F}"
 
@@ -19,7 +19,7 @@ DefaultGroupName=RechnungsApp
 AllowNoIcons=yes
 OutputDir=C:\Users\Marcel\Desktop
 OutputBaseFilename=RechnungsApp-Setup_v{#MyAppVersion}
-SetupIconFile=F:\Develop\build-RechnungsApp-Desktop-Release\release\rechnungsapp_icon.ico
+SetupIconFile=C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\rechnungsapp_icon.ico
 Compression=lzma
 SolidCompression=yes
 
@@ -34,18 +34,19 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\RechnungsApp.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\database\*"; DestDir: "{app}\database"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\platforms\*"; DestDir: "{app}\platforms"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\sqldrivers\*"; DestDir: "{app}\sqldrivers"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libstdc++-6.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\libwinpthread-1.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Core.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Gui.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Sql.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
-Source: "F:\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Widgets.dll"; DestDir: "{app}"; Flags: onlyifdoesntexist
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\RechnungsApp.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\database\*"; DestDir: "{app}\database"; Flags: onlyifdoesntexist recursesubdirs createallsubdirs
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\platforms\*"; DestDir: "{app}\platforms"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\sqldrivers\*"; DestDir: "{app}\sqldrivers"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\libgcc_s_dw2-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\libstdc++-6.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\libwinpthread-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\libgcc_s_seh-1.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Gui.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\Qt5PrintSupport.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Sql.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Marcel\Documents\Develop\build-RechnungsApp-Desktop-Release\release\Qt5Widgets.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Dirs]

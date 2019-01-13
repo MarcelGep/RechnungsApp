@@ -408,9 +408,9 @@ void MainWindow::setCustomerColumnsWidth() const
         ui->twCustomers->setColumnWidth(i, tempWidth + CUSTOMER_COLUMN_OFFSET);
     }
 
-    int width = ui->twCustomers->horizontalHeader()->length()+ui->twCustomers->verticalHeader()->width();
+//    int width = ui->twCustomers->horizontalHeader()->length()+ui->twCustomers->verticalHeader()->width();
 
-    ui->twCustomers->setMinimumWidth(width);
+//    ui->twCustomers->setMinimumWidth(width);
 }
 
 void MainWindow::setArticleColumnsWidth() const
@@ -994,7 +994,7 @@ void MainWindow::on_twRgArticles_itemChanged(QTableWidgetItem *item)
         }
         else if(item->column() == AnzahlPos)
         {
-            int anzahl = value.toInt();
+//            int anzahl = value.toInt();
 //            double price = ui->twRgArticles->item(item->row(), EinzelPreisPos)->text().split(" ").value(0).replace(",", ".").toDouble();
 //            ui->twRgArticles->setItem(item->row(), SummePos, new QTableWidgetItem(QLocale().toCurrencyString(price * anzahl)));
         }
@@ -2435,7 +2435,7 @@ void MainWindow::on_leRgSinglePrice_textChanged(const QString &arg1)
 void MainWindow::on_actionUeber_triggered()
 {
     QMessageBox::information(this, "Über RechnungsApp", "Author: Marcel Geprägs \n"
-                                                        "Version: 1.0.0.1", QMessageBox::Ok);
+                                                        "Version: " + APP_VERSION, QMessageBox::Ok);
 }
 
 void MainWindow::on_btnRgDetails_clicked()
