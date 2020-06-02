@@ -45,7 +45,7 @@
 #define DB_CONNECTED_MESSAGE "Datenbank verbunden"
 #define DB_NOTCONNECTED_MESSAGE "Datenbank nicht verbunden"
 
-static QString APP_VERSION = "1.0.0.2";
+static QString APP_VERSION = "1.0.0.3";
 
 enum ArtPosColumns
 {
