@@ -22,25 +22,47 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
     dbmanager.cpp \
     customers.cpp \
-    articles.cpp
+    articles.cpp \
+    settings.cpp \
+    invoices.cpp \
+    positions.cpp \
+    windowPositions.cpp \
+    windowArticle.cpp \
+    windowEditPosition.cpp
 
 HEADERS += \
         mainwindow.h \
     dbmanager.h \
     customers.h \
-    articles.h
+    articles.h \
+    settings.h \
+    invoices.h \
+    positions.h \
+    windowPositions.h \
+    windowArticle.h \
+    windowEditPosition.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    windowPositions.ui \
+    windowArticle.ui \
+    windowEditPosition.ui
 
 QT+= \
     network
 
 QT+= \
     sql
+
+QT += printsupport
+
+RESOURCES += \
+    resources.qrc
+
+RC_ICONS = rechnungsapp_icon.ico
+

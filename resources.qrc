@@ -1,0 +1,37 @@
+<RCC>
+    <qresource prefix="/Images">
+        <file>logo/tpt_logo.svg</file>
+        <file>logo/tpt_logo.png</file>
+        <file>logo/tpt_logo_header.png</file>
+        <file>logo/tpt_logo_header.svg</file>
+    </qresource>
+    <qresource prefix="/Icons">
+        <file>icons/customer_add.png</file>
+        <file>icons/customer_delete.png</file>
+        <file>icons/customer_edit.png</file>
+        <file>icons/customer_saved.png</file>
+        <file>icons/customer_search.png</file>
+        <file>icons/customers.png</file>
+        <file>icons/invoice_new.png</file>
+        <file>icons/cancel.png</file>
+        <file>icons/save.png</file>
+        <file>icons/articles_delete.png</file>
+        <file>icons/articles_deleteall.png</file>
+        <file>icons/article_new.png</file>
+        <file>icons/details.png</file>
+        <file>icons/invoice_delete.png</file>
+        <file>icons/article_edit.png</file>
+    </qresource>
+    <qresource prefix="/32x32">
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_add.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_delete.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_edit.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_gear.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_go.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/door_out.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_save.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/information.png</file>
+        <file>icons/fatcow-hosting-icons-3000/32x32/database_refresh.png</file>
+    </qresource>
+</RCC>

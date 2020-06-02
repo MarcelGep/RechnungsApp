@@ -9,34 +9,77 @@
 
 #include "customers.h"
 #include "articles.h"
+#include "settings.h"
+#include "invoices.h"
+#include "positions.h"
 
 #define DEBUG_TAG "DBManager"
+
+#define ARTIKEL   "Artikel"
+#define KUNDE     "Kunde"
+#define RECHNUNG  "Rechnung"
+#define POSITION  "Position"
+#define SETTINGS  "Settings"
 
 class DBManager
 {
 
 public:
-    DBManager(const QString& path);
+    DBManager();
     ~DBManager();
 
     bool isOpen() const;
     bool addCustomer(const Customers &customer);
     bool addBill(QString datum, double betrag);
-    bool editCustomer(QString id, const Customers &customers);
+    bool editCustomer(QString id, const Customers &customer);
+    bool editInvoiceSumme(QString rgnr, double summe);
+    bool editPosition(const Positions& position);
     bool removeDbEntry(QString table, QString id);
     void removeBill(int billID);
-//    bool removeAllArticles();
     void closeDatabase();
+    bool openDatabase(QString path);
     bool dbEntryExist(QString table, QString id);
     bool readCustomers(std::vector<Customers> &customers) const;
     int readLastID(QString table) const;
-    Customers readCustomer(QString customerID) const;
-
+    bool readCustomer(QString customerID, Customers &customer);
     QSqlQueryModel *readDbData(QString table);
-
     bool addArticle(const Articles &article);
+    bool readArticles(std::vector<Articles> &articles) const;
+    bool readArticle(QString articleID, Articles &article);
+    bool editArticle(QString id, const Articles &article);
+    QMap<int, QString> getCustomerFields() const;
+    QMap<int, QString> getArticleFields() const;
+    QMap<int, QString> getInvoiceFields() const;
+    QMap<int, QString> getPositionFields() const;
+    QMap<int, QString> getSettingsFields() const;
+    bool readSettings(Settings);
+    bool removeDBList(QString table);
+    bool editSettings(Settings &settings);
+
+    bool readSetting(QString typ, QString &data);
+    bool editSetting(QString typ, QString data);
+    bool readInvoices(std::vector<Invoices> &invoices);
+    bool readInvoice(Invoices &invoice, QString rgNr);
+    bool addPosition(const Positions &position);
+    bool addInvoice(const Invoices &invoice);
+    bool readPositions(std::vector<Positions> &positions, QString rgnr) const;
+    bool readPosition(Positions &position, QString pos, QString rgnr) const;
+    bool removeDbEntries(QString table, QString ident, QString id);
+
+    bool editPosNr(const Positions &position);
+
+public slots:
+    bool deletePosition(QString rgnr, QString pos);
+
 private:
     QSqlDatabase m_db;
+    QMap<int, QString> m_customerFields;
+    QMap<int, QString> m_articleFields;
+    QMap<int, QString> m_invoiceFields;
+    QMap<int, QString> m_positionFields;
+    QMap<int, QString> m_settingsFields;
+    QString getDbIdent(QString table);
+    QMap<int, QString> readFieldNames(QString table);
 };
 
 #endif // DBMANAGER_H
