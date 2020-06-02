@@ -733,8 +733,13 @@ void MainWindow::on_btnRgAddArticle_clicked()
 
             if (ret == QMessageBox::Yes)
             {
-                int count = ui->twRgArticles->item(i, AnzahlPos)->text().toInt();
-                ui->twRgArticles->item(i, AnzahlPos)->setText(QString::number(count + ui->sbRgCount->value()));
+                int currCount = ui->twRgArticles->item(i, AnzahlPos)->text().toInt();
+                int addCount = ui->sbRgCount->value();
+                double singlePrice = ui->leRgSinglePrice->text().replace(".", "").replace(",",".").toDouble();
+                double newTotalPrice = (currCount + addCount) * singlePrice;
+                ui->twRgArticles->item(i, AnzahlPos)->setText(QString::number(currCount + addCount));
+                ui->twRgArticles->item(i, SummePos)->setText(QLocale().toCurrencyString(newTotalPrice).split(" ").value(0) + " €");
+                updateTotalPrice();
             }
 
             clearBillEdits();
